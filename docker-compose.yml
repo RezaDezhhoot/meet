@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-#  admin
+  #  admin
   nginx:
     build:
       context: .
@@ -64,6 +64,8 @@ services:
     working_dir: /app
     networks:
       - main
+  # end admin
+  # db
   mysql:
     image: mysql
     container_name: app_mysql
@@ -80,7 +82,39 @@ services:
       MYSQL_PASSWORD: secret
     networks:
       - main
-# end admin
+  # end db
+  # backend
+  backend:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/backend/Dockerfile
+    container_name: backend
+    restart: on-failure
+    working_dir: /app
+    ports:
+      - '3000:3000'
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /app
+      - /app/node_modules
+    depends_on:
+      - mysql
+    command: npm run dev
+    deploy:
+      replicas: 1
+      update_config:
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [ node.hostname == slave1 ]
+    environment:
+      MONGO_URI: mongodb://admin:root@mongodb/admin?authSource=admin&directConnection=true
+      REDIS_URL: redis://:@redisService:6379
+    networks:
+      - main
+  # end backend
 networks:
   main:
     driver: bridge

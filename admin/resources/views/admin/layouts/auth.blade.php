@@ -40,7 +40,7 @@
                 <!--begin::Login Sign in form-->
                 <div class="login-signin">
                     <div class="mb-20">
-                        <h3>ورود به ادمین</h3>
+                        <h3>ورود به کاربر</h3>
                     </div>
                     @yield('content')
                 </div>

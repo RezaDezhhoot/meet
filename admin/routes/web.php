@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,7 +19,33 @@ Route::group(['middleware' => 'guest'], function () {
 });
 
 Route::group(['prefix' => 'admin' , 'as' => 'admin.' , 'middleware' => ['auth','role:admin']], function () {
-    Route::get('dashboard',function (){
-        echo 1;
-    })->name('dashboard');
+    Route::get('dashboard',\App\Http\Controllers\Dashboard\Dashboard::class)->name('dashboard');
+    Route::get('profile',\App\Http\Controllers\Profile\Profile::class)->name('profile');
+    Route::group(['prefix' => 'users','as' => 'user.'],function () {
+        Route::get('',\App\Http\Controllers\User\IndexUser::class)->name('index');
+        Route::get('/{action}/{id?}',\App\Http\Controllers\User\StoreUser::class)->name('store');
+    });
+    Route::group(['prefix' => 'rooms','as' => 'room.'],function () {
+       Route::get('',\App\Http\Controllers\Room\IndexRoom::class)->name('index');
+       Route::get('/{action}/{id?}',\App\Http\Controllers\Room\StoreRoom::class)->name('store');
+    });
+    Route::group(['prefix' => 'roles' , 'as' => 'role.'],function () {
+       Route::get('',\App\Http\Controllers\Role\IndexRole::class)->name('index');
+       Route::get('/{action}/{id?}',\App\Http\Controllers\Role\StoreRole::class)->name('store');
+    });
+    Route::group(['prefix' => 'subscriptions' , 'as' => 'subscription.'],function () {
+        Route::get('',\App\Http\Controllers\Subscription\IndexSubscription::class)->name('index');
+        Route::get('/{action}/{id?}',\App\Http\Controllers\Subscription\StoreSubscription::class)->name('store');
+    });
+
+    Route::group(['prefix' => 'settings' , 'as' => 'setting.'],function () {
+        Route::get('base',\App\Http\Controllers\Setting\Base::class)->name('base');
+    });
 });
+
+Route::get('/logout', function (){
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect()->route('auth');
+})->name('logout');

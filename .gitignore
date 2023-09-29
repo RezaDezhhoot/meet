@@ -1,4 +1,11 @@
 .idea/
-
 mysql/*
 !mysql/.gitkeep
+backend/node_modules
+/public/storage/*
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+/logs
+.env

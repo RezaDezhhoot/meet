@@ -3,8 +3,8 @@
     <!--begin::Brand-->
     <div class="brand flex-column-auto" id="kt_brand">
         <!--begin::Logo-->
-        <a href="{{ route('home') }}" class="brand-logo">
-            <img alt="Logo" style="max-width: 4rem;" src="{{asset($logo)}}" />
+        <a href="{{ route('admin.dashboard') }}" class="brand-logo">
+            <img alt="Logo" style="max-width: 5rem;" src="{{asset($logo)}}" />
         </a>
         <!--end::Logo-->
         <!--begin::Toggle-->
@@ -50,11 +50,7 @@
                     <h4 class="menu-text">بخش شخصی</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
-{{--                <x-admin.menu-item href="{{route('admin.profile')}}" icon="flaticon2-user" :active="request()->routeIs('admin.profile')" label="پروفایل" />--}}
-{{--                <x-admin.menu-item href="{{route('user.dashboard')}}" icon="flaticon2-user" :active="request()->routeIs('user.dashboard')" label="پنل کاربری" />--}}
-                @role('admin')
-                    <x-admin.menu-item href="{{route('teacher.dashboard')}}" icon="fas fa-chalkboard-teacher" :active="request()->routeIs('teacher.dashboard')" label="پنل مدرس" />
-                @endif
+                <x-admin.menu-item href="{{route('admin.profile')}}" icon="flaticon2-user" :active="request()->routeIs('admin.profile')" label="پروفایل" />
                 <li class="menu-section">
                     <h4 class="menu-text">بخش رسانه</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
@@ -64,53 +60,34 @@
                     <h4 class="menu-text">بخش گزارشات</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
-                @can('show_logs')
-                    <x-admin.menu-item href="{{route('admin.log')}}" icon="flaticon2-list-1" :active="request()->routeIs(['admin.log'])" label=" لاگ های کاربر" />
-                @endif
                 @role('administrator')
-                <x-admin.menu-item href="{{route('log-viewer::dashboard')}}" icon="flaticon-book" :active="request()->routeIs(['telescope'])" label=" گزارش های سیستم logger" />
-{{--                <x-admin.menu-item href="{{route('telescope')}}" icon="flaticon-search" :active="request()->routeIs(['telescope'])" label=" گزارش های سیستم telescope" />--}}
+                    <x-admin.menu-item href="{{route('log-viewer::dashboard')}}" icon="flaticon-book" :active="request()->routeIs(['telescope'])" label=" گزارش های سیستم logger" />
                 @endif
                 <li class="menu-section">
                     <h4 class="menu-text">بخش کاربر</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
-{{--                @can('show_users')--}}
-{{--                    <x-admin.menu-item href="{{route('admin.user')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user','admin.store.user'])" label="کاربران ({{$users}})" />--}}
-{{--                @endcan--}}
-{{--                @can('show_roles')--}}
-{{--                    <x-admin.menu-item href="{{route('admin.role')}}" icon="fas fa-key" :active="request()->routeIs(['admin.role','admin.store.role'])" label="نقش ها  " />--}}
-{{--                @endcan--}}
+                @can('show_users')
+                    <x-admin.menu-item href="{{route('admin.user.index')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user.index','admin.user.store'])" label="کاربر" />
+                @endcan
+                @can('show_roles')
+                    <x-admin.menu-item href="{{route('admin.role.index')}}" icon="fas fa-key" :active="request()->routeIs(['admin.role.index','admin.role.store'])" label="نقش ها  " />
+                @endcan
                 <li class="menu-section">
                     <h4 class="menu-text">بخش فنی</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
+                @can('show_rooms')
+                    <x-admin.menu-item href="{{route('admin.room.index')}}" icon="flaticon2-group" :active="request()->routeIs(['admin.room.index','admin.room.store'])" label="اتاق ها  " />
+                @endcan
+                @can('show_subscriptions')
+                    <x-admin.menu-item href="{{route('admin.subscription.index')}}" icon="flaticon2-box" :active="request()->routeIs(['admin.subscription.index','admin.subscription.store'])" label="اشتراک ها" />
+                @endcan
                 @can('show_settings')
-                    <x-admin.menu-group icon="flaticon2-settings" :active="request()->routeIs(
-                    ['admin.setting.base','admin.setting.home','admin.setting.aboutUs','admin.setting.contactUs'
-                       ,'admin.setting.fag','admin.setting.fag.create','admin.setting.sms','admin.setting.apply'])" label="تنظیمات" >
-                        @can('show_settings_base')
+                    <x-admin.menu-group icon="flaticon2-settings" :active="request()->routeIs(['admin.setting.base'])" label="تنظیمات" >
+                        @can('edit_base_settings')
                             <x-admin.menu-item href="{{route('admin.setting.base')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.base')" label="پایه " />
                         @endcan
-                        @can('show_settings_home')
-                            <x-admin.menu-item href="{{route('admin.setting.home')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.home')" label="صفحه اصلی " />
-                        @endcan
-                        @can('show_settings_sms')
-                            <x-admin.menu-item href="{{route('admin.setting.sms')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.sms')" label="متن های ارسالی" />
-                        @endcan
-                        @can('show_settings_aboutUs')
-                            <x-admin.menu-item href="{{route('admin.setting.aboutUs')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.aboutUs')" label="درباره ما " />
-                        @endcan
-                        @can('show_settings_contactUs')
-                            <x-admin.menu-item href="{{route('admin.setting.contactUs')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.contactUs')" label="ارتباط با ما " />
-                        @endcan
-                        @can('show_settings_fag')
-                            <x-admin.menu-item href="{{route('admin.setting.fag')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.fag','admin.setting.fag.create'])" label="سوالات متداول " />
-                        @endcan
-                            {{-- v3-apply-law --}}
-                            @can('show_settings_contactUs')
-                                <x-admin.menu-item href="{{route('admin.setting.apply')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.apply')" label="مدرس شوید" />
-                            @endcan
                     </x-admin.menu-group>
                 @endcan
                 <li class="menu-section">

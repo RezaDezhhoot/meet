@@ -15,6 +15,25 @@ class PermissionTableSeeder extends Seeder
     {
         $permissions = [
             ['name' => 'show_dashboard' , 'guard_name'=> 'web'],
+
+            ['name' => 'show_users' , 'guard_name'=> 'web'],
+            ['name' => 'edit_users' , 'guard_name'=> 'web'],
+            ['name' => 'delete_users' , 'guard_name'=> 'web'],
+
+            ['name' => 'show_roles' , 'guard_name'=> 'web'],
+            ['name' => 'edit_roles' , 'guard_name'=> 'web'],
+            ['name' => 'delete_roles' , 'guard_name'=> 'web'],
+
+            ['name' => 'show_rooms' , 'guard_name'=> 'web'],
+            ['name' => 'edit_rooms' , 'guard_name'=> 'web'],
+            ['name' => 'delete_rooms' , 'guard_name'=> 'web'],
+
+            ['name' => 'show_subscriptions' , 'guard_name'=> 'web'],
+            ['name' => 'edit_subscriptions' , 'guard_name'=> 'web'],
+            ['name' => 'delete_subscriptions' , 'guard_name'=> 'web'],
+
+            ['name' => 'show_settings' , 'guard_name'=> 'web'],
+            ['name' => 'edit_base_settings' , 'guard_name'=> 'web'],
         ];
 
         foreach ($permissions as $permission) {

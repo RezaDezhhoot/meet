@@ -29,9 +29,12 @@ echo "Installing composer dependencies..."
 docker-compose run --rm composer composer install
 
 echo "Generating key..."
-docker-compose run artisan key:generate
+docker-compose run --rm artisan key:generate
 
 echo "Migrating..."
-docker-compose run artisan migrate
+docker-compose run --rm artisan migrate
 
+echo "Storage link..."
 docker-compose run --rm artisan storage:link
+
+docker-compose run --rm artisan cache:clear

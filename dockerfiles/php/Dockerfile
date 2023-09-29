@@ -33,6 +33,12 @@ RUN chown -R www-data:www-data \
         /home/app/storage \
         /home/app/bootstrap/cache
 
+RUN chmod u+rwx /home/app/storage \
+    /home/app/bootstrap/cache
+
+RUN chmod g+rwx /home/app/storage \
+    /home/app/bootstrap/cache
+
 # Expose port 9000 and start php-fpm server (for FastCGI Process Manager)
 EXPOSE 9000
 CMD ["php-fpm"]

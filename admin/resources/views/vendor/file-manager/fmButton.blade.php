@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>مدیریت فایل</title>
     <!-- CSRF Token -->
-    <meta name="csrf-token" content="NRjAtSsM32NRlH7YXwlFbbJMfDRSXLa1eNUP4bQ8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" sizes="16x16" href="{{asset($logo)}}" />
 
     <link rel="stylesheet" href="{{asset('lfm/css/bootstrap.min.css')}}" >
