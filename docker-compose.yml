@@ -110,11 +110,25 @@ services:
       placement:
         constraints: [ node.hostname == slave1 ]
     environment:
-      MONGO_URI: mongodb://admin:root@mongodb/admin?authSource=admin&directConnection=true
-      REDIS_URL: redis://:@redisService:6379
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: admin
+      DB_USERNAME: admin
+      DB_PASSWORD: secret
     networks:
       - main
   # end backend
+  frontend:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/frontend/Dockerfile
+    container_name: frontend
+    restart: on-failure
+    working_dir: /app
+    ports:
+      - '8080:8080'
+    networks:
+      - main
 networks:
   main:
     driver: bridge

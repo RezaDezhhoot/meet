@@ -12,5 +12,6 @@ RUN npm install
 
 RUN npm install -g nodemon@2.0.7
 
+EXPOSE 3000
 # Copy the rest of the application code
 COPY ./backend .
