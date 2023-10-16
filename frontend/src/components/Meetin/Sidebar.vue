@@ -1,0 +1,46 @@
+<template>
+  <section class="right-section w-[30%] h-full ml-[0.5rem] flex flex-col justify-between items-center">
+    <Camera :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Camera>
+    <Users :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Users>
+    <Chat :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Chat>
+  </section>
+
+  <section class="navbar hide-pc">
+    <div class="btn-chat-tab active">
+      <span>گفت و گو</span>
+    </div>
+
+    <div class="btn-users-tab">
+      <span>کاربران</span>
+    </div>
+
+    <div class="btn-video-tab">
+      <span>ویدئو</span>
+    </div>
+  </section>
+</template>
+
+<script>
+import Audio from "./Elements/Audio.vue";
+import Chat from "./Chat.vue";
+import Camera from "./Camera.vue";
+import Users from "./Users.vue";
+
+export default {
+  name: "Sidebar",
+  components:{
+    Audio , Chat , Camera , Users
+  },
+  props:{
+    clients: Array,
+    room: Object,
+    socket: Object,
+    user: Object,
+    host: null,
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

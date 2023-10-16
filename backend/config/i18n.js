@@ -6,7 +6,7 @@ const i18n = new I18n({
     header: 'accept-language',
     queryParameter: 'lang',
     locales: ['en','fa'],
-    defaultLocale: 'en',
+    defaultLocale: 'fa',
     directory: path.join(appDir,'langs'),
     updateFiles: false
 });

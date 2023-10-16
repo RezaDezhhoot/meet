@@ -11,7 +11,6 @@ RUN npm install
 COPY ./frontend .
 
 RUN npm run build
-RUN npm run dev
 
 EXPOSE 8080
 

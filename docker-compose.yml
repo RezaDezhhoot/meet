@@ -125,6 +125,11 @@ services:
     container_name: frontend
     restart: on-failure
     working_dir: /app
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+      - /app/node_modules
     ports:
       - '8080:8080'
     networks:

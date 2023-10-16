@@ -15,7 +15,7 @@ require(path.join(appDir,'app/Providers/RouteServiceProvider')).loadApiRoutes(ap
 require(path.join(appDir,'app/Providers/SocketServiceProvider')).load(server);
 
 app.use(function( req, res, next){
-    return res.status(500).json({
+    return res.status(404).json({
         'message': 'Fallback'
     });
 });

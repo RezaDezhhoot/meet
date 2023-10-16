@@ -31,7 +31,7 @@ exports.store = async (req , res) => {
             }
         })){
             errorArr.push({
-                filed: 'code',
+                filed: 'phone',
                 message: res.__('auth.token_has_already_sent')
             });
             return res.status(403).json({ data: errorArr, message:  res.__('general.error') });
@@ -81,7 +81,6 @@ exports.reset = async (req , res) => {
             where: {
                 phone,
                 value: code,
-                status: false,
                 expires_at:{
                     [Op.gt]: Date.now()
                 },

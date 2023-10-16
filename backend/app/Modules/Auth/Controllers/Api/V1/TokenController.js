@@ -30,7 +30,7 @@ exports.store = async (req , res) => {
             }
         })){
             errorArr.push({
-                filed: 'code',
+                filed: 'phone',
                 message: res.__('auth.token_has_already_sent')
             });
             return res.status(403).json({ data: errorArr, message: res.__('general.error') });
@@ -80,7 +80,6 @@ exports.verify = async (req , res) => {
                 expires_at: {
                     [Op.gte]: Date.now()
                 },
-                status: false,
                 value:code
             }
         });

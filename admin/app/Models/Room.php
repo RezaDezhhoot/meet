@@ -37,7 +37,7 @@ class Room extends Model
     {
         return Attribute::get(function (){
             $queryParam = [
-                'key' => $this->key,
+                'room' => $this->key,
             ];
             $queryString = http_build_query($queryParam);
             return Setting::getSingleRow('room_domain') . '?' . $queryString;

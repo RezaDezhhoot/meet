@@ -1,0 +1,17 @@
+@font-face {
+  font-family: "IRANSansWeb";
+  src: url("../fonts/IRANSansWeb.eot"); /* IE */
+  src: url("../fonts/IRANSansWeb.eot?#iefix") format("embedded-opentype"), /* IE */
+  url("../fonts/IRANSansWeb.woff") format("woff"), /* Modern Browsers */
+  url("../fonts/IRANSansWeb.ttf") format("truetype"); /* Safari, Android, iOS */
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "logoFont";
+  src: url("../fonts/title/IranNastaliq.eot"); /* IE */
+  src: url("../fonts/title/IranNastaliq.eot?#iefix") format("embedded-opentype"), /* IE */
+  url("../fonts/title/IranNastaliq.woff") format("woff"), /* Modern Browsers */
+  url("../fonts/title/IranNastaliq.ttf") format("truetype"); /* Safari, Android, iOS */
+  font-weight: normal;
+}

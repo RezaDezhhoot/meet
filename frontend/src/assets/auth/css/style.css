@@ -1,0 +1,70 @@
+@import "font.css";
+
+*{
+  font-family: IRANSansWeb, sans-serif;
+}
+
+.title {
+  font-family: logoFont , sans-serif;
+}
+
+.auth {
+  background-image: url("../images/modern-abstract-geometric-background-free-vector.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: right;
+  background-color: #f6f6f6;
+  background-attachment: fixed;
+  height: 100%;
+  width: 100%;
+}
+
+.form-navbar {
+  border-bottom: 1px solid #d4d9de;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #d4d9de;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #d4d9de;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #d4d9de;
+}
+
+input,
+input::placeholder {
+  font: 12px/3 IRANSansWeb;
+}
+
+.active-tab{
+  color: red;
+}
+
+.active-tab:after {
+  content: "";
+  position: absolute;
+  height: 2px;
+  background-color: red;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+}
+
+.active-tab>small{
+  color: #4e4e4e !important;
+  font-weight: 900;
+}
+
+
+.fa-google {
+  background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
+  -webkit-background-clip: text;
+  /*background-clip: text;*/
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
