@@ -99,9 +99,15 @@ export default {
     room: Object,
     socket: Object,
   },
+  async mounted(){
+    this.wires();
+  },
   methods:{
     logout(){
       this.$emit('logout');
+    },
+    wires(){
+
     }
   }
 }

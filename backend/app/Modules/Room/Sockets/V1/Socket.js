@@ -8,6 +8,7 @@ let typistUsers = {};
 let host = null;
 let host_socket_id = null;
 let shared_camera = false;
+let shared_audio = false;
 
 const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
@@ -225,7 +226,6 @@ module.exports.shareScreen = async (io,socket,data,room) => {
 }
 
 module.exports.handRising = async (io,socket,data,room) => {
-
     if (socket.id === host_socket_id || data.to === socket.id) {
         const user = users[data.to];
         users[data.to].media.settings.hand_rising = ! user.media.settings.hand_rising;
@@ -238,7 +238,6 @@ module.exports.handRising = async (io,socket,data,room) => {
                 }
             });
         }
-        console.log(users[data.to].media);
 
         io.emit('get-users',{
             data:{
@@ -282,7 +281,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
             },status: 200
         });
     }
-
+    shared_audio = false;
     delete users[socket.id];
     delete typistUsers[socket.id];
     io.emit('get-users',{
@@ -321,4 +320,23 @@ module.exports.kickClient = async (io,socket,data,room) => {
             status: 200
         });
     }
+}
+
+module.exports.shareAudio = async (io , socket , data , room) => {
+    socket.to(data.to).emit("get-audio-offer",{
+        data:{
+            offer: data.offer,
+            from: socket.id
+        } , status: 200
+    })
+}
+
+module.exports.audioMakeAnswer = async (io , socket , data , room) => {
+    shared_audio = true;
+    socket.to(data.to).emit('audio-answer-made',{
+        data:{
+            answer: data.answer,
+            from: socket.id
+        } , status: 200
+    });
 }

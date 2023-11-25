@@ -11,7 +11,6 @@
     </svg>
     <span v-if="label" class="mr-[0.5rem] mt-[0.15rem]">{{ label }}</span>
   </button>
-  <audio class="hidden" autoplay ref="localAudio"></audio>
 </template>
 
 <script>
@@ -28,7 +27,6 @@ export default {
     responsive: false,
     label: null,
     clients: Object,
-    peerConnections: Object,
   },
   data(){
     return {
@@ -55,17 +53,14 @@ export default {
     },
     async shareAudio(){
       if (! this.$store.state.localStream && ! this.$store.state.localAudioStream) {
-        this.localAudioStream = await navigator.mediaDevices.getUserMedia({video: false, audio: true})
-        this.$refs.localAudio.srcObject = this.localAudioStream;
-        this.$store.commit('setLocalAudioStream',this.localAudioStream);
         await this.startAudio();
+      } else {
+        this.$store.commit('controlLocalMicrophone',this.status);
       }
-      this.$store.commit('controlLocalMicrophone',this.status);
     },
     async startAudio() {
-      if (this.user && this.user.media && this.user.media.media.local.microphone && this.user.media.media.remote.microphone) {
-        console.log(this.peerConnections)
-
+      if (this.user && this.user.media && this.user.media.media.remote.microphone) {
+        this.$store.dispatch('shareAudio',this.socket.id);
       }
     },
     wires(){

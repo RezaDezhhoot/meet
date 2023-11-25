@@ -2,7 +2,9 @@
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main>
     <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
-    <content  :user="user" :clients="clients" :socket="socket"></content>
+<!--    <content  :user="user" :clients="clients" :socket="socket"></content>-->
+    <audio class="" controls v-bind:id="`audio-player-${socket.id}`" autoplay ref="localAudio"></audio>
+
   </main>
 </template>
 =room
@@ -46,6 +48,7 @@ export default {
   methods:{
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
+      this.$store.commit('setSocket' , this.socket);
       return this.socket;
     },
     async join(){
@@ -69,6 +72,7 @@ export default {
         if (data.status === 200) {
           this.clients = data.data.users;
           this.user = data.data.users[this.socket.id];
+          this.$store.commit('setUser',this.user);
         }
       });
 
@@ -84,6 +88,23 @@ export default {
         }
 
         this.redirectClientIfHappenedError(this.$route.params.key , data.data.code);
+      });
+      this.socket.on('create-pc' , async data => {
+        if (data.status === 200) {
+          this.$store.commit('fillRTCs',this.clients);
+          // if (data.data.shared_camera) {
+          //   this.socket.emit('get-shared-camera',{
+          //     from: this.socket.id
+          //   })
+          // }
+
+        }
+      });
+      this.socket.on('get-audio-offer' , async data => {
+        this.$store.dispatch('getAudioOffer',data);
+      });
+      this.socket.on('audio-answer-made' , async data => {
+        this.$store.dispatch('audioAnswerMade',data);
       });
     },
     redirectClientIfHappenedError(room = null , code = null){

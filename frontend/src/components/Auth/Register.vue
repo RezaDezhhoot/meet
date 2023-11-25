@@ -240,7 +240,9 @@ export default {
           this.resetErrors();
           axios.post(`/v1/auth/register?room=${this.$route.query.room}&lang=fa`,this.user).then(res => {
             this.$cookies.set('auth',res.data.data);
+            this.$emit('redirect-to-meet',this.$route.query.room);
           }).catch(err => {
+            console.log(err)
             err.response.data.data.forEach(error => {
               return this.errors[error.filed] = error.message;
             });

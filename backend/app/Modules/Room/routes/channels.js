@@ -24,14 +24,6 @@ module.exports.ChannelV1 = async (io) => {
             // no Typing
             socket.on('no-typing', async data => await SocketV1.noTyping(io,socket,data,room))
 
-            // Share host's camera
-            socket.on('share-camera', async data => await SocketV1.shareCamera(io,socket,data,room))
-
-            // Get shared host's camera
-            socket.on('get-shared-camera', async data => await SocketV1.getSharedCamera(io,socket,data,room))
-
-            // Share host's camera
-            socket.on('camera-make-answer', async data => await SocketV1.cameraMakeAnswer(io,socket,data,room))
 
             // Control client's microphone
             socket.on('control-remote-microphone', async data => await SocketV1.controlRemoteMicrophone(io,socket,data,room))
@@ -62,6 +54,21 @@ module.exports.ChannelV1 = async (io) => {
 
             // Kick clint
             socket.on('kick-client', async data => await SocketV1.kickClient(io,socket,data,room))
+
+            /* Audio */
+            socket.on('share-audio' , async data => await SocketV1.shareAudio(io , socket , data , room))
+
+            socket.on('audio-make-answer' , async data => await SocketV1.audioMakeAnswer(io , socket , data , room))
+            /* End audio */
+
+
+            /* Camera */
+            socket.on('share-camera', async data => await SocketV1.shareCamera(io,socket,data,room))
+
+            socket.on('get-shared-camera', async data => await SocketV1.getSharedCamera(io,socket,data,room))
+
+            socket.on('camera-make-answer', async data => await SocketV1.cameraMakeAnswer(io,socket,data,room))
+            /* End camera */
         } else {
             socket.emit('error',{
                 data:{

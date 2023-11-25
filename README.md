@@ -1,6 +1,7 @@
 ## Get started
 ````bash
-copy src/.env.example src/.env
+copy backend/.env.example backend/.env
+copy admin/.env.example admin/.env
 ````
 ### Launching project on Docker
 ````bash
