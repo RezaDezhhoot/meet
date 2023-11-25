@@ -35,7 +35,6 @@ export const store = createStore({
             })
           };
           state.peerConnections[index]['pc'].ontrack = function ({ streams: [stream] }) {
-            console.log('ok');
             let audio = document.getElementById(`audio-player-${state.socket.id}`);
             console.log(audio);
             // video.srcObject = stream;
@@ -77,11 +76,11 @@ export const store = createStore({
   },
   actions:{
     async shareAudio(context){
-      let audioLocalStream = await navigator.mediaDevices.getUserMedia({video: false, audio: true})
-      context.commit('setLocalAudioStream',audioLocalStream);
+      let localAudioStream = await navigator.mediaDevices.getUserMedia({video: false, audio: true})
+      context.commit('setLocalAudioStream',localAudioStream);
       for (const id in context.state.peerConnections) {
         if (context.state.peerConnections[id]['pc']) {
-          audioLocalStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track, audioLocalStream));
+          context.state.localAudioStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track, context.state.localAudioStream));
           await context.dispatch('startAudio',{
             from: context.state.socket.id,
             to: id
