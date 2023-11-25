@@ -39,7 +39,8 @@
         </div>
       </div>
     </div>
-    <video id="video-player" class="h-full video-player rounded-b-[0.5rem] lg:rounded-[0.5rem] w-full" :class="{ 'hidden': hiddenVideo }"  muted ref="localVideo" autoplay></video>
+    <video id="video-player" class="h-full video-player rounded-b-[0.5rem] lg:rounded-[0.5rem] w-full" :class="{ 'hidden': hiddenVideo ,'self-media': user.user && host && user.user.id === host.user.id }" muted  ref="localVideo" autoplay>
+    </video>
   </div>
 </template>
 
@@ -59,27 +60,40 @@ export default {
     return {
       hiddenVideo: true,
       localStream: null,
+      peerConnections: Object
     }
   },
   created() {
     this.wires();
   },
+  watch:{
+    "$store.state.localStream"(value) {
+      const status = !value;
+      this.hiddenVideo = status;
+      if (status) {
+        this.socket.emit('end-camera')
+      }
+    }
+  },
   methods:{
     async shareCamera(){
       this.hiddenVideo = false;
+      this.$store.commit('turnOffLocalMicrophone');
       this.localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
       this.$refs.localVideo.srcObject = this.localStream;
+      this.$store.commit('setLocalStream',this.localStream);
+      this.$store.commit('controlLocalMicrophone',this.user.media.media.local.microphone);
 
-      for (var id in this.clients) {
-        if (this.clients[id]['pc']) {
-          this.localStream.getTracks().forEach(track => this.clients[id]['pc'].addTrack(track, this.localStream));
+      for (const id in this.peerConnections) {
+        if (this.peerConnections[id]['pc']) {
+          this.localStream.getTracks().forEach(track => this.peerConnections[id]['pc'].addTrack(track, this.localStream));
           await this.startSharing(this.socket.id,id);
         }
       }
     },
     async startSharing(from , to){
-      let offer = await this.clients[to]['pc'].createOffer();
-      await this.clients[to]['pc'].setLocalDescription(new RTCSessionDescription(offer));
+      let offer = await this.peerConnections[to]['pc'].createOffer();
+      await this.peerConnections[to]['pc'].setLocalDescription(new RTCSessionDescription(offer));
 
       this.socket.emit("share-camera", {
         offer, from , to
@@ -88,16 +102,20 @@ export default {
     wires(){
       this.socket.on('create-pc' , async data => {
         if (data.status === 200) {
-          for ( var index in this.clients ) {
-            if (this.clients[index].user.id !== this.user?.user?.id && ! this.clients[index]['pc']) {
-              this.clients[index]['pc'] = new RTCPeerConnection({
-                iceServers: [
-                  { urls: 'stun:stun.l.google.com:19302' },
-                ],
-              });
-              this.clients[index]['pc'].ontrack = function ({ streams: [stream] }) {
+          for (const index in this.clients ) {
+            if (this.clients[index].user.id !== this.user?.user?.id && (! this.peerConnections[index] || ! this.peerConnections[index]['pc'])) {
+              this.peerConnections[index] = {
+                user_id: this.clients[index].user.id,
+                pc: new RTCPeerConnection({
+                  iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                  ],
+                })
+              };
+              this.peerConnections[index]['pc'].ontrack = function ({ streams: [stream] }) {
                 let video = document.getElementById('video-player');
                 video.srcObject = stream;
+                video.load();
               };
             }
           }
@@ -112,15 +130,14 @@ export default {
       });
 
       this.socket.on('get-camera-offer',async data => {
-
-        if (this.clients[data.data.from]['pc']) {
-          await this.clients[data.data.from]['pc'].setRemoteDescription(
+        if (this.peerConnections[data.data.from] && this.peerConnections[data.data.from]['pc']) {
+          await this.peerConnections[data.data.from]['pc'].setRemoteDescription(
               new RTCSessionDescription(data.data.offer)
           );
 
-          const answer = await this.clients[data.data.from]['pc'].createAnswer();
+          const answer = await this.peerConnections[data.data.from]['pc'].createAnswer();
 
-          await this.clients[data.data.from]['pc'].setLocalDescription(new RTCSessionDescription(answer));
+          await this.peerConnections[data.data.from]['pc'].setLocalDescription(new RTCSessionDescription(answer));
           this.hiddenVideo = false;
 
           this.socket.emit('camera-make-answer',{
@@ -128,19 +145,21 @@ export default {
             to: data.data.from
           })
         }
-
       });
 
       this.socket.on('camera-answer-made' , async data => {
         this.hiddenVideo = false;
-        await this.clients[data.data.from]['pc'].setRemoteDescription(
+        await this.peerConnections[data.data.from]['pc'].setRemoteDescription(
             new RTCSessionDescription(data.data.answer)
         );
-        await this.startSharing(this.socket.id,data.data.from);
+        if (! this.peerConnections[data.data.from]['camera_shared']) {
+          this.peerConnections[data.data.from]['camera_shared'] = true;
+          await this.startSharing(this.socket.id,data.data.from);
+        }
       })
 
       this.socket.on('send-shared-camera' , async data => {
-        this.localStream.getTracks().forEach(track => this.clients[data.data.from]['pc'].addTrack(track, this.localStream));
+        this.localStream.getTracks().forEach(track => this.peerConnections[data.data.from]['pc'].addTrack(track, this.localStream));
         await this.startSharing(this.socket.id,data.data.from);
       })
 

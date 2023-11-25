@@ -1,3 +1,22 @@
 .video-player{
     object-fit: unset;
 }
+
+.text-muted{
+    color: #616161;
+}
+
+.box-sidbar-chats{
+    height: calc(100% - 6rem) !important;
+    width: 100%;
+    overflow-y: auto;
+    padding: 0rem 0.5rem;
+}
+
+.swal2-popup {
+    font-size: 12px !important;
+}
+
+.text-black{
+    color: #000;
+}

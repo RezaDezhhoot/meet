@@ -3,7 +3,7 @@
 	"general.error": "خطا",
 	"general.not_found": "یافت نشد",
 	"general.unauthorized": "غیرمجاز",
-	"general.access_denied": "دسترسی ممنوع",
+	"general.access_denied": "دسترسی محدود شده است",
 
 	"auth.user_has_already_registered": "این شماره قبلاً ثبت شده است",
 	"auth.token_has_already_sent": "توکن قبلاً ارسال شده است",

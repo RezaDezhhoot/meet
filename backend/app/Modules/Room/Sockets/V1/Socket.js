@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const {GUEST, LOGIN} = require("../../../Auth/Enums/LoginTypes");
 const User = require('../../../User/Models/User');
+const Penalty = require('../../../User/Models/Penalty');
 const Chat = require('../../Models/Chat');
 let users = {};
 let typistUsers = {};
@@ -24,6 +25,16 @@ module.exports.sendRoom = async (io,socket,data,room) => {
 
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
+
+    if (room.capacity === Object.entries(users).length) {
+        socket.emit('error',{
+            data:{
+                code: 422
+            }
+        });
+        return;
+    }
+
     await this.sendRoom(io,socket,data,room);
     switch (data.type) {
         case LOGIN:
@@ -36,6 +47,7 @@ module.exports.join = async (io,socket,data,room) => {
                     users[socket.id] = {
                         socketId: socket.id,
                         name: user.name,
+                        ip: socket.handshake.address,
                         user: UserResource.make(user,null,['email','phone','status']),
                         media: MediaResource.make(user,room,data.type),
                     };
@@ -43,6 +55,9 @@ module.exports.join = async (io,socket,data,room) => {
                     if (user.id === room.host_id) {
                         host = users[socket.id];
                         host_socket_id = socket.id;
+                    }
+
+                    if (host) {
                         io.emit('host-joined',{
                             data:{
                                 host
@@ -58,13 +73,7 @@ module.exports.join = async (io,socket,data,room) => {
         default:
             return;
     }
-    // Checking capacity
-    socket.emit('get-me',{
-        data:{
-            me: users[socket.id]
-        },
-        status
-    })
+
     io.emit('get-users',{
         data:{
             users
@@ -87,7 +96,7 @@ module.exports.newMessage = async (io,socket,data,room) => {
                 text: data.message,
                 room_id: room.id,
                 sender: user.name,
-                user_id: user.user.id,
+                user_id: user?.user?.id,
                 user_ip: socket.handshake.address,
             });
         } else {
@@ -153,12 +162,92 @@ module.exports.getSharedCamera = async (io,socket,data,room) => {
     });
 }
 
+module.exports.controlRemoteMicrophone = async (io,socket,data,room) => {
+    if (host && socket.id === host_socket_id) {
+        const user = users[data.to];
+        const status = ! user.media.media.remote.microphone;
+        users[data.to].media.media.remote.microphone = status;
+
+        if (status) {
+            //
+        }
+
+        io.emit('get-users',{
+            data:{
+                users
+            },
+            status: 200
+        });
+    }
+}
+
+module.exports.controlLocalMicrophone = async (io,socket,data,room) => {
+    const user = users[socket.id];
+
+    if (user && user.media.media.remote.microphone) {
+        const status = ! user.media.media.local.microphone;
+        users[socket.id].media.media.local.microphone = status;
+
+        if (status) {
+            //
+        }
+
+        io.emit('get-users',{
+            data:{
+                users
+            },
+            status: 200
+        });
+    }
+}
+
+module.exports.controlRemoteScreen = async (io,socket,data,room) => {
+    if (host && socket.id === host_socket_id) {
+        const user = users[data.to];
+        const status = ! user.media.media.remote.screen;
+        users[data.to].media.media.remote.screen = status;
+
+        if (status) {
+            // 
+        }
+
+        io.emit('get-users',{
+            data:{
+                users
+            },
+            status: 200
+        });
+    }
+}
 
 module.exports.shareScreen = async (io,socket,data,room) => {
 
 }
 
 module.exports.handRising = async (io,socket,data,room) => {
+
+    if (socket.id === host_socket_id || data.to === socket.id) {
+        const user = users[data.to];
+        users[data.to].media.settings.hand_rising = ! user.media.settings.hand_rising;
+
+        if (socket.id !== host_socket_id && host) {
+            socket.to(host_socket_id).emit('client-risen-hand',{
+                data:{
+                    sender: user.name,
+                    status: users[data.to].media.settings.hand_rising
+                }
+            });
+        }
+        console.log(users[data.to].media);
+
+        io.emit('get-users',{
+            data:{
+                users
+            },
+            status: 200
+        });
+
+    }
 
 }
 
@@ -170,6 +259,13 @@ module.exports.demote = async (io,socket,data,room) => {
 
 }
 
+
+module.exports.endCamera = async (io,socket,data,room) => {
+    if (users[socket.id] === host && shared_camera) {
+        shared_camera = false;
+        io.emit('end-shared-camera');
+    }
+}
 
 module.exports.disconnect = async (io,socket,data,room) => {
 
@@ -195,4 +291,34 @@ module.exports.disconnect = async (io,socket,data,room) => {
         },
         status: 200
     });
+}
+
+module.exports.kickClient = async (io,socket,data,room) => {
+    if (host && socket.id === host_socket_id && host_socket_id !== data.to) {
+        const user = users[data.to];
+
+        await Penalty.create({
+            kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
+            room_id: room.id,
+            user_id: user?.user?.id,
+            user_ip: user.ip,
+        });
+
+        delete users[data.to];
+        delete typistUsers[data.to];
+
+
+        socket.to(data.to).emit('error',{
+            data:{
+                code: 403
+            }
+        });
+
+        io.emit('get-users',{
+            data:{
+                users
+            },
+            status: 200
+        });
+    }
 }

@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import Audio from "./Elements/Audio.vue";
+import Audio from "./Elements/UserMicrophone.vue";
 import Chat from "./Chat.vue";
 import Camera from "./Camera.vue";
 import Users from "./Users.vue";
@@ -37,6 +37,8 @@ export default {
     socket: Object,
     user: Object,
     host: null,
+  },
+  methods:{
   }
 }
 </script>

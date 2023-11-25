@@ -1,15 +1,48 @@
-import vuex from "vuex";
+import { createStore } from 'vuex'
 
-import * as StoreGetters from './items/StoreGetters';
-import * as StoreMutations from './items/StoreMutations';
-
-
-export const store = new vuex.Store({
+export const store = createStore({
   state:{
-    site_key: '6Lc9PTEhAAAAAI7TR8J7Id1SiN0xaMajrfSaynpR',
-    secret_key: '6Lc9PTEhAAAAAI3Qt3N1YaI8Ak9kWhG2wo03QuWf',
+    localStream: null,
+    localAudioStream: null,
+    sound: false,
   },
-  getters: StoreGetters,
-  mutations: StoreMutations,
+  mutations: {
+    setLocalStream(state , stream){
+      state.localStream = stream;
+    },
+    setLocalAudioStream(state , stream) {
+      state.localAudioStream = stream;
+    },
+    controlLocalMicrophone(state , status) {
+      try {
+        if (state.localStream) {
+          state.localStream.getAudioTracks()[0].enabled = status;
+        } else if(state.localAudioStream) {
+          state.localStream.getAudioTracks()[0].enabled = status;
+        }
+      } catch (err) {}
+    },
+    turnOffLocalCamera(state) {
+      try {
+        if (state.localStream) {
+          state.localStream.getTracks().forEach(function(track) { track.stop(); })
+          state.localStream = null;
+        }
+      } catch (err) {}
+    },
+    turnOffLocalMicrophone(state) {
+      try {
+        if (state.localAudioStream) {
+          state.localAudioStream.getTracks().forEach(function(track) { track.stop(); })
+          state.localAudioStream = null;
+        }
+      } catch (err) {}
+    },
+    controlSound(state , value){
+      state.sound = value.value;
+      Array.from(document.querySelectorAll('audio, video')).forEach(el => el.muted = ! value.value)
+      Array.from(document.querySelectorAll('.self-media')).forEach(el => el.muted = true)
+    }
+  },
 
 });

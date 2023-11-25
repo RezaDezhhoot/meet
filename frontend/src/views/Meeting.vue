@@ -1,5 +1,5 @@
 <template>
-  <top  :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
+  <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main>
     <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
     <content  :user="user" :clients="clients" :socket="socket"></content>
@@ -12,7 +12,6 @@ import Sidebar from "../components/Meetin/Sidebar.vue";
 import Content from "../components/Meetin/Content.vue";
 import io from 'socket.io-client';
 import { inject } from 'vue';
-const { RTCPeerConnection, RTCSessionDescription  } = window;
 
 export default {
   components: {
@@ -60,7 +59,6 @@ export default {
 
     },
     async wires() {
-
       this.socket.on('get-room',async data => {
         if (data.status === 200) {
           this.room = data.data.room;
@@ -70,21 +68,41 @@ export default {
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
           this.clients = data.data.users;
-        }
-      });
-
-      this.socket.on('get-me',async data => {
-        if (data.status === 200) {
-          this.user = data.data.me;
+          this.user = data.data.users[this.socket.id];
         }
       });
 
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
           this.host = data.data.host;
-
         }
       });
+
+      this.socket.on('error', async data => {
+        if (data.data.code !== 404) {
+          this.clearCookie();
+        }
+
+        this.redirectClientIfHappenedError(this.$route.params.key , data.data.code);
+      });
+    },
+    redirectClientIfHappenedError(room = null , code = null){
+      this.$router.push({
+        name: "error",
+        params:{
+          code
+        },
+        query:{
+          room
+        }
+      });
+    },
+    logout(){
+      this.clearCookie();
+      this.$emit('check-if-user-was-logged-in',this.$route.params.key);
+    },
+    clearCookie(){
+      this.$cookies.remove('auth');
     }
   },
   async unmounted() {

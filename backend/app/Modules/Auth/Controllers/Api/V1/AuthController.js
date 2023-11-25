@@ -3,6 +3,7 @@ const GuestRequest = require("../../../Requests/Api/V1/GuestRequest");
 const LoginRequest = require("../../../Requests/Api/V1/LoginRequest");
 const utils = require("../../../../../../utils/helpers");
 const User = require("../../../../User/Models/User");
+const Penalty = require("../../../../User/Models/Penalty");
 const Token = require("../../../../User/Models/Token");
 const UserResource = require('../../../../User/Resources/Api/V1/UserResource');
 const passport = require('passport');
@@ -46,6 +47,7 @@ exports.register = async (req , res) => {
 
 exports.login = (req , res ,next) => {
     const errorArr = [];
+    console.log();
     passport.authenticate(
         'login',
         async(err, user, info) => {
@@ -56,7 +58,7 @@ exports.login = (req , res ,next) => {
                 if (err || !user) {
                     errorArr.push({
                         filed: 'phone',
-                        message: res.__('auth.invalid_mobile_or_password')
+                        message: info.message
                     });
                     return res.status(422).json({ data: errorArr, message: res.__('general.error') });
                 }
@@ -77,6 +79,22 @@ exports.login = (req , res ,next) => {
 
 exports.guest = async (req , res , next) => {
     try {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        const check = await Penalty.findOne({where:{
+                user_ip: ip,
+                room_id: req.room.id,
+                kicked_at: {
+                    [Op.gte]: Date.now()
+                }
+            }});
+
+        if (check){
+            return res.status(403).json({
+                message: res.__("general.access_dined")
+            });
+        }
+
         await GuestRequest(res).validate(req.body, {
             abortEarly: false,
         });

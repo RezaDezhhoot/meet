@@ -28,7 +28,7 @@ const User = sequelize.define('User',{
     verified_at: {
         type: DataTypes.DATE,
         allowNull: true,
-    }
+    },
 },{
     tableName: 'users',
     createdAt: 'created_at',

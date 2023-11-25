@@ -1,7 +1,7 @@
 const utils = require('../../../../../../utils/helpers');
 
 exports.make = (user , room , type) => {
-    const host = user.id === room.id;
+    const host = user.id === room.host_id;
     return {
         host,
         type,

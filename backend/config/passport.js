@@ -5,6 +5,8 @@ const JWTstrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
 const utils = require("../utils/helpers");
 const {ADMIN, ADMINSTRATOR} = require("../app/Base/Constants/Role");
+const Penalty = require("../app/Modules/User/Models/Penalty");
+const {Op} = require("sequelize");
 
 passport.use(
     'login',
@@ -19,6 +21,18 @@ passport.use(
                 const user = await UserModel.findOne({ where: {phone} });
                 if (!user) {
                     return done(null, false, { message: req.__('auth.invalid_mobile_or_password') });
+                }
+
+                const check = await Penalty.findOne({where:{
+                        user_id: user.id,
+                        room_id: req.room.id,
+                        kicked_at: {
+                            [Op.gte]: Date.now()
+                        }
+                    }});
+
+                if (check) {
+                    return done(null, false, { message: req.__('general.access_denied') });
                 }
 
                 const isMatch = await utils.sha256Compare(password, user.password);

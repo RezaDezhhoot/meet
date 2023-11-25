@@ -40,6 +40,11 @@ const router = createRouter({
       path: '/meeting/:key',
       name: 'meeting',
       component: import('../views/Meeting.vue')
+    },
+    {
+      path: '/error/:code?',
+      name: 'error',
+      component: import('../views/Error.vue')
     }
   ],
   scrollBehavior(to, from, savePosition) {

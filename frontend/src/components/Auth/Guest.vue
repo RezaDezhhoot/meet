@@ -24,7 +24,6 @@
 
 <script>
 import {GuestSchema} from "../../secure/AurhVlidator";
-import {useCounterStore} from "../../stores/counter";
 import {mapGetters} from 'vuex';
 import axios from "axios";
 

@@ -16,12 +16,17 @@ let AppName = 'Brand name';
 
 
 router.beforeEach((to, from, next) => {
-    if (to.name === 'meeting') {
-        import ('../src/assets/meet/styles/style.css');
-        import ('../src/assets/meet/styles/custom.css');
-    } else {
-        import ('../src/assets/auth/css/bootstrap.min.css');
-        import ('../src/assets/auth/css/style.css');
+    switch (to.name) {
+        case 'meeting':
+            import ('../src/assets/meet/styles/style.css');
+            import ('../src/assets/meet/styles/custom.css');
+            break;
+        case 'error':
+            import ('../src/assets/error/css/style.css');
+            break;
+        default:
+            import ('../src/assets/auth/css/bootstrap.min.css');
+            import ('../src/assets/auth/css/style.css');
     }
     next();
 })

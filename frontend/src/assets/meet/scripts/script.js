@@ -19,21 +19,50 @@ CloseMiniMenus.forEach((CloseMiniMenu,index) => {
 });
 
 
-//  chenge color icon with css
+//  chenge acsses user
 
-var specers = document.querySelectorAll('.specer');
+var ManageUserKick = document.querySelectorAll('.manage-user-kick');
 
-specers.forEach((specer,index) => {
-    specer.addEventListener('click', function handleClick(event) {
-        specers[index].classList.toggle("mic-red");
+ManageUserKick.forEach((UsersKick,index) => {
+    UsersKick.addEventListener('click', function handleClick(event) {
+        ManageUserKick[index].classList.toggle("icon-stroke-red");
+        ManageUserKick[index].classList.toggle("text-[#df1111]");
+        ManageUserKick[index].classList.toggle("border-[#df1111]");
     });
 });
+
+var ManageUserMic = document.querySelectorAll('.manage-user-mic');
+
+ManageUserMic.forEach((UserMic,index) => {
+    UserMic.addEventListener('click', function handleClick(event) {
+        ManageUserMic[index].classList.toggle("icon-green");
+    });
+});
+
+var ManageUserScreen = document.querySelectorAll('.manage-user-screen');
+
+ManageUserScreen.forEach((UserScreen,index) => {
+    UserScreen.addEventListener('click', function handleClick(event) {
+        ManageUserScreen[index].classList.toggle("icon-stroke-green");
+    });
+});
+
+
+//  chenge color icon with css
+
+// var specers = document.querySelectorAll('.specer');
+//
+// specers.forEach((specer,index) => {
+//     specer.addEventListener('click', function handleClick(event) {
+//         specers[index].classList.toggle("icon-red");
+//     });
+// });
 
 var cameras = document.querySelectorAll('.camera');
 
 cameras.forEach((camera,index) => {
     camera.addEventListener('click', function handleClick(event) {
-        cameras[index].classList.toggle("mic-red");
+        cameras[index].classList.toggle("icon-red");
     });
 });
 
@@ -42,7 +71,7 @@ var mics = document.querySelectorAll('.mic');
 
 mics.forEach((mic,index) => {
     mic.addEventListener('click', function handleClick(event) {
-        mics[index].classList.toggle("mic-yellow");
+        mics[index].classList.toggle("icon-yellow");
     });
 });
 
