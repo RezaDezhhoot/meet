@@ -2,9 +2,7 @@
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main>
     <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
-<!--    <content  :user="user" :clients="clients" :socket="socket"></content>-->
-    <audio class="" controls v-bind:id="`audio-player-${socket.id}`" autoplay ref="localAudio"></audio>
-
+    <content  :user="user" :clients="clients" :socket="socket"></content>
   </main>
 </template>
 =room
@@ -29,6 +27,8 @@ export default {
       clients:[],
       socket: null,
       baseUrl: inject('BaseUrl'),
+      peerConnections: Object,
+      localAudioStream: null
     };
   },
   name: "Meeting",
@@ -91,21 +91,23 @@ export default {
       });
       this.socket.on('create-pc' , async data => {
         if (data.status === 200) {
-          this.$store.commit('fillRTCs',this.clients);
-          // if (data.data.shared_camera) {
-          //   this.socket.emit('get-shared-camera',{
-          //     from: this.socket.id
-          //   })
-          // }
-
+          this.$store.dispatch('fillRTCs',this.clients);
         }
       });
-      this.socket.on('get-audio-offer' , async data => {
-        this.$store.dispatch('getAudioOffer',data);
+      this.socket.on('get-offer' , async data => {
+        this.$store.dispatch('getOffer',data);
       });
-      this.socket.on('audio-answer-made' , async data => {
-        this.$store.dispatch('audioAnswerMade',data);
+      this.socket.on('answer-made' , async data => {
+        this.$store.dispatch('answerMade',data);
       });
+      this.socket.on('end-stream',async data => {
+        if (data.data.media === 'camera') {
+          this.$store.commit('updateHiddenCamera',true);
+        }
+      });
+      this.socket.on('send-shared' , async data => {
+        this.$store.dispatch('sendShared', data)
+      })
     },
     redirectClientIfHappenedError(room = null , code = null){
       this.$router.push({

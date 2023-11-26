@@ -10,17 +10,19 @@ exports.make = (user , room , type) => {
                 audio: false,
                 screen: false,
                 microphone: false,
+                camera: false
             },
             remote:{
                 audio: host,
                 screen: host,
                 microphone: host,
+                camera: host,
             }
         },
         settings: {
             hand_rising: false,
-            is_speaking: false,
-            is_sharing: false
+            camera: false,
+            audio: false
         }
     };
 }

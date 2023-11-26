@@ -8,7 +8,6 @@ let typistUsers = {};
 let host = null;
 let host_socket_id = null;
 let shared_camera = false;
-let shared_audio = false;
 
 const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
@@ -134,31 +133,60 @@ module.exports.noTyping = async (io,socket,data,room) => {
     });
 }
 
-module.exports.shareCamera = async (io,socket,data,room) => {
-    if (socket.id === host_socket_id) {
-        socket.to(data.to).emit("get-camera-offer",{
-            data:{
+module.exports.shareStream = async (io,socket,data,room) => {
+    if ( (socket.id === host_socket_id && data.media === 'camera') || data.media === 'audio') {
+        if (data.media === 'camara' && ! users[socket.id].media.media.remote.camera) {
+            return;
+        }
+
+        if (data.media === 'audio' && ! users[socket.id].media.media.remote.audio) {
+            return;
+        }
+
+        users[socket.id].media.settings[data.media] = true;
+
+        socket.to(data.to).emit("get-offer",{
+            data: {
                 offer: data.offer,
-                from: socket.id
-            } ,status: 200
+                from: socket.id,
+                media: data.media
+            } , status: 200
         })
     }
 }
 
-module.exports.cameraMakeAnswer = async (io,socket,data,room) => {
-    shared_camera = true;
-    socket.to(data.to).emit('camera-answer-made',{
+module.exports.makeAnswer = async (io,socket,data,room) => {
+    if (data.media === 'camera') {
+        shared_camera = true;
+    }
+    socket.to(data.to).emit('answer-made',{
         data:{
             answer: data.answer,
-            from: socket.id
+            from: socket.id,
+            media: data.media
         } , status: 200
     });
 }
 
-module.exports.getSharedCamera = async (io,socket,data,room) => {
-    socket.to(host_socket_id).emit('send-shared-camera',{
+module.exports.endStream = async (io,socket,data,room) => {
+    if (data.media === 'camera') {
+        if (users[socket.id] === host && shared_camera) {
+            shared_camera = false;
+        }
+    }
+    users[socket.id].media.settings[data.media] = false;
+    io.emit('end-stream',{
+        data: {
+            media: data.media
+        }
+    });
+}
+
+module.exports.getShared = async (io,socket,data,room) => {
+    socket.to(data.to).emit('send-shared',{
         data:{
-            from: data.from
+            from: data.from,
+            media: data.media
         }, status: 200
     });
 }
@@ -259,12 +287,7 @@ module.exports.demote = async (io,socket,data,room) => {
 }
 
 
-module.exports.endCamera = async (io,socket,data,room) => {
-    if (users[socket.id] === host && shared_camera) {
-        shared_camera = false;
-        io.emit('end-shared-camera');
-    }
-}
+
 
 module.exports.disconnect = async (io,socket,data,room) => {
 
@@ -281,7 +304,6 @@ module.exports.disconnect = async (io,socket,data,room) => {
             },status: 200
         });
     }
-    shared_audio = false;
     delete users[socket.id];
     delete typistUsers[socket.id];
     io.emit('get-users',{

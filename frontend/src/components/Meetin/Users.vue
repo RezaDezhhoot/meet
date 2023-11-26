@@ -92,30 +92,7 @@ export default {
     }
   },
   methods:{
-    wires(){
-      this.socket.on('create-pc', async data => {
-        if (data.status === 200) {
-          for (const index in this.clients ) {
-            if (this.clients[index].user.id !== this.user?.user?.id && (! this.peerConnections[index] || ! this.peerConnections[index]['pc'])) {
-              this.peerConnections[index] = {
-                user_id: this.clients[index].user.id,
-                pc: new RTCPeerConnection({
-                  iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                  ],
-                })
-              };
-              this.peerConnections[index]['pc'].ontrack = function ({ streams: [stream] }) {
-                let audio = document.getElementById('audio-player');
-                audio.srcObject = stream;
-                audio.load();
-              };
-            }
-          }
-
-        }
-      })
-    }
+    wires(){}
   }
 }
 </script>

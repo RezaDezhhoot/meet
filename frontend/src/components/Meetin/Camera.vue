@@ -71,102 +71,26 @@ export default {
       const status = !value;
       this.hiddenVideo = status;
       if (status) {
-        this.socket.emit('end-camera')
+        this.socket.emit('end-stream' , {
+          media: 'camera'
+        })
+      } else {
+        this.$refs.localVideo.srcObject = this.$store.state.localStream;
       }
+    },
+    "$store.state.hiddenVideo"(value) {
+      this.hiddenVideo = value;
     }
   },
   methods:{
     async shareCamera(){
       this.hiddenVideo = false;
       this.$store.commit('turnOffLocalMicrophone');
-      this.localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
-      this.$refs.localVideo.srcObject = this.localStream;
-      this.$store.commit('setLocalStream',this.localStream);
-      this.$store.commit('controlLocalMicrophone',this.user.media.media.local.microphone);
-
-      for (const id in this.peerConnections) {
-        if (this.peerConnections[id]['pc']) {
-          this.localStream.getTracks().forEach(track => this.peerConnections[id]['pc'].addTrack(track, this.localStream));
-          await this.startSharing(this.socket.id,id);
-        }
-      }
-    },
-    async startSharing(from , to){
-      let offer = await this.peerConnections[to]['pc'].createOffer();
-      await this.peerConnections[to]['pc'].setLocalDescription(new RTCSessionDescription(offer));
-
-      this.socket.emit("share-camera", {
-        offer, from , to
+      this.$store.dispatch('shareStream',{
+        video: true , audio: this.$store.state.user.media.media.local.microphone , media: 'camera'
       });
     },
-    wires(){
-      this.socket.on('create-pc' , async data => {
-        if (data.status === 200) {
-          for (const index in this.clients ) {
-            if (this.clients[index].user.id !== this.user?.user?.id && (! this.peerConnections[index] || ! this.peerConnections[index]['pc'])) {
-              this.peerConnections[index] = {
-                user_id: this.clients[index].user.id,
-                pc: new RTCPeerConnection({
-                  iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                  ],
-                })
-              };
-              this.peerConnections[index]['pc'].ontrack = function ({ streams: [stream] }) {
-                let video = document.getElementById('video-player');
-                video.srcObject = stream;
-                video.load();
-              };
-            }
-          }
-
-          if (data.data.shared_camera) {
-            this.socket.emit('get-shared-camera',{
-              from: this.socket.id
-            })
-          }
-
-        }
-      });
-
-      this.socket.on('get-camera-offer',async data => {
-        if (this.peerConnections[data.data.from] && this.peerConnections[data.data.from]['pc']) {
-          await this.peerConnections[data.data.from]['pc'].setRemoteDescription(
-              new RTCSessionDescription(data.data.offer)
-          );
-
-          const answer = await this.peerConnections[data.data.from]['pc'].createAnswer();
-
-          await this.peerConnections[data.data.from]['pc'].setLocalDescription(new RTCSessionDescription(answer));
-          this.hiddenVideo = false;
-
-          this.socket.emit('camera-make-answer',{
-            answer,
-            to: data.data.from
-          })
-        }
-      });
-
-      this.socket.on('camera-answer-made' , async data => {
-        this.hiddenVideo = false;
-        await this.peerConnections[data.data.from]['pc'].setRemoteDescription(
-            new RTCSessionDescription(data.data.answer)
-        );
-        if (! this.peerConnections[data.data.from]['camera_shared']) {
-          this.peerConnections[data.data.from]['camera_shared'] = true;
-          await this.startSharing(this.socket.id,data.data.from);
-        }
-      })
-
-      this.socket.on('send-shared-camera' , async data => {
-        this.localStream.getTracks().forEach(track => this.peerConnections[data.data.from]['pc'].addTrack(track, this.localStream));
-        await this.startSharing(this.socket.id,data.data.from);
-      })
-
-      this.socket.on('end-shared-camera',async data => {
-        this.hiddenVideo = true;
-      })
-    }
+    wires(){}
   }
 }
 </script>

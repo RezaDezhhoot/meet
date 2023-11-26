@@ -40,8 +40,6 @@ module.exports.ChannelV1 = async (io) => {
             // Client hand rising
             socket.on('hand-rising', async data => await SocketV1.handRising(io,socket,data,room))
 
-            // Client hand rising
-            socket.on('end-camera', async data => await SocketV1.endCamera(io,socket,data,room))
 
             // Promote client permissions
             socket.on('promotion', async data => await SocketV1.promotion(io,socket,data,room))
@@ -63,11 +61,14 @@ module.exports.ChannelV1 = async (io) => {
 
 
             /* Camera */
-            socket.on('share-camera', async data => await SocketV1.shareCamera(io,socket,data,room))
+            socket.on('share-stream', async data => await SocketV1.shareStream(io,socket,data,room))
 
-            socket.on('get-shared-camera', async data => await SocketV1.getSharedCamera(io,socket,data,room))
+            socket.on('make-answer', async data => await SocketV1.makeAnswer(io,socket,data,room))
 
-            socket.on('camera-make-answer', async data => await SocketV1.cameraMakeAnswer(io,socket,data,room))
+            socket.on('end-stream', async data => await SocketV1.endStream(io,socket,data,room))
+
+            socket.on('get-shared', async data => await SocketV1.getShared(io,socket,data,room))
+
             /* End camera */
         } else {
             socket.emit('error',{
