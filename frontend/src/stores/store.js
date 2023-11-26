@@ -78,10 +78,15 @@ export const store = createStore({
                 ],
               })
             };
-            state.peerConnections[index]['pc'].ontrack = function ({ streams: [stream] }) {
-              let video = document.getElementById('video-player');
-              video.srcObject = stream;
-              video.load();
+            state.peerConnections[index]['pc'].ontrack = function (stream) {
+              if (stream.track.kind === 'video') {
+                let video = document.getElementById('video-player');
+                video.srcObject = stream.streams[0];
+                video.load();
+              } else if(stream.kind === 'audio') {
+                // set audio  
+              }
+
             };
           }
 

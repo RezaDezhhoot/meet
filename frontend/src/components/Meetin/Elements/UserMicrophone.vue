@@ -52,7 +52,7 @@ export default {
       this.$store.commit('controlLocalMicrophone',false);
     },
     async shareAudio(){
-      if (! this.$store.state.localStream && ! this.$store.state.localAudioStream) {
+      if (! this.$store.state.localStream) {
         await this.startAudio();
       } else {
         this.$store.commit('controlLocalMicrophone',this.status);
@@ -60,7 +60,11 @@ export default {
     },
     async startAudio() {
       if (this.user && this.user.media && this.user.media.media.remote.microphone) {
-        this.$store.dispatch('shareAudio',this.socket.id);
+        this.$store.dispatch('shareStream',{
+          audio: true,
+          video: false,
+          media: 'audio',
+        });
       }
     },
     wires(){

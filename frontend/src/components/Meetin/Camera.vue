@@ -45,7 +45,6 @@
 </template>
 
 <script>
-const { RTCPeerConnection, RTCSessionDescription  } = window;
 
 export default {
   name: "Camera",
