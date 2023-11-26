@@ -11,6 +11,7 @@ export const store = createStore({
     peerConnections: Object,
     socket: Object,
     hiddenVideo: true,
+    showing: false,
   },
   mutations: {
     setLocalStream(state , stream){
@@ -28,11 +29,12 @@ export const store = createStore({
     updateHiddenCamera(state , status) {
       state.hiddenVideo = state;
     },
-    turnOffLocalCamera(state) {
+    endStream(state) {
       try {
         if (state.localStream) {
           state.localStream.getTracks().forEach(function(track) { track.stop(); })
           state.localStream = null;
+          state.showing = false;
           for (const id in state.peerConnections) {
             if (state.peerConnections[id]['pc']) {
               state.peerConnections[id]['camera_shared'] = false;
@@ -45,14 +47,6 @@ export const store = createStore({
       try {
         if (state.localStream) {
           state.localStream.getAudioTracks()[0].enabled = status;
-        }
-      } catch (err) {}
-    },
-    turnOffLocalMicrophone(state) {
-      try {
-        if (state.localAudioStream) {
-          state.localAudioStream.getTracks().forEach(function(track) { track.stop(); })
-          state.localAudioStream = null;
         }
       } catch (err) {}
     },
@@ -83,8 +77,9 @@ export const store = createStore({
                 let video = document.getElementById('video-player');
                 video.srcObject = stream.streams[0];
                 video.load();
-              } else if(stream.kind === 'audio') {
-                // set audio  
+              } else if(stream.track.kind === 'audio') {
+                // set audio
+                console.log(stream.track.id);
               }
 
             };
@@ -103,6 +98,9 @@ export const store = createStore({
     async shareStream(context , data) {
       const localStream = await navigator.mediaDevices.getUserMedia({video: data.video, audio: data.audio});
       context.state.localStream = localStream;
+      if (data.media === 'camera') {
+        context.state.showing = true;
+      }
       for (const id in context.state.peerConnections) {
         if (context.state.peerConnections[id]['pc']) {
           context.state.localStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track,localStream));

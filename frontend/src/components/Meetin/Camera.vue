@@ -68,7 +68,6 @@ export default {
   watch:{
     "$store.state.localStream"(value) {
       const status = !value;
-      this.hiddenVideo = status;
       if (status) {
         this.socket.emit('end-stream' , {
           media: 'camera'
@@ -84,7 +83,7 @@ export default {
   methods:{
     async shareCamera(){
       this.hiddenVideo = false;
-      this.$store.commit('turnOffLocalMicrophone');
+      this.$store.commit('endStream');
       this.$store.dispatch('shareStream',{
         video: true , audio: this.$store.state.user.media.media.local.microphone , media: 'camera'
       });

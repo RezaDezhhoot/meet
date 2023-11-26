@@ -28,13 +28,13 @@ export default {
     label: null,
   },
   watch: {
-    "$store.state.localStream"(value) {
-      this.show = ! !value;
+    "$store.state.showing"(value) {
+      this.show = value;
     }
   },
   methods:{
     control(){
-      this.$store.commit('turnOffLocalCamera');
+      this.$store.commit('endStream');
     }
   }
 }
