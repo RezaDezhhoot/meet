@@ -45,8 +45,6 @@ export const store = createStore({
       try {
         if (state.localStream) {
           state.localStream.getAudioTracks()[0].enabled = status;
-        } else if(state.localAudioStream) {
-          state.localStream.getAudioTracks()[0].enabled = status;
         }
       } catch (err) {}
     },
