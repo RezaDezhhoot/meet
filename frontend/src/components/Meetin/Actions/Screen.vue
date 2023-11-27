@@ -23,8 +23,9 @@ export default {
   },
   methods:{
     control(){
-      this.socket.emit('control-remote-screen',{
-        to: this.client.socketId
+      this.socket.emit('control-remote-media',{
+        to: this.client.socketId,
+        device: 'screen'
       });
     },
     wires(){

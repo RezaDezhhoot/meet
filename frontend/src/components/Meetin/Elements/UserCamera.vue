@@ -35,6 +35,9 @@ export default {
   },
   methods:{
     control(){
+      this.socket.emit('control-local-media',{
+        device: 'camera'
+      });
       this.$store.commit('controlCamera',false);
     }
   }

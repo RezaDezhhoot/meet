@@ -191,14 +191,14 @@ module.exports.getShared = async (io,socket,data,room) => {
     });
 }
 
-module.exports.controlRemoteMicrophone = async (io,socket,data,room) => {
+module.exports.controlRemoteMedia = async (io,socket,data,room) => {
     if (host && socket.id === host_socket_id) {
         const user = users[data.to];
-        const status = ! user.media.media.remote.microphone;
-        users[data.to].media.media.remote.microphone = status;
+        const status = ! user.media.media.remote[data.device];
+        users[data.to].media.media.remote[data.device] = status;
 
         if (status) {
-            //
+            // To be continued
         }
 
         io.emit('get-users',{
@@ -210,15 +210,14 @@ module.exports.controlRemoteMicrophone = async (io,socket,data,room) => {
     }
 }
 
-module.exports.controlLocalMicrophone = async (io,socket,data,room) => {
+module.exports.controlLocalMedia = async (io,socket,data,room) => {
     const user = users[socket.id];
-
-    if (user && user.media.media.remote.microphone) {
-        const status = ! user.media.media.local.microphone;
-        users[socket.id].media.media.local.microphone = status;
+    if (user && user.media.media.remote[data.device]) {
+        const status = ! user.media.media.local[data.device];
+        users[socket.id].media.media.local[data.device] = status;
 
         if (status) {
-            //
+            // To be continued
         }
 
         io.emit('get-users',{
@@ -230,24 +229,6 @@ module.exports.controlLocalMicrophone = async (io,socket,data,room) => {
     }
 }
 
-module.exports.controlRemoteScreen = async (io,socket,data,room) => {
-    if (host && socket.id === host_socket_id) {
-        const user = users[data.to];
-        const status = ! user.media.media.remote.screen;
-        users[data.to].media.media.remote.screen = status;
-
-        if (status) {
-            // 
-        }
-
-        io.emit('get-users',{
-            data:{
-                users
-            },
-            status: 200
-        });
-    }
-}
 
 module.exports.shareScreen = async (io,socket,data,room) => {
 

@@ -41,7 +41,9 @@ export default {
   methods:{
     async control(){
       this.status = ! this.user.media.media.local.microphone;
-      this.socket.emit('control-local-microphone');
+      this.socket.emit('control-local-media',{
+        device: 'microphone'
+      });
       if (this.status) {
         await this.shareAudio();
       } else {

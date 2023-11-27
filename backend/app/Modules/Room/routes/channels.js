@@ -25,14 +25,12 @@ module.exports.ChannelV1 = async (io) => {
             socket.on('no-typing', async data => await SocketV1.noTyping(io,socket,data,room))
 
 
-            // Control client's microphone
-            socket.on('control-remote-microphone', async data => await SocketV1.controlRemoteMicrophone(io,socket,data,room))
+            // Control client's remote media
+            socket.on('control-remote-media', async data => await SocketV1.controlRemoteMedia(io,socket,data,room))
 
-            // Control client's microphone
-            socket.on('control-local-microphone', async data => await SocketV1.controlLocalMicrophone(io,socket,data,room))
+            // Control client's local media
+            socket.on('control-local-media', async data => await SocketV1.controlLocalMedia(io,socket,data,room))
 
-            // Control client's screen
-            socket.on('control-remote-screen', async data => await SocketV1.controlRemoteScreen(io,socket,data,room))
 
             // Share client's screen
             socket.on('share-screen', async data => await SocketV1.shareScreen(io,socket,data,room))
