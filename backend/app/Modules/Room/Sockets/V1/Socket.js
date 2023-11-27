@@ -343,22 +343,3 @@ module.exports.kickClient = async (io,socket,data,room) => {
         });
     }
 }
-
-module.exports.shareAudio = async (io , socket , data , room) => {
-    socket.to(data.to).emit("get-audio-offer",{
-        data:{
-            offer: data.offer,
-            from: socket.id
-        } , status: 200
-    })
-}
-
-module.exports.audioMakeAnswer = async (io , socket , data , room) => {
-    shared_audio = true;
-    socket.to(data.to).emit('audio-answer-made',{
-        data:{
-            answer: data.answer,
-            from: socket.id
-        } , status: 200
-    });
-}

@@ -61,7 +61,7 @@ export const store = createStore({
   },
   actions:{
     fillRTCs({state , dispatch} , clients){
-      for (const index in clients ) {
+      for (const index in clients) {
         if (clients[index].user.id !== state.user.user.id) {
           if ( ! state.peerConnections[index] || ! state.peerConnections[index]['pc'] ) {
             state.peerConnections[index] = {
@@ -78,13 +78,11 @@ export const store = createStore({
                 video.srcObject = stream.streams[0];
                 video.load();
               } else if(stream.track.kind === 'audio') {
-                // set audio
+                // create audio tag.
                 console.log(stream.track.id);
               }
-
             };
           }
-
           if (clients[index].media.settings.camera || clients[index].media.settings.audio) {
             state.socket.emit('get-shared' , {
               from: state.socket.id,
@@ -112,7 +110,6 @@ export const store = createStore({
         }
       }
     },
-
     async startStream({state} , data) {
       let offer = await state.peerConnections[data.to]['pc'].createOffer();
       await state.peerConnections[data.to]['pc'].setLocalDescription(new RTCSessionDescription(offer));
@@ -123,7 +120,6 @@ export const store = createStore({
         media: data.media
       });
     },
-
     async getOffer({state , commit} , data) {
       if (state.peerConnections[data.data.from] && state.peerConnections[data.data.from]['pc']) {
         await state.peerConnections[data.data.from]['pc'].setRemoteDescription(
@@ -145,7 +141,6 @@ export const store = createStore({
         })
       }
     },
-
     async answerMade(context , data) {
       await context.state.peerConnections[data.data.from]['pc'].setRemoteDescription(
           new RTCSessionDescription(data.data.answer)

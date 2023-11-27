@@ -69,6 +69,7 @@ export default {
     "$store.state.localStream"(value) {
       const status = !value;
       if (status) {
+        this.hiddenVideo = true;
         this.socket.emit('end-stream' , {
           media: 'camera'
         })

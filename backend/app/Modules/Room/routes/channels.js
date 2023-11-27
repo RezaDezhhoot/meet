@@ -53,14 +53,7 @@ module.exports.ChannelV1 = async (io) => {
             // Kick clint
             socket.on('kick-client', async data => await SocketV1.kickClient(io,socket,data,room))
 
-            /* Audio */
-            socket.on('share-audio' , async data => await SocketV1.shareAudio(io , socket , data , room))
-
-            socket.on('audio-make-answer' , async data => await SocketV1.audioMakeAnswer(io , socket , data , room))
-            /* End audio */
-
-
-            /* Camera */
+            // Stream
             socket.on('share-stream', async data => await SocketV1.shareStream(io,socket,data,room))
 
             socket.on('make-answer', async data => await SocketV1.makeAnswer(io,socket,data,room))
@@ -68,8 +61,7 @@ module.exports.ChannelV1 = async (io) => {
             socket.on('end-stream', async data => await SocketV1.endStream(io,socket,data,room))
 
             socket.on('get-shared', async data => await SocketV1.getShared(io,socket,data,room))
-
-            /* End camera */
+            // End stream
         } else {
             socket.emit('error',{
                 data:{
