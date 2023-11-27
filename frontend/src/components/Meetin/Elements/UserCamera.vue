@@ -26,6 +26,7 @@ export default {
     socket: Object,
     responsive: false,
     label: null,
+    status: false
   },
   watch: {
     "$store.state.showing"(value) {
@@ -34,7 +35,7 @@ export default {
   },
   methods:{
     control(){
-      this.$store.commit('endStream');
+      this.$store.commit('controlCamera',false);
     }
   }
 }

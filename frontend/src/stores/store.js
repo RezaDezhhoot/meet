@@ -29,6 +29,20 @@ export const store = createStore({
     updateHiddenCamera(state , status) {
       state.hiddenVideo = state;
     },
+    controlCamera(state , status){
+      try {
+        if (state.localStream) {
+          state.localStream.getVideoTracks()[0].enabled = status;
+          if (! status) {
+            state.showing = false;
+            state.hiddenVideo = true;
+          } else {
+            state.showing = true;
+            state.hiddenVideo = false;
+          }
+        }
+      } catch (err) {}
+    },
     endStream(state) {
       try {
         if (state.localStream) {
@@ -78,8 +92,12 @@ export const store = createStore({
                 video.srcObject = stream.streams[0];
                 video.load();
               } else if(stream.track.kind === 'audio') {
-                // create audio tag.
-                console.log(stream.track.id);
+                const audio = document.createElement("audio");
+                audio.setAttribute('id',stream.track.id)
+                audio.setAttribute('controls','1');
+                audio.setAttribute('autoplay','1');
+                audio.srcObject = stream.streams[0];
+                document.body.appendChild(audio);
               }
             };
           }
@@ -94,20 +112,25 @@ export const store = createStore({
       }
     },
     async shareStream(context , data) {
-      const localStream = await navigator.mediaDevices.getUserMedia({video: data.video, audio: data.audio});
-      context.state.localStream = localStream;
-      if (data.media === 'camera') {
-        context.state.showing = true;
-      }
-      for (const id in context.state.peerConnections) {
-        if (context.state.peerConnections[id]['pc']) {
-          context.state.localStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track,localStream));
-          await context.dispatch('startStream',{
-            from: context.state.socket.id,
-            to: id,
-            media: data.media
-          })
+      if (! context.state.localStream) {
+        const localStream = await navigator.mediaDevices.getUserMedia({video: data.video, audio: data.audio});
+        context.state.localStream = localStream;
+        if (data.media === 'camera') {
+          context.state.showing = true;
         }
+        for (const id in context.state.peerConnections) {
+          if (context.state.peerConnections[id]['pc']) {
+            context.state.localStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track,localStream));
+            await context.dispatch('startStream',{
+              from: context.state.socket.id,
+              to: id,
+              media: data.media
+            })
+          }
+        }
+      } else {
+        context.commit('controlLocalMicrophone',context.state.user.media.media.local.microphone);
+        context.commit('controlCamera',context.state.user.media.media.local.camera);
       }
     },
     async startStream({state} , data) {

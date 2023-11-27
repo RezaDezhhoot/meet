@@ -79,12 +79,15 @@ export default {
     },
     "$store.state.hiddenVideo"(value) {
       this.hiddenVideo = value;
+    },
+    "$store.state.showing"(value) {
+      this.hiddenVideo = ! value;
     }
   },
   methods:{
     async shareCamera(){
       this.hiddenVideo = false;
-      this.$store.commit('endStream');
+      // this.$store.commit('endStream');
       this.$store.dispatch('shareStream',{
         video: true , audio: this.$store.state.user.media.media.local.microphone , media: 'camera'
       });
