@@ -64,6 +64,7 @@ export const store = createStore({
     },
     controlSound(state , value){
       state.sound = value.value;
+      localStorage.setItem('sound',value.value);
       Array.from(document.querySelectorAll('audio, video')).forEach(el => el.muted = ! value.value)
       Array.from(document.querySelectorAll('.self-media')).forEach(el => el.muted = true)
     }
@@ -92,6 +93,8 @@ export const store = createStore({
                 audio.setAttribute('controls','1');
                 audio.setAttribute('autoplay','1');
                 audio.srcObject = stream.streams[0];
+                const muted = ! (localStorage.getItem('sound') == 'true');
+                audio.setAttribute('muted',muted);
                 document.body.appendChild(audio);
               }
             };

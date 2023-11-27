@@ -36,6 +36,15 @@ export default {
     responsive: false,
     socket: Object
   },
+  mounted() {
+    if (localStorage.getItem('sound')) {
+      this.$store.commit('controlSound', {
+        value: localStorage.getItem('sound') == 'true'
+      });
+    } else {
+      localStorage.setItem('sound',false);
+    }
+  },
   methods:{
     control(){
       this.$store.commit('controlSound', {
