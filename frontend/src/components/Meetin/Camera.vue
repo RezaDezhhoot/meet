@@ -90,7 +90,6 @@ export default {
       this.socket.emit('control-local-media',{
         device: 'camera'
       });
-
       if (! this.$store.state.localStream) {
         this.$store.dispatch('shareStream',{
           video: true , audio: this.$store.state.user.media.media.local.microphone , media: 'camera'
@@ -98,8 +97,6 @@ export default {
       } else {
         this.$store.commit('controlCamera',! this.$store.state.user.media.media.local.camera);
       }
-
-
     },
     wires(){}
   }
