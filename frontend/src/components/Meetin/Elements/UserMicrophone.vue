@@ -51,13 +51,13 @@ export default {
       }
     },
     endAudio(){
-      this.$store.commit('controlLocalMicrophone',false);
+      this.$store.commit('controlMicrophone',false);
     },
     async shareAudio(){
       if (! this.$store.state.localStream) {
         await this.startAudio();
       } else {
-        this.$store.commit('controlLocalMicrophone',this.status);
+        this.$store.commit('controlMicrophone',this.status);
       }
     },
     async startAudio() {

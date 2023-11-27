@@ -17,9 +17,6 @@ export const store = createStore({
     setLocalStream(state , stream){
       state.localStream = stream;
     },
-    setLocalAudioStream(state , stream) {
-      state.localAudioStream = stream;
-    },
     setUser(state,user){
       state.user = user;
     },
@@ -27,7 +24,22 @@ export const store = createStore({
       state.socket = socket;
     },
     updateHiddenCamera(state , status) {
-      state.hiddenVideo = state;
+      state.hiddenVideo = status;
+    },
+    endStream(state) {
+      try {
+        if (state.localStream) {
+          state.localStream.getTracks().forEach(function(track) { track.stop(); })
+          state.localStream = null;
+          state.showing = false;
+          for (const id in state.peerConnections) {
+            if (state.peerConnections[id]['pc']) {
+              state.peerConnections[id]['camera_shared'] = false;
+              state.peerConnections[id]['audio_shared'] = false;
+            }
+          }
+        }
+      } catch (err) {}
     },
     controlCamera(state , status){
       try {
@@ -43,21 +55,7 @@ export const store = createStore({
         }
       } catch (err) {}
     },
-    endStream(state) {
-      try {
-        if (state.localStream) {
-          state.localStream.getTracks().forEach(function(track) { track.stop(); })
-          state.localStream = null;
-          state.showing = false;
-          for (const id in state.peerConnections) {
-            if (state.peerConnections[id]['pc']) {
-              state.peerConnections[id]['camera_shared'] = false;
-            }
-          }
-        }
-      } catch (err) {}
-    },
-    controlLocalMicrophone(state , status) {
+    controlMicrophone(state , status) {
       try {
         if (state.localStream) {
           state.localStream.getAudioTracks()[0].enabled = status;
@@ -68,9 +66,6 @@ export const store = createStore({
       state.sound = value.value;
       Array.from(document.querySelectorAll('audio, video')).forEach(el => el.muted = ! value.value)
       Array.from(document.querySelectorAll('.self-media')).forEach(el => el.muted = true)
-    },
-    localAudioStreamAddTrack(state , data) {
-      state.peerConnections[data.id]['pc'].addTrack(data.track, state.localAudioStream);
     }
   },
   actions:{
@@ -128,9 +123,6 @@ export const store = createStore({
             })
           }
         }
-      } else {
-        context.commit('controlLocalMicrophone',context.state.user.media.media.local.microphone);
-        context.commit('controlCamera',context.state.user.media.media.local.camera);
       }
     },
     async startStream({state} , data) {
