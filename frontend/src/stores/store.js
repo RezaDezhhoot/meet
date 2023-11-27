@@ -26,24 +26,10 @@ export const store = createStore({
     updateHiddenCamera(state , status) {
       state.hiddenVideo = status;
     },
-    endStream(state) {
-      try {
-        if (state.localStream) {
-          state.localStream.getTracks().forEach(function(track) { track.stop(); })
-          state.localStream = null;
-          state.showing = false;
-          for (const id in state.peerConnections) {
-            if (state.peerConnections[id]['pc']) {
-              state.peerConnections[id]['camera_shared'] = false;
-              state.peerConnections[id]['audio_shared'] = false;
-            }
-          }
-        }
-      } catch (err) {}
-    },
     controlCamera(state , status){
       try {
         if (state.localStream) {
+          console.log(status);
           state.localStream.getVideoTracks()[0].enabled = status;
           if (! status) {
             state.showing = false;
@@ -110,21 +96,19 @@ export const store = createStore({
       }
     },
     async shareStream(context , data) {
-      if (! context.state.localStream) {
-        const localStream = await navigator.mediaDevices.getUserMedia({video: data.video, audio: data.audio});
-        context.state.localStream = localStream;
-        if (data.media === 'camera') {
-          context.state.showing = true;
-        }
-        for (const id in context.state.peerConnections) {
-          if (context.state.peerConnections[id]['pc']) {
-            context.state.localStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track,localStream));
-            await context.dispatch('startStream',{
-              from: context.state.socket.id,
-              to: id,
-              media: data.media
-            })
-          }
+      const localStream = await navigator.mediaDevices.getUserMedia({video: data.video, audio: data.audio});
+      context.state.localStream = localStream;
+      if (data.media === 'camera') {
+        context.state.showing = true;
+      }
+      for (const id in context.state.peerConnections) {
+        if (context.state.peerConnections[id]['pc']) {
+          context.state.localStream.getTracks().forEach(track => context.state.peerConnections[id]['pc'].addTrack(track,localStream));
+          await context.dispatch('startStream',{
+            from: context.state.socket.id,
+            to: id,
+            media: data.media
+          })
         }
       }
     },
@@ -182,6 +166,21 @@ export const store = createStore({
           media: data.data.media
         })
       }
-    }
+    },
+    endStream(state) {
+      try {
+        if (state.localStream) {
+          state.localStream.getTracks().forEach(function(track) { track.stop(); })
+          state.localStream = null;
+          state.showing = false;
+          for (const id in state.peerConnections) {
+            if (state.peerConnections[id]['pc']) {
+              state.peerConnections[id]['camera_shared'] = false;
+              state.peerConnections[id]['audio_shared'] = false;
+            }
+          }
+        }
+      } catch (err) {}
+    },
   }
 });
