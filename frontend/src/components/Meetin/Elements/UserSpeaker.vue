@@ -34,6 +34,7 @@ export default {
     socket: Object
   },
   created() {
+    localStorage.removeItem('sound')
     this.active = this.$store.state.sound;
     this.$store.commit('controlSound', {
       value: false
@@ -46,9 +47,6 @@ export default {
         value: ! this.active,
       });
     }
-  },
-  unmounted() {
-    localStorage.removeItem('sound');
   }
 }
 </script>
