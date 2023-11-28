@@ -23,7 +23,7 @@
               </li>
 
               <li>
-                <UserMicrophone :responsive="true" label="دسترسی میکروفن" :fill="(user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
+                <UserMicrophone :responsive="true" label="دسترسی میکروفن"  width="30" height="30" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
               </li>
 
               <li>
@@ -69,7 +69,7 @@
       <div class="flex ml-[3rem] hidden-mobile">
         <UserHandRising :border="true" :fill="(user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="24" height="24" :socket="socket" :user="user" :show="user && host && user.user?.id !== host.user.id" :active="user.media && user.media.settings.hand_rising" ></UserHandRising>
         <UserCamera :fill=" (user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && host && user.user?.id === host.user.id" ></UserCamera>
-        <UserMicrophone :fill=" (user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
+        <UserMicrophone width="30" height="30" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
         <UserSpeaker  width="30" height="30"  :user="user" :socket="socket"></UserSpeaker>
       </div>
 

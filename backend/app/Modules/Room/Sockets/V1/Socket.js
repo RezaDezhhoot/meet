@@ -197,12 +197,7 @@ module.exports.getShared = async (io,socket,data,room) => {
 module.exports.controlRemoteMedia = async (io,socket,data,room) => {
     if (host && socket.id === host_socket_id) {
         const user = users[data.to];
-        const status = ! user.media.media.remote[data.device];
-        users[data.to].media.media.remote[data.device] = status;
-
-        if (status) {
-            // To be continued
-        }
+        users[data.to].media.media.remote[data.device] = !user.media.media.remote[data.device];
 
         io.emit('get-users',{
             data:{
@@ -215,13 +210,15 @@ module.exports.controlRemoteMedia = async (io,socket,data,room) => {
 
 module.exports.controlLocalMedia = async (io,socket,data,room) => {
     const user = users[socket.id];
-    if (user && user.media.media.remote[data.device]) {
-        const status = ! user.media.media.local[data.device];
-        users[socket.id].media.media.local[data.device] = status;
+    let status;
+    if (data.hasOwnProperty('action')) {
+        status = data.action;
+    } else {
+        status = ! user.media.media.local[data.device];
+    }
 
-        if (status) {
-            // To be continued
-        }
+    if (user) {
+        users[socket.id].media.media.local[data.device] = status;
 
         io.emit('get-users',{
             data:{

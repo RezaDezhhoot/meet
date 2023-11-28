@@ -78,24 +78,8 @@ export const store = createStore({
                 })
               }
             };
-            state.peerConnections[index]['pc']['local'].ontrack = async function (stream) {
-              if (stream.track.kind === 'video') {
-                let video = document.getElementById('video-player');
-                video.srcObject = stream.streams[0];
-                video.load();
-              } else if(stream.track.kind === 'audio') {
-                const audio = document.createElement('audio');
-                audio.autoplay = 1;
-                audio.controls = 1;
-                audio.id = stream.streams[0].id;
-                audio.muted = ! (localStorage.getItem('sound') == 'true');
-                audio.srcObject = stream.streams[0];
-                audio.load();
-                audio.play();
-                document.getElementById('main').appendChild(audio);
-              }
-            };
             state.peerConnections[index]['pc']['remote'].ontrack = async function (stream) {
+              console.log(stream);
               if (stream.track.kind === 'video') {
                 let video = document.getElementById('video-player');
                 video.srcObject = stream.streams[0];
