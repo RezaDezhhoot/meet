@@ -15,9 +15,6 @@
 <script>
 export default {
   name: "UserSpeaker",
-  created() {
-    this.active = this.$store.state.sound;
-  },
   data(){
     return {
       active: false
@@ -36,21 +33,22 @@ export default {
     responsive: false,
     socket: Object
   },
-  mounted() {
-    if (localStorage.getItem('sound')) {
-      this.$store.commit('controlSound', {
-        value: localStorage.getItem('sound') == 'true'
-      });
-    } else {
-      localStorage.setItem('sound',false);
-    }
+  created() {
+    this.active = this.$store.state.sound;
+    this.$store.commit('controlSound', {
+      value: false
+    });
   },
   methods:{
     control(){
+      localStorage.setItem('sound',(! this.active));
       this.$store.commit('controlSound', {
         value: ! this.active,
       });
     }
+  },
+  unmounted() {
+    localStorage.removeItem('sound');
   }
 }
 </script>

@@ -15,7 +15,7 @@ exports.make = (user , room , type) => {
             remote:{
                 audio: host,
                 screen: host,
-                microphone: host,
+                microphone: true,
                 camera: host,
             }
         },

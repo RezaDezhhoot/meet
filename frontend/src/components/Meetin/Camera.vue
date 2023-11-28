@@ -66,22 +66,14 @@ export default {
     this.wires();
   },
   watch:{
-    "$store.state.localStream"(value) {
-      const status = !value;
-      if (status) {
-        this.hiddenVideo = true;
-        this.socket.emit('end-stream' , {
-          media: 'camera'
-        })
-      } else {
-        this.$refs.localVideo.srcObject = this.$store.state.localStream;
-      }
-    },
     "$store.state.hiddenVideo"(value) {
       this.hiddenVideo = value;
     },
     "$store.state.showing"(value) {
       this.hiddenVideo = ! value;
+      if (value) {
+        this.$refs.localVideo.srcObject = this.$store.state.localStream;
+      }
     }
   },
   methods:{
@@ -90,9 +82,11 @@ export default {
       this.socket.emit('control-local-media',{
         device: 'camera'
       });
-      this.$store.dispatch('endStream');
+      this.$store.dispatch('endStream',{
+        media: 'camera'
+      });
       this.$store.dispatch('shareStream',{
-        video: true , audio: this.$store.state.user.media.media.local.microphone , media: 'camera'
+        video: true , audio: true , media: 'camera'
       });
     },
     wires(){}

@@ -139,7 +139,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
             return;
         }
 
-        if (data.media === 'audio' && ! users[socket.id].media.media.remote.audio) {
+        if (data.media === 'audio' && ! users[socket.id].media.media.remote.microphone) {
             return;
         }
 
@@ -149,7 +149,8 @@ module.exports.shareStream = async (io,socket,data,room) => {
             data: {
                 offer: data.offer,
                 from: socket.id,
-                media: data.media
+                media: data.media,
+                streamID: data.streamID
             } , status: 200
         })
     }
@@ -177,7 +178,9 @@ module.exports.endStream = async (io,socket,data,room) => {
     users[socket.id].media.settings[data.media] = false;
     io.emit('end-stream',{
         data: {
-            media: data.media
+            media: data.media,
+            streamID: data.streamID,
+            from: socket.id
         }
     });
 }

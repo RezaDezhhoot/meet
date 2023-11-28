@@ -1,8 +1,8 @@
 <template>
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
-  <main>
+  <main id="main">
     <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
-    <content  :user="user" :clients="clients" :socket="socket"></content>
+<!--    <content  :user="user" :clients="clients" :socket="socket"></content>-->
   </main>
 </template>
 =room
@@ -59,7 +59,9 @@ export default {
       })
     },
     async disconnect(){
-
+      this.$store.dispatch('endStream',{
+        media: ['camera','audio']
+      });
     },
     async wires() {
       this.socket.on('get-room',async data => {
@@ -100,14 +102,12 @@ export default {
       this.socket.on('answer-made' , async data => {
         this.$store.dispatch('answerMade',data);
       });
-      this.socket.on('end-stream',async data => {
-        if (data.data.media === 'camera') {
-          this.$store.commit('updateHiddenCamera',true);
-        }
-      });
       this.socket.on('send-shared' , async data => {
         this.$store.dispatch('sendShared', data)
-      })
+      });
+      this.socket.on('end-stream',async data => {
+        this.$store.dispatch('clearRemoteStream',data)
+      });
     },
     redirectClientIfHappenedError(room = null , code = null){
       this.$router.push({
@@ -128,7 +128,7 @@ export default {
       this.$cookies.remove('auth');
     }
   },
-  async unmounted() {
+  async onbeforeunload() {
     await this.disconnect();
   }
 }
