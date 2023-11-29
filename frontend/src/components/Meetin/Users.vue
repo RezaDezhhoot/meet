@@ -29,7 +29,12 @@
             </g>
           </svg>
 
-          <span>{{ host.name }}</span>
+          <span>
+            {{ host.name }}
+            <small v-if="host.socketId === socket.id">
+                  (شما)
+                </small>
+          </span>
           <template v-if="clients[host.socketId]">
             <UserMicrophone :peer-connections="peerConnections" width="20" height="20" fill="#616161" :socket="socket" :user="clients[host.socketId]" :show="clients[host.socketId].media.media.remote.microphone" :active="clients[host.socketId].media.media.remote.microphone && clients[host.socketId].media.media.local.microphone"></UserMicrophone>
           </template>
@@ -46,7 +51,12 @@
                 </g>
               </svg>
 
-              <span>{{ item.name }}</span>
+              <span>
+                {{ item.name }}
+                <small v-if="item.socketId === socket.id">
+                  (شما)
+                </small>
+              </span>
               <UserMicrophone :peer-connections="peerConnections" width="20" height="20" fill="#616161" :socket="socket" :user="item" :show="item.media.media.remote.microphone" :active="item.media.media.remote.microphone && item.media.media.local.microphone"></UserMicrophone>
               <UserHandRising :disabled="host && socket.id !== host.socketId && socket.id !== item.socketId" fill="#616161" width="16" height="16" :socket="socket" :user="item" :show="item.media && item.media.settings.hand_rising" :active="item.media && item.media.settings.hand_rising" ></UserHandRising>
 

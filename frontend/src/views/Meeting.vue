@@ -2,10 +2,9 @@
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main">
     <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
-<!--    <content  :user="user" :clients="clients" :socket="socket"></content>-->
+    <content :user="user" :clients="clients" :socket="socket"></content>
   </main>
 </template>
-=room
 <script>
 import Top from "../components/Meetin/Top.vue";
 import Sidebar from "../components/Meetin/Sidebar.vue";
@@ -27,8 +26,6 @@ export default {
       clients:[],
       socket: null,
       baseUrl: inject('BaseUrl'),
-      peerConnections: Object,
-      localAudioStream: null
     };
   },
   name: "Meeting",

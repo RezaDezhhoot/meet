@@ -5,14 +5,15 @@ const { RTCPeerConnection, RTCSessionDescription  } = window;
 export const store = createStore({
   state:{
     localStream: null,
-    localAudioStream: null,
     sound: false,
     user: null,
     peerConnections: Object,
     socket: Object,
     hiddenVideo: true,
     showing: false,
-    remoteStreams: Array
+    remoteStreams: Array,
+    displayStream: null,
+    shareScreen: false
   },
   mutations: {
     setLocalStream(state , stream){
@@ -75,11 +76,16 @@ export const store = createStore({
                   iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
                   ],
+                }),
+                screen: new RTCPeerConnection({
+                  iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                  ],
                 })
               }
             };
             state.peerConnections[index]['pc']['remote'].ontrack = async function (stream) {
-              console.log(stream);
+              console.log('remote stream')
               if (stream.track.kind === 'video') {
                 let video = document.getElementById('video-player');
                 video.srcObject = stream.streams[0];
@@ -88,47 +94,99 @@ export const store = createStore({
                 const audio = document.createElement('audio');
                 audio.autoplay = 1;
                 audio.controls = 1;
+                audio.classList.add('hidden');
                 audio.id = stream.streams[0].id;
                 audio.muted = ! (localStorage.getItem('sound') == 'true');
                 audio.srcObject = stream.streams[0];
                 audio.load();
-                audio.play();
+                audio.onloadedmetadata = function(e) {
+                  audio.play();
+                };
                 document.getElementById('main').appendChild(audio);
               }
+            };
+            state.peerConnections[index]['pc']['screen'].ontrack = async function (stream) {
+              document.getElementById('screen-player').srcObject = stream.streams[0];
             };
           }
           if (clients[index].media.settings.camera || clients[index].media.settings.audio) {
             state.socket.emit('get-shared' , {
               from: state.socket.id,
               to: index,
-              media: clients[index].media.settings.camera ? 'camera' : 'audio'
+              media: 'camera'
+            })
+          }
+          if (clients[index].media.settings.audio) {
+            state.socket.emit('get-shared' , {
+              from: state.socket.id,
+              to: index,
+              media: 'audio'
+            })
+          }
+          if (clients[index].media.settings.screen) {
+            state.socket.emit('get-shared' , {
+              from: state.socket.id,
+              to: index,
+              media: 'screen'
             })
           }
         }
       }
     },
     async shareStream(context , data) {
-      const localStream = await navigator.mediaDevices.getUserMedia({video: data.video, audio: data.audio});
-      context.state.localStream = localStream;
-      if (data.media === 'camera') {
-        context.state.showing = true;
+      if (data.hasOwnProperty('screen') && data.screen) {
+        let constraints = { video:true, audio: false};
+        navigator.mediaDevices.getDisplayMedia(constraints).then(async function(stream){
+          stream.getVideoTracks()[0].onended = function () {
+            context.state.shareScreen = false;
+            context.state.shareScreen = null;
+          };
+          context.state.displayStream = stream;
+          context.state.shareScreen = true;
+          for (const id in context.state.peerConnections) {
+            if (context.state.peerConnections[id]['pc']) {
+              context.state.displayStream.getTracks().forEach(track => {
+                track.shareing = true;
+                context.state.peerConnections[id]['pc']['screen'].addTrack(track,stream)
+              });
+              await context.dispatch('startStream',{
+                from: context.state.socket.id,
+                to: id,
+                media: data.media,
+                streamID: stream.id
+              })
+            }
+          }
+        });
+      } else {
+        let constraints = {video: data.video, audio: data.audio};
+        navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
+          const localStream = stream;
+          context.state.localStream = localStream;
+          if (data.media === 'camera') {
+            context.state.showing = true;
+          }
+          for (const id in context.state.peerConnections) {
+            if (context.state.peerConnections[id]['pc']) {
+              context.state.localStream.getTracks().forEach(track => {
+                context.state.peerConnections[id]['pc']['local'].addTrack(track,localStream)
+              });
+              await context.dispatch('startStream',{
+                from: context.state.socket.id,
+                to: id,
+                media: data.media,
+                streamID: localStream.id
+              })
+            }
+          }
+          context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
+        });
       }
-      for (const id in context.state.peerConnections) {
-        if (context.state.peerConnections[id]['pc']) {
-          context.state.localStream.getTracks().forEach(track => context.state.peerConnections[id]['pc']['local'].addTrack(track,localStream));
-          await context.dispatch('startStream',{
-            from: context.state.socket.id,
-            to: id,
-            media: data.media,
-            streamID: localStream.id
-          })
-        }
-      }
-      context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
     },
     async startStream({state} , data) {
-      let offer = await state.peerConnections[data.to]['pc']['local'].createOffer();
-      await state.peerConnections[data.to]['pc']['local'].setLocalDescription(new RTCSessionDescription(offer));
+      const PC = data.media === 'screen' ? 'screen' : 'local';
+      let offer = await state.peerConnections[data.to]['pc'][PC].createOffer();
+      await state.peerConnections[data.to]['pc'][PC].setLocalDescription(new RTCSessionDescription(offer));
       state.socket.emit("share-stream", {
         offer,
         from: data.from,
@@ -138,17 +196,22 @@ export const store = createStore({
       });
     },
     async getOffer({state , commit} , data) {
+      const PC = data.data.media === 'screen' ? 'screen' : 'remote';
       if (state.peerConnections[data.data.from] && state.peerConnections[data.data.from]['pc']) {
-        await state.peerConnections[data.data.from]['pc']['remote'].setRemoteDescription(
+        await state.peerConnections[data.data.from]['pc'][PC].setRemoteDescription(
             new RTCSessionDescription(data.data.offer)
         );
 
-        const answer = await state.peerConnections[data.data.from]['pc']['remote'].createAnswer();
+        const answer = await state.peerConnections[data.data.from]['pc'][PC].createAnswer();
 
-        await state.peerConnections[data.data.from]['pc']['remote'].setLocalDescription(new RTCSessionDescription(answer));
+        await state.peerConnections[data.data.from]['pc'][PC].setLocalDescription(new RTCSessionDescription(answer));
 
         if (data.data.media === 'camera') {
           state.hiddenVideo = false;
+        }
+
+        if (data.data.media === 'screen') {
+          state.shareScreen = true;
         }
 
         if (! state.remoteStreams[data.data.streamID]) {
@@ -162,8 +225,9 @@ export const store = createStore({
         })
       }
     },
-    async answerMade(context , data) {
-      await context.state.peerConnections[data.data.from]['pc']['local'].setRemoteDescription(
+    async answerMade(context , data)  {
+      const PC = data.data.media === 'screen' ? 'screen' : 'local';
+      await context.state.peerConnections[data.data.from]['pc'][PC].setRemoteDescription(
           new RTCSessionDescription(data.data.answer)
       );
       const shared_status = `${data.data.media}_shared`;
@@ -179,6 +243,13 @@ export const store = createStore({
     async sendShared({state , dispatch} , data) {
       if (state.localStream) {
         state.localStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['local'].addTrack(track, state.localStream));
+        dispatch('startStream',{
+          from: state.socket.id,
+          to: data.data.from,
+          media: data.data.media
+        })
+      } else if (state.displayStream) {
+        state.displayStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['screen'].addTrack(track, state.displayStream));
         dispatch('startStream',{
           from: state.socket.id,
           to: data.data.from,
@@ -205,6 +276,12 @@ export const store = createStore({
           })
         }
       } catch (err) {}
+    },
+    endScreen(context  , data) {
+      context.state.displayStream.getTracks().forEach(function(track) { track.stop(); })
+      context.state.displayStream.getVideoTracks()[0].enabled = false;
+      context.state.shareScreen = false;
+      context.state.shareScreen = null;
     },
     clearRemoteStream(context , data){
       if (data.data.from !== context.state.socket.id) {

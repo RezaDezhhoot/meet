@@ -20,3 +20,32 @@
 .text-black{
     color: #000;
 }
+
+.video-controller{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.video-controller ul {
+    list-style: none;
+}
+
+.video-controller ul li {
+    background: rgb(229, 45, 45);
+    width: 70px;
+    cursor: pointer;
+    height: 35px;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: 400ms;
+}
+
+.video-controller ul li:hover{
+    background: #c70000;
+}

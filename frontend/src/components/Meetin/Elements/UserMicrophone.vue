@@ -53,7 +53,6 @@ export default {
   },
   methods:{
     async control(){
-      console.log( this.$store.state.user.media.media.local.microphone);
       this.status = ! this.user.media.media.local.microphone;
       this.socket.emit('control-local-media',{
         device: 'microphone'
