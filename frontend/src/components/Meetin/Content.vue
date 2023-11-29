@@ -111,12 +111,13 @@
     </div>
     <div :class="{ hidden:  !$store.state.shareScreen}">
       <video controls class="h-full rounded my-[1rem] w-full" muted autoplay ref="screenPlayer" id="screen-player"></video>
-      <hr>
-      <div class="video-controller">
-        <ul>
-          <li v-on:click="end">
-            <svg fill="#fff" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                 viewBox="0 0 512.456 512.456" xml:space="preserve">
+      <div v-if="$store.state.displayStream">
+        <hr>
+        <div class="video-controller">
+          <ul>
+            <li v-on:click="end">
+              <svg fill="#fff" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                   viewBox="0 0 512.456 512.456" xml:space="preserve">
               <g transform="translate(-1)">
               <g>
                 <g>
@@ -147,8 +148,9 @@
               </g>
             </g>
             </svg>
-          </li>
-        </ul>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
