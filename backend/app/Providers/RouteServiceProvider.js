@@ -25,7 +25,7 @@ exports.loadApiRoutes = (app) => {
     const {RoomRouterV1} = require(path.join(appDir,'app','Modules/Room/routes/api.js'));
     app.use('/api/v1/rooms',ValidRoom,RoomRouterV1);
 
-    // Room API routes V1:
+    // Chat API routes V1:
     const {ChatRouterV1} = require(path.join(appDir,'app','Modules/Room/routes/api.js'));
     app.use('/api/v1/chats',ValidRoom,ChatRouterV1);
 

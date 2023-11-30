@@ -134,26 +134,33 @@ module.exports.noTyping = async (io,socket,data,room) => {
 }
 
 module.exports.shareStream = async (io,socket,data,room) => {
-    if ( (socket.id === host_socket_id && data.media === 'camera') || data.media === 'audio') {
-        if (data.media === 'camara' && ! users[socket.id].media.media.remote.camera) {
-            return;
-        }
 
-        if (data.media === 'audio' && ! users[socket.id].media.media.remote.microphone) {
-            return;
-        }
-
-        users[socket.id].media.settings[data.media] = true;
-
-        socket.to(data.to).emit("get-offer",{
-            data: {
-                offer: data.offer,
-                from: socket.id,
-                media: data.media,
-                streamID: data.streamID
-            } , status: 200
-        })
+    if (socket.id !== host_socket_id && data.media === 'camera') {
+        return;
     }
+
+    if (data.media === 'camara' && ! users[socket.id].media.media.remote.camera) {
+        return;
+    }
+
+    if (data.media === 'audio' && ! users[socket.id].media.media.remote.microphone) {
+        return;
+    }
+
+    if (data.media === 'screen' && ! users[socket.id].media.media.remote.screen) {
+        return;
+    }
+
+    users[socket.id].media.settings[data.media] = true;
+
+    socket.to(data.to).emit("get-offer",{
+        data: {
+            offer: data.offer,
+            from: socket.id,
+            media: data.media,
+            streamID: data.streamID
+        } , status: 200
+    })
 }
 
 module.exports.makeAnswer = async (io,socket,data,room) => {
