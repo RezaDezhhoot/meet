@@ -85,7 +85,6 @@ export const store = createStore({
               }
             };
             state.peerConnections[index]['pc']['remote'].ontrack = async function (stream) {
-              console.log('remote stream')
               if (stream.track.kind === 'video') {
                 let video = document.getElementById('video-player');
                 video.srcObject = stream.streams[0];
@@ -138,8 +137,9 @@ export const store = createStore({
         let constraints = { video:true, audio: false};
         navigator.mediaDevices.getDisplayMedia(constraints).then(async function(stream){
           stream.getVideoTracks()[0].onended = function () {
-            context.state.shareScreen = false;
-            context.state.shareScreen = null;
+            context.dispatch('endScreen',{
+              media: 'screen'
+            })
           };
           context.state.displayStream = stream;
           context.state.shareScreen = true;
@@ -277,19 +277,32 @@ export const store = createStore({
         }
       } catch (err) {}
     },
-    endScreen(context  , data) {
-      context.state.displayStream.getTracks().forEach(function(track) { track.stop(); })
-      context.state.displayStream.getVideoTracks()[0].enabled = false;
-      context.state.shareScreen = false;
-      context.state.shareScreen = null;
+    endScreen({state}  , data) {
+      if (state.displayStream) {
+        const streamID = state.displayStream.id;
+        state.displayStream.getTracks().forEach(function(track) { track.stop(); })
+        state.displayStream.getVideoTracks()[0].enabled = false;
+        state.shareScreen = false;
+        state.displayStream = null;
+        state.socket.emit('end-stream' , {
+          media: data.media,
+          streamID
+        })
+      }
     },
     clearRemoteStream(context , data){
       if (data.data.from !== context.state.socket.id) {
         if (data.data.media === 'camera') {
           context.commit('updateHiddenCamera',true);
         }
+        if (data.data.media === 'screen') {
+          context.state.shareScreen = false;
+        }
         delete context.state.remoteStreams[data.data.streamID];
-        document.getElementById(data.data.streamID).remove();
+        const el = document.getElementById(data.data.streamID);
+        if (el) {
+          el.remove();
+        }
       }
     }
   }

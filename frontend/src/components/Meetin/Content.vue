@@ -55,10 +55,9 @@
         <div class="flex flex-col justify-center items-center my-[0.5rem]">
           <span class="text-[2rem] font-bold text-[#b8b8b8] text-center">هیچ چیزی اشتراک گذاری نشده!</span>
 
-          <span class="text-[1.2rem] font-semibold text-[#5481ff]">برای اشتراک گذاری کلیک کنید</span>
         </div>
 
-        <div class="flex no-file-btns">
+        <div class="flex no-file-btns" v-if="$store.state.user && $store.state.user.media.media.remote.screen">
 <!--          <button class="flex text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">-->
 <!--            <div class="flex justify-center items-center w-[2.5rem] border-l border-[#d1d1d1] h-full">-->
 <!--              <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
@@ -110,7 +109,7 @@
       </div>
     </div>
     <div :class="{ hidden:  !$store.state.shareScreen}">
-      <video controls class="h-full rounded my-[1rem] w-full" muted autoplay ref="screenPlayer" id="screen-player"></video>
+      <video class="h-full rounded my-[1rem] w-full" muted autoplay ref="screenPlayer" id="screen-player"></video>
       <div v-if="$store.state.displayStream">
         <hr>
         <div class="video-controller">
@@ -166,9 +165,9 @@ export default {
   },
   watch:{
     "$store.state.displayStream"(value) {
-      if (value.active) {
+      if (value && value.active) {
         document.getElementById('screen-player').srcObject = value;
-      } else if(! value.active) {
+      } else {
         this.$store.state.shareScreen = false;
       }
     }
@@ -180,7 +179,9 @@ export default {
       });
     },
     end() {
-      this.$store.dispatch('endScreen');
+      this.$store.dispatch('endScreen',{
+        media: 'screen'
+      });
     }
   }
 }
