@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/frontend/Dockerfile
+    container_name: frontend
+    image: frontend
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+      - /app/node_modules
+    ports:
+      - '5173:8080'
+    networks:
+      - main
+networks:
+  main:
+    driver: bridge
+    name: main
