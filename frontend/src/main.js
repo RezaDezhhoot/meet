@@ -13,7 +13,7 @@ import router from './router'
 
 const app = createApp(App)
 let AppName = 'Brand name';
-
+let logo = null;
 
 router.beforeEach((to, from, next) => {
     switch (to.name) {
@@ -37,19 +37,21 @@ router.afterEach((to, from) => {
     }
 })
 
-// const base = await axios.get('/v1/settings/base?lang=fa');
-//
-// if (base && base.data.data.title) {
-//     AppName = base.data.data.title;
-// }
-//
-// if (base && base.data.data.logo) {
-//     const icon = useFavicon();
-//     icon.value = base.data.data.logo;
-// }
+const base = await axios.get('/v1/settings/base?lang=fa');
+
+if (base && base.data.data.title) {
+    AppName = base.data.data.title;
+}
+
+if (base && base.data.data.logo) {
+    const icon = useFavicon();
+    icon.value = base.data.data.logo;
+    logo = base.data.data.logo;
+}
 
 app.provide('AppName',AppName);
 app.provide('BaseUrl',baseURL);
+app.provide('Logo',logo);
 
 app.use(createPinia())
 app.use(router)

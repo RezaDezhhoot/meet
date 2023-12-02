@@ -168,6 +168,11 @@ module.exports.makeAnswer = async (io,socket,data,room) => {
     if (data.media === 'camera') {
         shared_camera = true;
     }
+
+    if (data.media === 'screen') {
+        shared_screen = true;
+    }
+
     socket.to(data.to).emit('answer-made',{
         data:{
             answer: data.answer,
@@ -183,6 +188,11 @@ module.exports.endStream = async (io,socket,data,room) => {
             shared_camera = false;
         }
     }
+
+    if (data.media === 'screen') {
+        shared_screen = false;
+    }
+
     users[socket.id].media.settings[data.media] = false;
     io.emit('end-stream',{
         data: {
@@ -278,6 +288,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
             },status: 200
         });
     }
+    
     delete users[socket.id];
     delete typistUsers[socket.id];
     io.emit('get-users',{

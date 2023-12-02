@@ -2,7 +2,7 @@
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main">
     <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
-    <content :user="user" :clients="clients" :socket="socket"></content>
+    <content></content>
   </main>
 </template>
 <script>
@@ -26,13 +26,14 @@ export default {
       clients:[],
       socket: null,
       baseUrl: inject('BaseUrl'),
+      logo: inject('Logo')
     };
   },
   name: "Meeting",
   async created() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
-
+    this.$store.commit('setLogo' , this.logo);
     let conencted = false;
     do {
       conencted = await this.connect()
@@ -64,6 +65,7 @@ export default {
       this.socket.on('get-room',async data => {
         if (data.status === 200) {
           this.room = data.data.room;
+          document.title = this.room.title;
         }
       });
 
