@@ -8,6 +8,7 @@ let typistUsers = {};
 let host = null;
 let host_socket_id = null;
 let shared_camera = false;
+let shared_screen = false;
 
 const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
@@ -237,10 +238,6 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
 }
 
 
-module.exports.shareScreen = async (io,socket,data,room) => {
-
-}
-
 module.exports.handRising = async (io,socket,data,room) => {
     if (socket.id === host_socket_id || data.to === socket.id) {
         const user = users[data.to];
@@ -265,17 +262,6 @@ module.exports.handRising = async (io,socket,data,room) => {
     }
 
 }
-
-module.exports.promotion = async (io,socket,data,room) => {
-
-}
-
-module.exports.demote = async (io,socket,data,room) => {
-
-}
-
-
-
 
 module.exports.disconnect = async (io,socket,data,room) => {
 

@@ -170,6 +170,14 @@ export default {
       } else {
         this.$store.state.shareScreen = false;
       }
+    },
+    "$store.state.user.media.media.remote.screen"(value){
+      if (! value) {
+        this.$store.dispatch('endScreen',{
+          media: "screen"
+        });
+        this.$store.state.shareScreen = false;
+      }
     }
   },
   methods:{

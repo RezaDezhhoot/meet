@@ -98,9 +98,6 @@ export const store = createStore({
                 audio.muted = ! (localStorage.getItem('sound') == 'true');
                 audio.srcObject = stream.streams[0];
                 audio.load();
-                audio.onloadedmetadata = function(e) {
-                  audio.play();
-                };
                 document.getElementById('main').appendChild(audio);
               }
             };
@@ -108,7 +105,7 @@ export const store = createStore({
               document.getElementById('screen-player').srcObject = stream.streams[0];
             };
           }
-          if (clients[index].media.settings.camera || clients[index].media.settings.audio) {
+          if (clients[index].media.settings.camera) {
             state.socket.emit('get-shared' , {
               from: state.socket.id,
               to: index,
@@ -123,6 +120,7 @@ export const store = createStore({
             })
           }
           if (clients[index].media.settings.screen) {
+            console.log(1);
             state.socket.emit('get-shared' , {
               from: state.socket.id,
               to: index,
@@ -248,7 +246,8 @@ export const store = createStore({
           to: data.data.from,
           media: data.data.media
         })
-      } else if (state.displayStream) {
+      }
+      if (state.displayStream) {
         state.displayStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['screen'].addTrack(track, state.displayStream));
         dispatch('startStream',{
           from: state.socket.id,
@@ -266,8 +265,7 @@ export const store = createStore({
           state.showing = false;
           for (const id in state.peerConnections) {
             if (state.peerConnections[id]['pc']) {
-              state.peerConnections[id]['camera_shared'] = false;
-              state.peerConnections[id]['audio_shared'] = false;
+              state.peerConnections[id][`${data.media}_shared`] = false;
             }
           }
           state.socket.emit('end-stream' , {
@@ -284,6 +282,11 @@ export const store = createStore({
         state.displayStream.getVideoTracks()[0].enabled = false;
         state.shareScreen = false;
         state.displayStream = null;
+        for (const id in state.peerConnections) {
+          if (state.peerConnections[id]['pc']) {
+            state.peerConnections[id][`${data.media}_shared`] = false;
+          }
+        }
         state.socket.emit('end-stream' , {
           media: data.media,
           streamID

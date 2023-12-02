@@ -30,17 +30,9 @@ module.exports.ChannelV1 = async (io) => {
             // Control client's local media
             socket.on('control-local-media', async data => await SocketV1.controlLocalMedia(io,socket,data,room))
 
-            // Share client's screen
-            socket.on('share-screen', async data => await SocketV1.shareScreen(io,socket,data,room))
 
             // Client hand rising
             socket.on('hand-rising', async data => await SocketV1.handRising(io,socket,data,room))
-
-            // Promote client permissions
-            socket.on('promotion', async data => await SocketV1.promotion(io,socket,data,room))
-
-            // Demote client permissions
-            socket.on('demotion', async data => await SocketV1.demote(io,socket,data,room))
 
             // Disconnect client
             socket.on('disconnect', async data => await SocketV1.disconnect(io,socket,data,room))
