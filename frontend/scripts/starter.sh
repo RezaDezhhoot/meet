@@ -1,11 +1,9 @@
 #!/bin/bash
 
-echo "🟡 Deploy backend application..."
-
 set -e
 
-echo "🟡 Pulling code"
-git pull origin main --no-edit
+CYAN='\033[0;36m'
+COMPOSE_FILE="./frontend/docker-compose.yml"
 
 if docker info -ne 0 >/dev/null 2>&1; then
   echo -e "${CYAN}Docker is not running."
@@ -13,11 +11,12 @@ if docker info -ne 0 >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "🔴 Building images"
 docker-compose -f $COMPOSE_FILE down
-docker-compose -f $COMPOSE_FILE up --build -d
+docker-compose -f $COMPOSE_FILE up -d --build frontend
 
 echo "🔴 Remove old images"
 if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then
   docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 fi;
+
+

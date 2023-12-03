@@ -37,17 +37,19 @@ router.afterEach((to, from) => {
     }
 })
 
-const base = await axios.get('/v1/settings/base?lang=fa');
+axios.get('/v1/settings/base?lang=fa').then(base => {
+    if (base && base.data.data.title) {
+        AppName = base.data.data.title;
+    }
 
-if (base && base.data.data.title) {
-    AppName = base.data.data.title;
-}
+    if (base && base.data.data.logo) {
+        const icon = useFavicon();
+        icon.value = base.data.data.logo;
+        logo = base.data.data.logo;
+    }
+}).catch(err => {});
 
-if (base && base.data.data.logo) {
-    const icon = useFavicon();
-    icon.value = base.data.data.logo;
-    logo = base.data.data.logo;
-}
+
 
 app.provide('AppName',AppName);
 app.provide('BaseUrl',baseURL);

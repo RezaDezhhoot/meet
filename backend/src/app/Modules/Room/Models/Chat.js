@@ -22,7 +22,6 @@ const Chat = sequelize.define('Chat',{
     room_id: {
         unsigned: true,
         type: DataTypes.BIGINT,
-
     }
 },{
     tableName: 'chats',

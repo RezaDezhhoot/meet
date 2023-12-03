@@ -15,8 +15,6 @@ services:
         source: ./src
         target: /app
       - /app/node_modules
-    depends_on:
-      - mysql
     command: npm run dev
     deploy:
       replicas: 1
@@ -31,4 +29,3 @@ services:
 networks:
   main:
     driver: bridge
-    name: main

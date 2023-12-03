@@ -83,7 +83,7 @@
 
 <script>
 
-import {forgetSchema, resetPasswordSchema} from "../../secure/aurhVlidator";
+import {forgetSchema, resetPasswordSchema} from "../../secure/AurhVlidator";
 import axios from "axios";
 
 export default {

@@ -29,10 +29,5 @@ if docker info -ne 0 >/dev/null 2>&1; then
   exit 1
 fi
 
-while ! docker container exec -it $DATABASE_CONTAINER mysqladmin --user="$DATABASE_USER" --password="$DATABASE_PASSWORD" --host 127.0.0.1 ping --silent &> /dev/null ; do
-    echo "Waiting for database connection..."
-    sleep 3
-done
-
 docker-compose -f $COMPOSE_FILE down
 docker-compose -f $COMPOSE_FILE up --build -d

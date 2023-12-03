@@ -52,8 +52,7 @@
 </template>
 
 <script>
-// import {mapGetters} from "vuex";
-import {loginSchema} from "../../secure/aurhVlidator";
+import {loginSchema} from "../../secure/AurhVlidator.js";
 import axios from "axios";
 
 export default {

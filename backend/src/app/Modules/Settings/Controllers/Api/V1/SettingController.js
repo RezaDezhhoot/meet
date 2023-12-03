@@ -6,8 +6,8 @@ module.exports.base = async (req , res) => {
 
     return res.status(200).json({
         data:{
-            title: title.value,
-            logo: logo.value
+            title: title?.value,
+            logo: logo?.value
         },
         message: res.__("general.success")
     });

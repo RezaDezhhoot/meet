@@ -50,7 +50,7 @@ export default {
     },
   },
   mounted() {
-    axios.post(`/v1/rooms/exists?room=${this.$route.query.room}`).then(response => {
+    axios.get(`/v1/rooms/exists?room=${this.$route.query.room}`).then(response => {
       console.log(response);
       this.room_exists = true;
       this.$emit("check-for-login",this.$route.query.room,this.room_exists);

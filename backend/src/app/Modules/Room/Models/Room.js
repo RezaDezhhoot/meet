@@ -22,10 +22,6 @@ const Room = sequelize.define('Room',{
     },
     host_id: {
         type: DataTypes.BIGINT,
-        references: {
-            model: User,
-            key: 'id',
-        },
         allowNull: true,
     }
 },{
@@ -41,8 +37,6 @@ const Room = sequelize.define('Room',{
     }
 });
 
-Room.belongsTo(User,{
-    foreignKey: 'host_id'
-});
+
 
 module.exports = Room;
