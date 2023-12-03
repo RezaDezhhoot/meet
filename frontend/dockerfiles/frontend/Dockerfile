@@ -8,9 +8,10 @@ COPY ./ .
 
 RUN npm install
 
+RUN npm run build
 
-# RUN npm run build
+#npm install -g serve
 
-# EXPOSE 8080
+EXPOSE 8080
 
-# CMD [ "http-server", "dist" ]
+CMD [ "http-server", "dist" ]
