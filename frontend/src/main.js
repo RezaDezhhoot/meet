@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import axios from 'axios';
+import axios from 'axios'
 import { store } from "./stores/store";
 import VueCookies from 'vue-cookies';
 import { useFavicon } from '@vueuse/core';

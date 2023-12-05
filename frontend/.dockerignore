@@ -4,3 +4,6 @@ docker-compose.yml
 .vscode
 .git
 .dockerignore
+dist
+dockerfiles
+node_modules

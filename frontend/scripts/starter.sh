@@ -12,6 +12,7 @@ if docker info -ne 0 >/dev/null 2>&1; then
 fi
 
 docker-compose -f $COMPOSE_FILE down
+
 docker-compose -f $COMPOSE_FILE up -d --build frontend
 
 echo "🔴 Remove old images"

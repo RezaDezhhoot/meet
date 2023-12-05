@@ -6,11 +6,11 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: import('../views/Auth.vue'),
+      component: () => import('../views/Auth.vue'),
       children: [
         {
           path : '/guest',
-          component: import('../components/Auth/Guest.vue'),
+          component: () => import('../components/Auth/Guest.vue'),
           name: 'guest',
         },
         {
@@ -19,17 +19,17 @@ const router = createRouter({
           children:[
             {
               path: '',
-              component: import('../components/Auth/Login.vue'),
+              component: () => import('../components/Auth/Login.vue'),
               name: 'login_action'
             },
             {
               path: 'register/:step?',
-              component: import('../components/Auth/Register.vue'),
+              component: () => import('../components/Auth/Register.vue'),
               name: 'register'
             },
             {
               path: 'forget/:step?',
-              component: import('../components/Auth/Forget.vue'),
+              component: () => import('../components/Auth/Forget.vue'),
               name: 'forget'
             },
           ]
@@ -39,12 +39,12 @@ const router = createRouter({
     {
       path: '/meeting/:key',
       name: 'meeting',
-      component: import('../views/Meeting.vue')
+      component: () => import('../views/Meeting.vue')
     },
     {
       path: '/error/:code?',
       name: 'error',
-      component: import('../views/Error.vue')
+      component: () => import('../views/Error.vue')
     }
   ],
   scrollBehavior(to, from, savePosition) {

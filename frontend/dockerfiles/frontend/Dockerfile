@@ -1,7 +1,5 @@
 FROM node:14
 
-RUN npm install -g http-server
-
 WORKDIR /app
 
 COPY ./ .
@@ -10,8 +8,8 @@ RUN npm install
 
 RUN npm run build
 
-#npm install -g serve
+RUN npm install -g serve
 
-EXPOSE 8080
+EXPOSE 4173
 
-CMD [ "http-server", "dist" ]
+CMD [ "serve", "-s" , "dist" , "-p" ,"4173"]

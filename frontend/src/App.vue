@@ -1,11 +1,14 @@
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router'
 </script>
+
+
 <template>
   <RouterView @check-if-user-was-logged-in="checkIfUserWasLoggedIn" @redirect-to-meet="redirectToMeet" @check-for-login="checkForLogin" />
 </template>
 
 <script>
+import { RouterView } from 'vue-router'
 
 export default {
   name: "App",

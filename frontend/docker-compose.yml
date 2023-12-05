@@ -8,10 +8,8 @@ services:
     image: frontend
     restart: on-failure
     working_dir: /app
-    volumes:
-      - ./:/app
     ports:
-      - '8080:8080'
+      - '4173:4173'
     networks:
       - main
 networks:

@@ -3,7 +3,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: ./dockerfiles/backend/Dockerfile
+      dockerfile: dockerfiles/backend/Dockerfile
     container_name: backend
     restart: on-failure
     image: backend
@@ -29,3 +29,4 @@ services:
 networks:
   main:
     driver: bridge
+    name: main
