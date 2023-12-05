@@ -1,6 +1,0 @@
-Dockerfile
-docker-compose.yml
-.idea
-.vscode
-.git
-.dockerignore
