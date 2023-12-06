@@ -1,11 +1,10 @@
 .idea/
 mysql/*
 !mysql/.gitkeep
-backend/src/node_modules
-frontend/src/node_modules
-admin/src/node_modules
-admin/src/vendor
-frontend/.vscode
+*/src/node_modules
+*/node_modules
+*/src/vendor
+*/.vscode
 /public/storage/*
 npm-debug.log
 yarn-error.log
