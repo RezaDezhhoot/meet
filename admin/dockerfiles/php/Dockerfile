@@ -26,6 +26,8 @@ RUN docker-php-ext-install gd
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+RUN composer -v
+
 WORKDIR /home/app
 
 COPY ./src .
@@ -34,5 +36,7 @@ RUN chown -R www-data:www-data \
         /home/app/storage \
         /home/app/bootstrap/cache
 
-EXPOSE 9000
-CMD ["php-fpm"]
+RUN composer install
+
+CMD php artisan serve --host=0.0.0.0
+EXPOSE 8000

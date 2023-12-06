@@ -15,7 +15,7 @@ services:
         source: ./src
         target: /app
       - /app/node_modules
-    command: npm run dev
+    command: npm start
     deploy:
       replicas: 1
       update_config:
@@ -29,4 +29,5 @@ services:
 networks:
   main:
     driver: bridge
+    external: true
     name: main

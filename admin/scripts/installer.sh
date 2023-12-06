@@ -30,13 +30,14 @@ if docker info -ne 0 >/dev/null 2>&1; then
   exit 1
 fi
 
+
 docker-compose -f $COMPOSE_FILE down
-docker-compose -f $COMPOSE_FILE up --build -d nginx
 
-docker-compose -f $COMPOSE_FILE exec -T app bash <<EOF
-  echo "🔴 Installing composer dependencies..."
-  composer install --ignore-platform-reqs
+docker-compose -f $COMPOSE_FILE build --no-cache
 
+docker-compose -f $COMPOSE_FILE up -d admin
+
+docker-compose -f $COMPOSE_FILE exec -T admin bash <<EOF
   echo "Generating key..."
   php artisan key:generate
 

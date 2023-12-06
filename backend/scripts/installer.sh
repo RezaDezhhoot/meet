@@ -30,4 +30,5 @@ if docker info -ne 0 >/dev/null 2>&1; then
 fi
 
 docker-compose -f $COMPOSE_FILE down
-docker-compose -f $COMPOSE_FILE up --build -d
+docker-compose -f $COMPOSE_FILE build --no-cache
+docker-compose -f $COMPOSE_FILE up -d

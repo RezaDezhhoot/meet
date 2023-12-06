@@ -14,7 +14,10 @@ fi
 
 echo "🔴 Building images"
 docker-compose -f $COMPOSE_FILE down
-docker-compose -f $COMPOSE_FILE up --build -d nginx
+
+docker-compose -f $COMPOSE_FILE build --no-cache
+
+docker-compose -f $COMPOSE_FILE up -d nginx
 
 echo "🔴 Remove old images"
 if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then
@@ -23,9 +26,6 @@ fi;
 
 echo "🔴 Installing dependencies..."
 docker-compose -f $COMPOSE_FILE exec -T app bash <<EOF
-  echo "🔴 Installing composer dependencies..."
-  composer install --ignore-platform-reqs
-
   echo "🔴 Migrating"
   php artisan migrate
 

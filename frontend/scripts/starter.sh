@@ -13,7 +13,9 @@ fi
 
 docker-compose -f $COMPOSE_FILE down
 
-docker-compose -f $COMPOSE_FILE up -d --build frontend
+docker-compose -f $COMPOSE_FILE build --no-cache
+
+docker-compose -f $COMPOSE_FILE up -d frontend
 
 echo "🔴 Remove old images"
 if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then

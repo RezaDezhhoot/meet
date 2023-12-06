@@ -15,7 +15,8 @@ fi
 
 echo "🔴 Building images"
 docker-compose -f $COMPOSE_FILE down
-docker-compose -f $COMPOSE_FILE up --build -d
+docker-compose -f $COMPOSE_FILE build --no-cache
+docker-compose -f $COMPOSE_FILE up -d
 
 echo "🔴 Remove old images"
 if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then
