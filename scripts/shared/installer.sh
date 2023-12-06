@@ -1,11 +1,11 @@
 #!/bin/bash
 
-source ./shared/.env
+source ./.env
 
 set -e
 
 CYAN='\033[0;36m'
-COMPOSE_FILE="./shared/docker-compose.yml"
+COMPOSE_FILE="docker-compose.yml"
 
 DATABASE_CONTAINER=$DATABASE_CONTAINER
 

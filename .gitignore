@@ -1,5 +1,5 @@
 .idea/
-mysql/*
+*/mysql
 !mysql/.gitkeep
 */src/node_modules
 */node_modules

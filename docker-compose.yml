@@ -1,0 +1,86 @@
+version: '3.8'
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: images/php/Dockerfile
+    container_name: admin
+    restart: on-failure
+    image: admin
+    depends_on:
+      - mysql
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./admin:/home/app
+      - ./images/php/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - main
+  npm:
+    image: node:14
+    volumes:
+      - ./admin:/app
+    working_dir: /app
+    depends_on:
+      - admin
+    networks:
+      - main
+  backend:
+    build:
+      context: .
+      dockerfile: images/backend/Dockerfile
+    container_name: backend
+    restart: on-failure
+    image: backend
+    working_dir: /app
+    depends_on:
+      - mysql
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm start
+    deploy:
+      replicas: 1
+      update_config:
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [ node.hostname == slave1 ]
+    networks:
+      - main
+  frontend:
+    build:
+      context: .
+      dockerfile: images/frontend/Dockerfile
+    container_name: frontend
+    image: frontend
+    restart: on-failure
+    working_dir: /app
+    ports:
+      - '4173:4173'
+    networks:
+      - main
+  mysql:
+    image: mysql
+    container_name: ${DATABASE_CONTAINER}
+    restart: on-failure
+    tty: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./shared/config/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./shared/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_DB}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    networks:
+      - main
+networks:
+  main:
+    driver: bridge
+    name: main

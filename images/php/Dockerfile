@@ -28,7 +28,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 WORKDIR /home/app
 
-COPY ./src .
+COPY ./admin .
 
 RUN chown -R www-data:www-data \
         /home/app/storage \

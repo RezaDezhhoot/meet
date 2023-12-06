@@ -1,9 +1,0 @@
-dockerfiles
-docker-compose.yml
-.idea
-.vscode
-.git
-.dockerignore
-.gitlab-ci.yml
-README.md
-scripts
