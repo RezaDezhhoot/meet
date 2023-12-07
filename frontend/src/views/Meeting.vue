@@ -31,7 +31,6 @@ export default {
   },
   name: "Meeting",
   mounted() {
-    console.log(inject('LogoAddr'));
   },
   async created() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);

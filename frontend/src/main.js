@@ -5,7 +5,7 @@ import { store } from "./stores/store";
 import VueCookies from 'vue-cookies';
 import { useFavicon } from '@vueuse/core';
 
-const baseURL = 'http://backend.localhost:3000';
+const baseURL = import.meta.env.VITE_BASE_URL
 axios.defaults.baseURL = `${baseURL}/api`; // Replace with your API base URL
 
 import App from './App.vue'
