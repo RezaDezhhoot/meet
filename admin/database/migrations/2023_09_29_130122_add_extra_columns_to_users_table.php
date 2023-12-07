@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('verified_at')->nullable();
-            $table->string('status')->nullable();
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (! Schema::hasColumn('users','verified_at')) {
+                    $table->timestamp('verified_at')->nullable();
+                }
+
+                if (! Schema::hasColumn('users','status')) {
+                    $table->string('status')->nullable();
+                }
+            });
+        }
     }
 
     /**
