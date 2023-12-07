@@ -7,14 +7,6 @@ set -e
 CYAN='\033[0;36m'
 COMPOSE_FILE="docker-compose.yml"
 
-DATABASE_CONTAINER=$DATABASE_CONTAINER
-
-DATABASE_USER=$DATABASE_USER
-
-DATABASE_DB=$DATABASE_USER
-
-DATABASE_PASSWORD=$DATABASE_PASSWORD
-
 if docker info -ne 0 >/dev/null 2>&1; then
   echo -e "${CYAN}Docker is not running."
 

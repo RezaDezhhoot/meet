@@ -14,7 +14,7 @@ fi
 
 read -r -p 'CONFIG DATABASE(no/yes)? no ' CONFIG_DATABASE
 
-read -r -p 'Install specified service? (service name) ' SPECIFIED_SERVICE
+read -r -p 'Install specified service? (admin,backend,frontend,shared): ' SPECIFIED_SERVICE
 
 if [[ $CONFIG_DATABASE == "yes" || $CONFIG_DATABASE == "YES" ]];then
   read -r -p 'ENTER DATABASE USER: ' DATABASE_USER

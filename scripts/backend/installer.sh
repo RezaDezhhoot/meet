@@ -4,16 +4,9 @@ source ./.env
 
 set -e
 
+# shellcheck disable=SC2034
 CYAN='\033[0;36m'
 COMPOSE_FILE="docker-compose.yml"
-
-DATABASE_CONTAINER=$DATABASE_CONTAINER
-
-DATABASE_USER=$DATABASE_USER
-
-DATABASE_DB=$DATABASE_DB
-
-DATABASE_PASSWORD=$DATABASE_PASSWORD
 
 if [ ! -f ./backend/.env ]; then
   cp ./backend/.env.example ./backend/.env
