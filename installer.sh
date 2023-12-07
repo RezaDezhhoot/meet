@@ -12,7 +12,7 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
-read -r -p 'CONFIG DATABASE(no/yes)? no ' CONFIG_DATABASE
+read -r -p 'Database config? (no/yes)? no ' CONFIG_DATABASE
 
 read -r -p 'Install specified service? (admin,backend,frontend,shared): ' SPECIFIED_SERVICE
 
@@ -34,6 +34,11 @@ if [ -z "$SPECIFIED_SERVICE" ]; then
 
   sleep $SLEEP_VAL
 
+  echo "Admin installer"
+  bash  ./scripts/admin/installer.sh
+
+  sleep $SLEEP_VAL
+
   echo "Backend Installer"
   bash ./scripts/backend/installer.sh
 
@@ -41,11 +46,6 @@ if [ -z "$SPECIFIED_SERVICE" ]; then
 
   echo "Frontend Installer"
   bash ./scripts/client/installer.sh
-
-  sleep $SLEEP_VAL
-
-  echo "Admin installer"
-  bash  ./scripts/admin/installer.sh
 else
   echo "$SPECIFIED_SERVICE" "installer"
   bash ./scripts/"$SPECIFIED_SERVICE"/installer.sh

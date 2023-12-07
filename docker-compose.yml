@@ -12,8 +12,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./admin:/home/app
       - ./images/php/php.ini:/usr/local/etc/php/php.ini
+      - ./admin:/home/app
+      - /home/app/vendor
     networks:
       - main
   npm:

@@ -29,6 +29,10 @@ const User = sequelize.define('User',{
         type: DataTypes.DATE,
         allowNull: true,
     },
+    remember_token: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
 },{
     tableName: 'users',
     createdAt: 'created_at',

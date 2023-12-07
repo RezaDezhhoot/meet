@@ -7,3 +7,4 @@ docker-compose.yml
 .gitlab-ci.yml
 README.md
 scripts
+admin/public/storage

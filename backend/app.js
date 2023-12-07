@@ -21,17 +21,11 @@ app.use(function( req, res, next){
         'message': 'Fallback'
     });
 });
-User.sync({force: true}).then(async res => {
-    Room.sync({force: true}).then(async res => {
-        sequelize.sync().then(async res => {
-            server.listen(process.env.PORT, () => {
-                console.log(`Server running in ${process.env.APP_DOMAIN}:${process.env.PORT}`);
-                console.log(`Admin panel running in ${process.env.APP_DOMAIN}:${process.env.PORT}/admin`);
-            });
-        }).catch(err => {
-            console.log(err);
-        });
-    })
-
-})
-
+sequelize.sync().then(async res => {
+    server.listen(process.env.PORT, () => {
+        console.log(`Server running in ${process.env.APP_DOMAIN}:${process.env.PORT}`);
+        console.log(`Admin panel running in ${process.env.APP_DOMAIN}:${process.env.PORT}/admin`);
+    });
+}).catch(err => {
+    console.log(err);
+});
