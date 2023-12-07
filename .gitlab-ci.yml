@@ -1,25 +1,51 @@
 stages:
   - admin
+  - backend
+  - frontend
 
 variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: "tcp://docker:2375"
   GIT_CLEAN_FLAGS: -x -f -e **
-deploy:
+
+before_script:
+  - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan $VM_IPADDRESS >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+admin:
   stage: admin
   tags:
-    - admin
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan $VM_IPADDRESS >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+    - meet
   script:
     - ssh $SSH_USER@$VM_IPADDRESS "export CICD_PATH='$CICD_PATH' &&
       cd $CICD_PATH &&
-      bash -s < $CICD_PATH/admin/scripts/deployer.sh"
+      bash -s < $CICD_PATH/deployer.sh admin"
+  only:
+    - main
+
+backend:
+  stage: backend
+  tags:
+    - meet
+  script:
+    - ssh $SSH_USER@$VM_IPADDRESS "export CICD_PATH='$CICD_PATH' &&
+      cd $CICD_PATH &&
+      bash -s < $CICD_PATH/deployer.sh backend"
+  only:
+    - main
+
+frontend:
+  stage: frontend
+  tags:
+    - meet
+  script:
+    - ssh $SSH_USER@$VM_IPADDRESS "export CICD_PATH='$CICD_PATH' &&
+      cd $CICD_PATH &&
+      bash -s < $CICD_PATH/deployer.sh frontend"
   only:
     - main

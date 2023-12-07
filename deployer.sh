@@ -6,9 +6,6 @@ echo "🟡 Deploy backend application..."
 
 set -e
 
-# shellcheck disable=SC2034
-read -r -p 'Install specified service? (admin,backend,frontend): ' SPECIFIED_SERVICE
-
 echo "🟡 Pulling code"
 git pull origin main --no-edit
 
@@ -20,7 +17,12 @@ fi
 
 echo -e "\n"
 
-if [ -z "$SPECIFIED_SERVICE" ]; then
+if [ -z "$1" ]; then
+  echo "Admin Deployer"
+  bash  ./scripts/admin/deployer.sh
+
+  sleep $SLEEP_VAL
+
   echo "Backend Deployer"
   bash ./scripts/backend/deployer.sh
 
@@ -28,12 +30,7 @@ if [ -z "$SPECIFIED_SERVICE" ]; then
 
   echo "Frontend Deployer"
   bash ./scripts/client/deployer.sh
-
-  sleep $SLEEP_VAL
-
-  echo "Admin Deployer"
-  bash  ./scripts/admin/deployer.sh
 else
-  echo "$SPECIFIED_SERVICE" "Deployer"
-  bash ./scripts/"$SPECIFIED_SERVICE"/deployer.sh
+  echo "$1" "Deployer"
+  bash ./scripts/"$1"/deployer.sh
 fi
