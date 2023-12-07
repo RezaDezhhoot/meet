@@ -38,22 +38,20 @@ router.afterEach((to, from) => {
 })
 
 axios.get('/v1/settings/base?lang=fa').then(base => {
+    console.log(base.data.data.logo);
     if (base && base.data.data.title) {
         AppName = base.data.data.title;
+        app.provide('AppName',AppName);
     }
 
     if (base && base.data.data.logo) {
+        app.provide('LogoAddr',base.data.data.logo);
         const icon = useFavicon();
         icon.value = base.data.data.logo;
-        logo = base.data.data.logo;
     }
 }).catch(err => {});
 
-
-
-app.provide('AppName',AppName);
 app.provide('BaseUrl',baseURL);
-app.provide('Logo',logo);
 
 app.use(createPinia())
 app.use(router)

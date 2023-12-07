@@ -26,10 +26,13 @@ export default {
       clients:[],
       socket: null,
       baseUrl: inject('BaseUrl'),
-      logo: inject('Logo')
+      logo: inject('LogoAddr')
     };
   },
   name: "Meeting",
+  mounted() {
+    console.log(inject('LogoAddr'));
+  },
   async created() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');

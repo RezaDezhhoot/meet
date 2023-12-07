@@ -20,8 +20,7 @@ class Setting extends Model
     public function value(): Attribute
     {
         return  Attribute::make(
-            get: fn($value) => $this->attributes['value'] = str_replace(env('APP_URL') . '/', '', $value),
-            set: function($value) {
+            get: function($value) {
                 $data = json_decode($value, true);
                 return is_array($data) ? $data : $value;
             }

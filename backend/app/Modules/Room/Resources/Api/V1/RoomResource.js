@@ -1,6 +1,7 @@
 const UserResource = require("../../../../User/Resources/Api/V1/UserResource");
+const User = require("../../../../User/Models/User");
 exports.make =  async (room  , ignore = [] ) => {
-    const host = await room.getUser();
+    const host = await User.findByPk(room.id);
     ignore.forEach((v , k) => {
         user[v] = undefined;
     });

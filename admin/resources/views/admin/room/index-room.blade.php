@@ -26,7 +26,7 @@
                                     <td>{{ $item->title }}</td>
                                     <td>{{ $item->key }}</td>
                                     <td>
-                                        <a href="{{ $item->room_link }}">{{ $item->room_link }}</a>
+                                        <a target="_blank" href="{{ $item->room_link }}">ورود به اتاق</a>
                                     </td>
                                     <td>{{ $item->capacity }} نفر </td>
                                     <td>{{ $item->status_label }}</td>

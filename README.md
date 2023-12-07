@@ -1,7 +1,8 @@
 # Get started
 
-## Meet project
+<img src="https://rezaprojects.ir/storage/Fast-Learn-Icon.png" width="80" height="80">
 
+## Fast learn meet project
 A service for creating online rooms for online meetings, uploading content like share screen and online training
 
 ### Install project
@@ -23,5 +24,5 @@ bash deployer.sh
 4. [x] Frontend service will available on **http://server-ip:4173**
 ---
 ### **Default access:**
-    - Admin username: **admin@gmail.com**
-    - Admin password: **123456**
+* Admin username: **admin@gmail.com**
+* Admin password: **123456**
