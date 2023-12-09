@@ -4,7 +4,7 @@ import axios from 'axios'
 import { store } from "./stores/store";
 import VueCookies from 'vue-cookies';
 import { useFavicon } from '@vueuse/core';
-
+import PrimeVue from 'primevue/config';
 const baseURL = import.meta.env.VITE_BASE_URL
 axios.defaults.baseURL = `${baseURL}/api`; // Replace with your API base URL
 
@@ -38,7 +38,6 @@ router.afterEach((to, from) => {
 })
 
 axios.get('/v1/settings/base?lang=fa').then(base => {
-    console.log(base.data.data.logo);
     if (base && base.data.data.title) {
         AppName = base.data.data.title;
         app.provide('AppName',AppName);
@@ -53,6 +52,7 @@ axios.get('/v1/settings/base?lang=fa').then(base => {
 
 app.provide('BaseUrl',baseURL);
 
+app.use(PrimeVue);
 app.use(createPinia())
 app.use(router)
 app.use(store)

@@ -9,5 +9,9 @@ export const state = {
     remoteStreams: Array,
     displayStream: null,
     shareScreen: false,
-    logo: null
+    logo: null,
+    videoInputs: [],
+    audioInputs: [],
+    speakers: [],
+    selectedVideoDevice: null
 }

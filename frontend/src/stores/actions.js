@@ -1,7 +1,7 @@
 export const actions = {
     fillRTCs({state , dispatch} , clients){
         for (const index in clients) {
-            if (clients[index].user.id !== state.user.user.id) {
+            if (state.user.user && clients[index].user.id !== state.user.user.id) {
                 if ( ! state.peerConnections[index] || ! state.peerConnections[index]['pc'] ) {
                     state.peerConnections[index] = {
                         user_id: clients[index].user.id,
@@ -70,7 +70,7 @@ export const actions = {
     },
     async shareStream(context , data) {
         if (data.hasOwnProperty('screen') && data.screen) {
-            let constraints = { video:true, audio: false};
+            let constraints = { video: true, audio: false};
             navigator.mediaDevices.getDisplayMedia(constraints).then(async function(stream){
                 stream.getVideoTracks()[0].onended = function () {
                     context.dispatch('endScreen',{
@@ -95,7 +95,10 @@ export const actions = {
                 }
             });
         } else {
-            let constraints = {video: data.video, audio: data.audio};
+            let constraints = {
+                video: data.video ? ( {deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined} ) : false,
+                audio: data.audio
+            };
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 const localStream = stream;
                 context.state.localStream = localStream;

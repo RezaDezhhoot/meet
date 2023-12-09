@@ -30,8 +30,6 @@ export default {
     };
   },
   name: "Meeting",
-  mounted() {
-  },
   async created() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
@@ -49,6 +47,8 @@ export default {
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
       this.$store.commit('setSocket' , this.socket);
+      this.$store.commit('setDevices');
+
       return this.socket;
     },
     async join(){
