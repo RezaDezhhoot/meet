@@ -6,6 +6,7 @@ export const state = {
     socket: Object,
     hiddenVideo: true,
     showing: false,
+    updating: false,
     remoteStreams: Array,
     displayStream: null,
     shareScreen: false,
@@ -13,5 +14,7 @@ export const state = {
     videoInputs: [],
     audioInputs: [],
     speakers: [],
-    selectedVideoDevice: null
+    selectedVideoDevice: null,
+    selectedSpeakerDevice: null,
+    selectedAudioDevice: null,
 }

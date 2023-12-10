@@ -1,5 +1,8 @@
 <template>
   <div class="video-tab w-full h-[32%] mr-[0.5rem] bg-white rounded-b-[0.5rem] lg:rounded-[0.5rem] px-[1.2rem] py-[1rem] hidden-mobile">
+
+
+
     <div v-if="hiddenVideo" class="w-full h-full">
       <div class="flex w-full justify-between border-b-[1px] border-[#aaaaaa]">
         <div class="text-[#616161] font-bold flex justify-center items-center pb-[0.5rem]">
@@ -21,19 +24,24 @@
 
       <div class="h-full w-full flex justify-center items-center flex-col">
         <div class="w-full text-center">
-
-
-
-          <span class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
+          <span v-if="$store.state.updating" class=" text-[#b8b8b8] text-amber-500">
+            در حال تغییر منبع...
+          </span>
+          <span v-else class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
           <template v-if="room.host && user.user && room.host.id === user.user.id">
 
             <div class="relative mt-[0.5rem]">
-              <div class="flex justify-center items-center" v-if="$store.state.videoInputs.length > 0">
-                <button  @click="toggleDropdown" class="dropdown-btn border border-[#d1d1d1] ">&#9662;</button>
+              <div class="flex justify-center items-center" v-if="$store.state.videoInputs.length > 0 && ! $store.state.updating">
+                <button  @click="toggleDropdown" class="dropdown-btn border-x-2 border-y-2 border-[#d1d1d1] ">&#9662;</button>
                 <div v-show="showDropdown" class="dropdown-content">
-                  <a v-for="(video , key) in $store.state.videoInputs " @click="selectOption(video.id)"> {{ video.id === $store.state.selectedVideoDevice ? '✅' : '' }} {{video.label}} </a>
+                  <a v-for="(video , key) in $store.state.videoInputs " @click="selectOption(video.id)">
+                    <small>
+                      {{ video.id === $store.state.selectedVideoDevice ? '✅' : '' }} {{video.label}}
+                    </small>
+                    <hr>
+                  </a>
                 </div>
-                <button v-on:click="shareCamera" class="flex text-[#616161] border border-[#d1d1d1] rounded-l-lg justify-center items-center">
+                <button v-on:click="shareCamera" class="flex text-[#616161] border-l-2 border-y-2 border-[#d1d1d1] rounded-l-lg justify-center items-center">
                   <div  class="flex px-[0.5rem] py-[0.4rem] ">
                     <span class="font-bold text-[#616161] px-[0.8rem]">نمایش ویدئوی من</span>
 
@@ -46,8 +54,8 @@
                   </div>
                 </button>
               </div>
-              <div v-else>
-                <p class="text-amber-500" >
+              <div v-else-if="!$store.state.updating">
+                <p class="text-amber-500">
                   هیچ دوربینی پیدا نشد.
                 </p>
               </div>
@@ -81,8 +89,6 @@ export default {
       selectedOption: null,
     }
   },
-  mounted() {
-  },
   created() {
     this.wires();
   },
@@ -95,7 +101,7 @@ export default {
       if (value) {
         this.$refs.localVideo.srcObject = this.$store.state.localStream;
       }
-    }
+    },
   },
   methods:{
     async shareCamera(){
@@ -115,60 +121,16 @@ export default {
       this.showDropdown = !this.showDropdown;
     },
     selectOption(option) {
-      this.$store.commit('setDefaultDevice',{
+      this.$store.dispatch('setDefaultDevice',{
         type: 'camera',
         value: option
       });
       this.showDropdown = false;
     },
-    performMainAction() {
-      // Add your main action logic here
-      console.log('Performing main action');
-    }
   }
 }
 </script>
 
 <style>
-.split-dropdown {
-  position: relative;
-  display: inline-block;
-}
 
-.main-btn {
-  padding: 10px;
-  cursor: pointer;
-}
-
-.dropdown-btn {
-  padding: 7px 4px;
-  cursor: pointer;
-}
-
-.dropdown-content {
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-  z-index: 1;
-  top: 100% ;
-}
-
-.dropdown-content a {
-  padding: 5px 18px;
-  text-align: left;
-  display: block;
-  text-decoration: none;
-  color: #333;
-  cursor: pointer;
-  font-size: 12px
-}
-
-.dropdown-content a:hover {
-  background-color: #ddd;
-}
-
-.show {
-  display: block;
-}
 </style>

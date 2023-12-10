@@ -288,9 +288,16 @@ module.exports.disconnect = async (io,socket,data,room) => {
             },status: 200
         });
     }
-    
+    io.emit('end-stream',{
+        data: {
+            media: 'camera',
+            media2: 'screen',
+            from: socket.id
+        }
+    });
     delete users[socket.id];
     delete typistUsers[socket.id];
+
     io.emit('get-users',{
         data:{
             users

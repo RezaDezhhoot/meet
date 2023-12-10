@@ -1,3 +1,5 @@
+import Swal from "sweetalert2";
+
 export const actions = {
     fillRTCs({state , dispatch} , clients){
         for (const index in clients) {
@@ -97,13 +99,15 @@ export const actions = {
         } else {
             let constraints = {
                 video: data.video ? ( {deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined} ) : false,
-                audio: data.audio
+                audio: data.audio ? ( {deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined} ) : false,
             };
+
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 const localStream = stream;
                 context.state.localStream = localStream;
                 if (data.media === 'camera') {
                     context.state.showing = true;
+                    context.state.updating = false;
                 }
                 for (const id in context.state.peerConnections) {
                     if (context.state.peerConnections[id]['pc']) {
@@ -119,6 +123,10 @@ export const actions = {
                     }
                 }
                 context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
+            }).catch(function (err){
+                if (data.media === 'camera') {
+                    context.dispatch('setDevices');
+                }
             });
         }
     },
@@ -204,7 +212,13 @@ export const actions = {
                 const streamID = state.localStream.id;
                 state.localStream.getTracks().forEach(function(track) { track.stop(); })
                 state.localStream = null;
+
                 state.showing = false;
+
+                if (data.hasOwnProperty('updating')) {
+                    state.updating = true;
+                }
+
                 for (const id in state.peerConnections) {
                     if (state.peerConnections[id]['pc']) {
                         state.peerConnections[id][`${data.media}_shared`] = false;
@@ -240,14 +254,138 @@ export const actions = {
             context.commit('updateHiddenCamera',true);
         }
         if (data.data.from !== context.state.socket.id) {
-            if (data.data.media === 'screen') {
+            if (data.data.media === 'screen' || (data.data.hasOwnProperty('media2') && data.data.media2 === 'screen' ) ) {
                 context.state.shareScreen = false;
             }
-            delete context.state.remoteStreams[data.data.streamID];
-            const el = document.getElementById(data.data.streamID);
-            if (el) {
-                el.remove();
+            if (data.data.hasOwnProperty('streamID')) {
+                delete context.state.remoteStreams[data.data.streamID];
+                const el = document.getElementById(data.data.streamID);
+                if (el) {
+                    el.remove();
+                }
             }
         }
-    }
+    },
+    setDevices({state,dispatch}) {
+        function updateDevice() {
+            navigator.mediaDevices
+                .enumerateDevices()
+                .then((devices) => {
+                    state.videoInputs = [];
+                    state.speakers = [];
+                    state.audioInputs = [];
+
+                    devices.forEach((device,key) => {
+                        if (device.kind === 'videoinput') {
+                            if (! state.selectedVideoDevice) {
+                                state.selectedVideoDevice = device.deviceId;
+                            }
+                            state.videoInputs.push({
+                                label: device.label || 'unknown camera',
+                                id: device.deviceId
+                            });
+                        } else if (device.kind === 'audioinput') {
+                            state.audioInputs.push({
+                                label: device.label || 'unknown microphone',
+                                id: device.deviceId
+                            });
+                        } else if (device.kind === 'audiooutput') {
+                            state.speakers.push({
+                                label: device.label || 'unknown speaker',
+                                id: device.deviceId
+                            });
+                        }
+                    });
+
+                    if (state.selectedVideoDevice) {
+                        const currentVideo = state.videoInputs.filter(item => {
+                            return item.id === state.selectedVideoDevice;
+                        });
+
+                        if (currentVideo.length === 0) {
+                            dispatch('endStream',{
+                                media: 'camera'
+                            });
+                            state.selectedVideoDevice = null;
+                        }
+                    }
+
+                    if (state.selectedAudioDevice) {
+                        const currentAudio = state.audioInputs.filter(item => {
+                            return item.id === state.selectedAudioDevice;
+                        });
+
+                        if (currentAudio.length === 0) {
+                            dispatch('endStream',{
+                                media: 'audio'
+                            });
+                            state.selectedAudioDevice = null;
+                        }
+                    }
+
+
+                })
+                .catch((err) => {
+                    console.error(`${err.name}: ${err.message}`);
+                });
+
+        }
+
+        navigator.mediaDevices.ondevicechange = function(event) {
+
+            updateDevice();
+        }
+        updateDevice();
+
+
+    },
+    setDefaultDevice({state,dispatch} , value){
+        if (value.type === 'camera') {
+            state.selectedVideoDevice = value.value;
+            // rebuild local stream if user has already shared.
+        } else if (value.type === 'microphone') {
+            if (state.selectedAudioDevice !== value.value) {
+                state.selectedAudioDevice = value.value;
+
+                if (state.localStream) {
+                    if (state.user.media.media.local.camera) {
+                        dispatch('endStream',{
+                            media: 'camera' , updating: true
+                        });
+                        dispatch('shareStream',{
+                            video: true , audio: state.user.media.media.local.microphone , media: 'camera'
+                        });
+                    } else {
+                        dispatch('endStream',{
+                            media: 'audio'
+                        });
+                        dispatch('shareStream',{
+                            video: false , audio: true , media: 'audio'
+                        });
+                    }
+                }
+            }
+
+        } else if (value.type === 'speaker') {
+            const mediaPlayers = document.querySelectorAll('audio');
+            Array.from(mediaPlayers).forEach(async el => {
+                el.setSinkId(value.value).then(() => {
+                    state.selectedSpeakerDevice = value.value;
+                }).catch(error => {
+                    let errorMessage = error;
+                    if (error.name === 'SecurityError') {
+                        errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+                    }
+                    Swal.fire({
+                        position: 'top-start',
+                        text: errorMessage,
+                        icon: 'warning',
+                        showConfirmButton: false,
+                        backdrop: false,
+                        timer: 3500,
+                    })
+                });
+            })
+        }
+    },
 }

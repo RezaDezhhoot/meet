@@ -13,15 +13,16 @@ export const mutations = {
     },
     controlCamera(state , status){
         try {
+            if (! status) {
+                state.showing = false;
+                state.hiddenVideo = true;
+                state.selectedVideoDevice = null;
+            } else {
+                state.showing = true;
+                state.hiddenVideo = false;
+            }
             if (state.localStream) {
                 state.localStream.getVideoTracks()[0].enabled = status;
-                if (! status) {
-                    state.showing = false;
-                    state.hiddenVideo = true;
-                } else {
-                    state.showing = true;
-                    state.hiddenVideo = false;
-                }
             }
         } catch (err) {}
     },
@@ -43,69 +44,5 @@ export const mutations = {
     },
     setLogo(state , value) {
         state.logo = value;
-    },
-    setDevices(state) {
-        navigator.mediaDevices.ondevicechange = function(event) {
-            state.videoInputs = [];
-            state.speakers = [];
-            state.audioInputs = [];
-            navigator.mediaDevices.enumerateDevices()
-                .then(function(devices) {
-                    devices.forEach((device,key) => {
-                        if (device.kind === 'videoinput') {
-                            state.videoInputs.push({
-                                label: device.label || 'unknown camera',
-                                id: device.deviceId
-                            });
-                        } else if (device.kind === 'audioinput') {
-                            state.audioInputs.push({
-                                label: device.label || 'unknown microphone',
-                                id: device.deviceId
-                            });
-                        } else if (device.kind === 'audiooutput') {
-                            state.speakers.push({
-                                label: device.label || 'unknown speaker',
-                                id: device.deviceId
-                            });
-                        }
-                    });
-                });
-
-        }
-        navigator.mediaDevices
-            .enumerateDevices()
-            .then((devices) => {
-                devices.forEach((device,key) => {
-                    if (device.kind === 'videoinput') {
-                        state.videoInputs.push({
-                            label: device.label || 'unknown camera',
-                            id: device.deviceId
-                        });
-                    } else if (device.kind === 'audioinput') {
-                        state.audioInputs.push({
-                            label: device.label || 'unknown microphone',
-                            id: device.deviceId
-                        });
-                    } else if (device.kind === 'audiooutput') {
-                        state.speakers.push({
-                            label: device.label || 'unknown speaker',
-                            id: device.deviceId
-                        });
-                    }
-                });
-            })
-            .catch((err) => {
-                console.error(`${err.name}: ${err.message}`);
-            });
-    },
-    setDefaultDevice(state , value){
-        if (value.type === 'camera') {
-            state.selectedVideoDevice = value.value
-            // rebuild local stream if user has shared.
-        } else if (value.type === 'microphone') {
-
-        } else if (value.type === 'speaker') {
-
-        }
     },
 }

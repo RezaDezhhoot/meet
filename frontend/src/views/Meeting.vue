@@ -47,7 +47,7 @@ export default {
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
       this.$store.commit('setSocket' , this.socket);
-      this.$store.commit('setDevices');
+      this.$store.dispatch('setDevices');
 
       return this.socket;
     },
