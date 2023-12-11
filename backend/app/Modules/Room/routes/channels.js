@@ -10,44 +10,48 @@ module.exports.ChannelV1 = async (io) => {
         });
 
         const namespace = socket.nsp.name.split('-')[1];
+
         const room = await Room.findOne({where:{key:namespace}});
         if (room && room.status === OPEN) {
+
+            const nsp = socket.nsp;
+
+            await SocketV1.createRoom(nsp,socket,room)
             // Client join.
-            socket.on('join', async data => await SocketV1.join(io,socket,data,room))
+            socket.on('join', async data => await SocketV1.join(nsp,socket,data,room))
 
             // Submit new message
-            socket.on('new-message', async data => await SocketV1.newMessage(io,socket,data,room))
+            socket.on('new-message', async data => await SocketV1.newMessage(nsp,socket,data,room))
 
             // Typing
-            socket.on('typing', async data => await SocketV1.typing(io,socket,data,room))
+            socket.on('typing', async data => await SocketV1.typing(nsp,socket,data,room))
 
             // no Typing
-            socket.on('no-typing', async data => await SocketV1.noTyping(io,socket,data,room))
+            socket.on('no-typing', async data => await SocketV1.noTyping(nsp,socket,data,room))
 
             // Control client's remote media
-            socket.on('control-remote-media', async data => await SocketV1.controlRemoteMedia(io,socket,data,room))
+            socket.on('control-remote-media', async data => await SocketV1.controlRemoteMedia(nsp,socket,data,room))
 
             // Control client's local media
-            socket.on('control-local-media', async data => await SocketV1.controlLocalMedia(io,socket,data,room))
-
+            socket.on('control-local-media', async data => await SocketV1.controlLocalMedia(nsp,socket,data,room))
 
             // Client hand rising
-            socket.on('hand-rising', async data => await SocketV1.handRising(io,socket,data,room))
+            socket.on('hand-rising', async data => await SocketV1.handRising(nsp,socket,data,room))
 
             // Disconnect client
-            socket.on('disconnect', async data => await SocketV1.disconnect(io,socket,data,room))
+            socket.on('disconnect', async data => await SocketV1.disconnect(nsp,socket,data,room))
 
             // Kick clint
-            socket.on('kick-client', async data => await SocketV1.kickClient(io,socket,data,room))
+            socket.on('kick-client', async data => await SocketV1.kickClient(nsp,socket,data,room))
 
             // Stream
-            socket.on('share-stream', async data => await SocketV1.shareStream(io,socket,data,room))
+            socket.on('share-stream', async data => await SocketV1.shareStream(nsp,socket,data,room))
 
-            socket.on('make-answer', async data => await SocketV1.makeAnswer(io,socket,data,room))
+            socket.on('make-answer', async data => await SocketV1.makeAnswer(nsp,socket,data,room))
 
-            socket.on('end-stream', async data => await SocketV1.endStream(io,socket,data,room))
+            socket.on('end-stream', async data => await SocketV1.endStream(nsp,socket,data,room))
 
-            socket.on('get-shared', async data => await SocketV1.getShared(io,socket,data,room))
+            socket.on('get-shared', async data => await SocketV1.getShared(nsp,socket,data,room))
             // End stream
         } else {
             socket.emit('error',{

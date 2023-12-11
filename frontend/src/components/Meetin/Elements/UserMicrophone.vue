@@ -4,7 +4,7 @@
     <div v-show="showDropdown" class="dropdown-content">
       <a v-for="(microphone , key) in $store.state.audioInputs " @click="selectOption(microphone.id)">
         <small>
-          {{ microphone.id === $store.state.selectedAudioDevice ? '✅' : '' }} {{microphone.label}}
+          {{ microphone.id === $store.state.selectedAudioDevice ? '✔️' : '' }} {{microphone.label}}
         </small>
         <hr>
       </a>

@@ -21,15 +21,15 @@
           <div>
             <ul>
               <li>
-                <UserHandRising :responsive="true" label="بلند کردن دست" :fill="(user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && host && user.user?.id !== host.user.id" :active="user.media && user.media.settings.hand_rising" ></UserHandRising>
+                <UserHandRising :responsive="true" label="بلند کردن دست" :fill="(user && user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && user.media && host && user.user?.id !== host.user.id" :active="user && user.media && user.media.settings.hand_rising" ></UserHandRising>
               </li>
 
               <li>
-                <UserMicrophone width="30" height="30" :responsive="true" label=" میکروفن" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
+                <UserMicrophone width="30" height="30" :responsive="true" label=" میکروفن" :socket="socket" :user="user" :show="user && user.media && user.media.media.remote.microphone" :active="user && user.media && user.media.media.local.microphone" ></UserMicrophone>
               </li>
 
               <li>
-                <UserCamera :responsive="true" label="دوربین" :fill=" (user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && host && user.user?.id === host.user.id" ></UserCamera>
+                <UserCamera :responsive="true" label="دوربین" :fill=" (user && user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && user.media && host && user.user?.id === host.user.id" ></UserCamera>
               </li>
               <li>
                 <UserSpeaker  width="30" height="30"  :responsive="true" label=" بلند گو" :user="user" :socket="socket"></UserSpeaker>

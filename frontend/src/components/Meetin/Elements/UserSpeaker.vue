@@ -4,7 +4,7 @@
     <div v-show="showDropdown" class="dropdown-content">
       <a v-for="(speaker , key) in $store.state.speakers " @click="selectOption(speaker.id)">
         <small>
-          {{ speaker.id === $store.state.selectedSpeakerDevice ? '✅' : '' }} {{speaker.label}}
+          {{ speaker.id === $store.state.selectedSpeakerDevice ? '✔️' : '' }} {{speaker.label}}
         </small>
         <hr>
       </a>

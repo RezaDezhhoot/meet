@@ -36,7 +36,7 @@
                 <div v-show="showDropdown" class="dropdown-content">
                   <a v-for="(video , key) in $store.state.videoInputs " @click="selectOption(video.id)">
                     <small>
-                      {{ video.id === $store.state.selectedVideoDevice ? '✅' : '' }} {{video.label}}
+                      {{ video.id === $store.state.selectedVideoDevice ? '✔️' : '' }} {{video.label}}
                     </small>
                     <hr>
                   </a>
