@@ -22,7 +22,8 @@ exports.make = (user , room , type) => {
         settings: {
             hand_rising: false,
             camera: false,
-            audio: false
+            audio: false,
+            screen: false,
         }
     };
 }

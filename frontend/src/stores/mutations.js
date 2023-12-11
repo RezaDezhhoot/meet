@@ -14,15 +14,12 @@ export const mutations = {
     controlCamera(state , status){
         try {
             if (! status) {
-                state.showing = false;
-                state.hiddenVideo = true;
                 state.selectedVideoDevice = null;
-            } else {
-                state.showing = true;
-                state.hiddenVideo = false;
             }
-            if (state.localStream) {
-                state.localStream.getVideoTracks()[0].enabled = status;
+
+            state.showing = status;
+            if (state.videoStream) {
+                state.videoStream.getVideoTracks()[0].enabled = status;
             }
         } catch (err) {}
     },

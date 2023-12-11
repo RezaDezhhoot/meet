@@ -76,15 +76,14 @@ module.exports.join = async (io,socket,data,room) => {
     }
 
     io.emit('get-users',{
-        data:{
-            users
-        },
+        data:{users , from: socket.id},
         status
     });
     io.emit('create-pc',{
-        data:{shared_camera,host_id: room.host_id},
+        data:{host_id: room.host_id},
         status
     });
+    socket.emit('join-stream');
 }
 
 module.exports.newMessage = async (io,socket,data,room) => {
@@ -196,7 +195,9 @@ module.exports.endStream = async (io,socket,data,room) => {
     users[socket.id].media.settings[data.media] = false;
     io.emit('end-stream',{
         data: {
-            media: data.media,
+            camera: data.media === 'camera',
+            screen: data.media === 'screen',
+            audio: data.media === 'audio',
             streamID: data.streamID,
             from: socket.id
         }
@@ -219,7 +220,7 @@ module.exports.controlRemoteMedia = async (io,socket,data,room) => {
 
         io.emit('get-users',{
             data:{
-                users
+                users, from: socket.id
             },
             status: 200
         });
@@ -240,7 +241,7 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
 
         io.emit('get-users',{
             data:{
-                users
+                users, from: socket.id
             },
             status: 200
         });
@@ -264,7 +265,7 @@ module.exports.handRising = async (io,socket,data,room) => {
 
         io.emit('get-users',{
             data:{
-                users
+                users, from: socket.id
             },
             status: 200
         });
@@ -274,36 +275,39 @@ module.exports.handRising = async (io,socket,data,room) => {
 }
 
 module.exports.disconnect = async (io,socket,data,room) => {
-
-    if (users[socket.id] === host) {
-        host= null;
-        if (shared_camera) {
-            shared_camera = false;
-            io.emit('end-shared-camera');
+    if (users[socket.id]) {
+        if (users[socket.id] === host) {
+            host= null;
+            if (shared_camera) {
+                shared_camera = false;
+                io.emit('end-shared-camera');
+            }
+            host_socket_id = null;
+            io.emit('host-joined',{
+                data:{
+                    host: null
+                },status: 200
+            });
         }
-        host_socket_id = null;
-        io.emit('host-joined',{
+
+        io.emit('end-stream',{
+            data: {
+                camera: users[socket.id].media.settings.camera,
+                screen: users[socket.id].media.settings.screen,
+                audio: users[socket.id].media.settings.audio,
+                from: socket.id
+            }
+        });
+        delete users[socket.id];
+        delete typistUsers[socket.id];
+
+        io.emit('get-users',{
             data:{
-                host: null
-            },status: 200
+                users , from: socket.id
+            },
+            status: 200
         });
     }
-    io.emit('end-stream',{
-        data: {
-            media: 'camera',
-            media2: 'screen',
-            from: socket.id
-        }
-    });
-    delete users[socket.id];
-    delete typistUsers[socket.id];
-
-    io.emit('get-users',{
-        data:{
-            users
-        },
-        status: 200
-    });
 }
 
 module.exports.kickClient = async (io,socket,data,room) => {

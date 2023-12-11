@@ -79,6 +79,10 @@ export default {
         }
       });
 
+      this.socket.on('join-stream' , async data => {
+        this.$store.dispatch('joinStream',this.clients);
+      })
+
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
           this.host = data.data.host;

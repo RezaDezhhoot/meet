@@ -94,14 +94,17 @@ export default {
   },
   watch:{
     "$store.state.hiddenVideo"(value) {
+      console.log(value);
       this.hiddenVideo = value;
     },
     "$store.state.showing"(value) {
       this.hiddenVideo = ! value;
-      if (value) {
-        this.$refs.localVideo.srcObject = this.$store.state.localStream;
-      }
     },
+    "$store.state.videoStream"(value) {
+      if (value) {
+        this.$refs.localVideo.srcObject = value;
+      }
+    }
   },
   methods:{
     async shareCamera(){
@@ -109,12 +112,13 @@ export default {
       this.socket.emit('control-local-media',{
         device: 'camera'
       });
-      this.$store.dispatch('endStream',{
-        media: 'camera'
-      });
-      this.$store.dispatch('shareStream',{
-        video: true , audio: true , media: 'camera'
-      });
+      if (this.$store.state.videoStream) {
+        this.$store.commit('controlCamera',true);
+      } else {
+        this.$store.dispatch('shareStream',{
+          video: true , audio: false , media: 'camera'
+        });
+      }
     },
     wires(){},
     toggleDropdown() {

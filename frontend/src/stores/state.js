@@ -1,5 +1,6 @@
 export const state = {
     localStream: null,
+    videoStream: null,
     sound: false,
     user: null,
     peerConnections: Object,
