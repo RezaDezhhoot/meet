@@ -4,8 +4,30 @@ export const state = {
     displayStream: null,
     remoteStreams: Array,
 
+    host: {
+        user: {
+            id: false
+        }
+    },
+
     sound: false,
-    user: null,
+    user: {
+        media:{
+            settings: {
+                hand_rising: false
+            },
+            media: {
+                remote: {
+                    microphone: false,
+                    camera: false,
+                },
+                local: {
+                    microphone: false,
+                    camera: false,
+                }
+            }
+        }
+    },
 
     peerConnections: Object,
 

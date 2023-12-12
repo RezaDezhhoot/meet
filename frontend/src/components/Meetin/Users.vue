@@ -21,7 +21,7 @@
 
     <div class="box-sidbar-users">
       <ul>
-        <li class="host-style" v-if="host">
+        <li class="host-style" v-if="host && host.user">
           <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <g id="#000000ff">
               <path fill="#df1111" opacity="1.00" d=" M 46.44 8.64 C 56.42 6.70 67.10 13.24 69.88 23.01 C 72.43 30.88 69.66 40.09 63.21 45.26 C 56.96 50.52 47.53 51.49 40.34 47.61 C 33.23 43.97 28.65 35.98 29.21 28.00 C 29.55 18.57 37.14 10.10 46.44 8.64 Z" />
@@ -62,7 +62,7 @@
 
             </div>
 
-            <div class="flex" v-if="host && user.user.id === host.user.id">
+            <div class="flex" v-if="host && host.user && user.user.id === host.user.id">
               <Kick :client="item" :socket="socket"></Kick>
               <Microphone :client="item" :socket="socket"></Microphone>
               <Screen :client="item" :socket="socket"></Screen>

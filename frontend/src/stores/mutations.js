@@ -49,4 +49,7 @@ export const mutations = {
     setLogo(state , value) {
         state.logo = value;
     },
+    setHost(state , value = null) {
+        state.host = value;
+    }
 }

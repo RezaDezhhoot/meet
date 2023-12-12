@@ -86,6 +86,7 @@ export default {
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
           this.host = data.data.host;
+          this.$store.commit('setHost',this.host);
         }
       });
 
