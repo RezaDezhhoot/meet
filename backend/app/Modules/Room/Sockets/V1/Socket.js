@@ -28,9 +28,9 @@ module.exports.createRoom = async (io , socket , room) => {
 }
 
 module.exports.sendRoom = async (io,socket,data,room) => {
-    io.emit('get-room',{
+    socket.emit('get-room',{
         data:{
-            room:await RoomResource.make(room),
+            room: await RoomResource.make(room),
         },
         status: 200
     });
@@ -68,10 +68,14 @@ module.exports.join = async (io,socket,data,room) => {
                     if (user.id === room.host_id) {
                         host[room.key] = users[room.key][socket.id];
                         host_socket_id[room.key] = socket.id;
-                    }
 
-                    if (host[room.key]) {
                         io.emit('host-joined',{
+                            data:{
+                                host: host[room.key]
+                            },status
+                        });
+                    } else if (host[room.key]) {
+                        socket.emit('host-joined',{
                             data:{
                                 host: host[room.key]
                             },status
@@ -82,6 +86,24 @@ module.exports.join = async (io,socket,data,room) => {
             break;
         case GUEST:
             status = 200;
+            const user= {
+                name: data.name,
+            }
+            users[room.key][socket.id] = {
+                socketId: socket.id,
+                name: user.name,
+                ip: socket.handshake.address,
+                user: UserResource.make(user,null,['id','email','phone','status']),
+                media: MediaResource.make(user,room,data.type),
+            };
+
+            if (host[room.key]) {
+                socket.emit('host-joined',{
+                    data:{
+                        host: host[room.key]
+                    },status
+                });
+            }
             break;
         default:
             return;
@@ -108,7 +130,7 @@ module.exports.newMessage = async (io,socket,data,room) => {
                 text: data.message,
                 room_id: room.id,
                 sender: user.name,
-                user_id: user?.user?.id,
+                user_id: user.user.id ?? null,
                 user_ip: socket.handshake.address,
             });
         } else {
@@ -186,7 +208,7 @@ module.exports.makeAnswer = async (io,socket,data,room) => {
 }
 
 module.exports.endStream = async (io,socket,data,room) => {
-    if (users[room.key]) {
+    if (users[room.key] && users[room.key][socket.id].media) {
         users[room.key][socket.id].media.settings[data.media] = false;
         io.emit('end-stream',{
             data: {
@@ -289,7 +311,9 @@ module.exports.disconnect = async (io,socket,data,room) => {
             }
         });
         delete users[room.key][socket.id];
-        delete typistUsers[room.key][socket.id];
+        if (typistUsers[room.key][socket.id]) {
+            delete typistUsers[room.key][socket.id];
+        }
 
         io.emit('get-users',{
             data:{

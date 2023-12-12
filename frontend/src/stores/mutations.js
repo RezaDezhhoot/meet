@@ -16,10 +16,13 @@ export const mutations = {
             if (! status) {
                 state.selectedVideoDevice = null;
             }
-
             state.showing = status;
             if (state.videoStream) {
                 state.videoStream.getVideoTracks()[0].enabled = status;
+                state.socket.emit('control-local-media',{
+                    device: 'camera',
+                    action: status
+                });
             }
         } catch (err) {}
     },
@@ -27,6 +30,10 @@ export const mutations = {
         try {
             if (state.localStream) {
                 state.localStream.getAudioTracks()[0].enabled = status;
+                state.socket.emit('control-local-media',{
+                    device: 'microphone',
+                    action: status
+                });
             }
         } catch (err) {}
     },

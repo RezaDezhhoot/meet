@@ -1,5 +1,4 @@
 import Swal from "sweetalert2";
-
 export const actions = {
     fillRTCs({state , dispatch} , clients){
         for (const index in clients) {
@@ -94,8 +93,10 @@ export const actions = {
         }
     },
     async shareStream(context , data) {
+        let constraints;
+
         if (data.hasOwnProperty('screen') && data.screen) {
-            let constraints = { video: true, audio: false};
+            constraints = { video: true, audio: false};
             navigator.mediaDevices.getDisplayMedia(constraints).then(async function(stream){
                 stream.getVideoTracks()[0].onended = function () {
                     context.dispatch('endScreen',{
@@ -118,9 +119,18 @@ export const actions = {
                         })
                     }
                 }
-            });
+            }).catch(function (err) {
+                Swal.fire({
+                    position: 'top-start',
+                    text: "مشکلی در عملیات اشتراک گذاری رخ داده است!",
+                    icon: 'warning',
+                    showConfirmButton: false,
+                    backdrop: false,
+                    timer: 3500,
+                })
+            });;
         } else if (data.media === 'camera') {
-            let constraints = {
+            constraints = {
                 video: data.video ? ( {deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined} ) : false,
                 audio: false,
             };
@@ -134,6 +144,11 @@ export const actions = {
                             context.state.peerConnections[id]['pc']['video']['local'].addTrack(track,localStream)
                         });
 
+                        context.state.socket.emit('control-local-media',{
+                            device: 'camera',
+                            action: true
+                        });
+
                         await context.dispatch('startStream',{
                             from: context.state.socket.id,
                             to: id,
@@ -143,12 +158,18 @@ export const actions = {
                     }
                 }
             }).catch(function (err) {
-                if (data.media === 'camera') {
-                    context.dispatch('setDevices');
-                }
+                context.dispatch('setDevices');
+                Swal.fire({
+                    position: 'top-start',
+                    text: "دوربینی یافت نشد!",
+                    icon: 'warning',
+                    showConfirmButton: false,
+                    backdrop: false,
+                    timer: 3500,
+                })
             });
         } else {
-            let constraints = {
+            constraints = {
                 video: false,
                 audio: data.audio ? ( {deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined} ) : false,
             };
@@ -162,6 +183,11 @@ export const actions = {
                             context.state.peerConnections[id]['pc']['audio']['local'].addTrack(track,localStream)
                         });
 
+                        context.state.socket.emit('control-local-media',{
+                            device: 'microphone',
+                            action: true
+                        });
+
                         await context.dispatch('startStream',{
                             from: context.state.socket.id,
                             to: id,
@@ -172,7 +198,15 @@ export const actions = {
                 }
                 context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
             }).catch(function (err){
-                //
+                context.dispatch('setDevices');
+                Swal.fire({
+                    position: 'top-start',
+                    text: "میکروفونی یافت نشد!",
+                    icon: 'warning',
+                    showConfirmButton: false,
+                    backdrop: false,
+                    timer: 3500,
+                })
             });
         }
     },
@@ -217,7 +251,7 @@ export const actions = {
                 state.shareScreen = true;
             } else if (data.data.media === 'camera' || data.data.media === 'audio') {
                 if (data.data.media === 'camera') {
-                    state.hiddenVideo = false;
+                    state.showing = true;
                     PC = 'video';
                 } else {
                     PC = 'audio';

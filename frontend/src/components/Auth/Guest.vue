@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import {GuestSchema} from "../../secure/AurhVlidator";
+import {GuestSchema} from "@/secure/AurhVlidator";
 import {mapGetters} from 'vuex';
 import axios from "axios";
 

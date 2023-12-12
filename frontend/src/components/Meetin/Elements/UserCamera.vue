@@ -31,14 +31,13 @@ export default {
   },
   watch: {
     "$store.state.showing"(value) {
-      this.show = value;
+      if (this.$store.state.videoStream) {
+        this.show = value;
+      }
     }
   },
   methods:{
     control(){
-      this.socket.emit('control-local-media',{
-        device: 'camera'
-      });
       this.$store.commit('controlCamera',false);
     }
   }

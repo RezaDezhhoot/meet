@@ -94,7 +94,6 @@ export default {
   },
   watch:{
     "$store.state.hiddenVideo"(value) {
-      console.log(value);
       this.hiddenVideo = value;
     },
     "$store.state.showing"(value) {
@@ -108,10 +107,6 @@ export default {
   },
   methods:{
     async shareCamera(){
-      this.hiddenVideo = false;
-      this.socket.emit('control-local-media',{
-        device: 'camera'
-      });
       if (this.$store.state.videoStream) {
         this.$store.commit('controlCamera',true);
       } else {

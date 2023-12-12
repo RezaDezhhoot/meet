@@ -55,7 +55,7 @@ export default {
       this.socket.emit('join',{
         token: this.user.token,
         type: this.user.type,
-        name: this.user.name
+        name: this.user.name,
       })
     },
     async disconnect(){

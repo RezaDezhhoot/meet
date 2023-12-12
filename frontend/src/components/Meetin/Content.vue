@@ -1,35 +1,43 @@
 <template>
-  <section class="left-section w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] px-[1.2rem] py-[1rem]">
+  <section :class="{'full-screen': full}" class="left-section share-screen w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] px-[1.2rem] py-[1rem]">
     <div class="flex w-full justify-between border-b-[1px] border-[#aaaaaa] pb-[0.5rem]">
       <div class="flex">
         <div class="flex justify-center items-center box-mini-menu">
-          <button class="btn-mini-menu">
-            <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-              <g id="#000000ff">
-                <path fill="#616161" opacity="1.00" d=" M 14.30 38.34 C 20.95 35.59 29.25 39.89 30.82 46.90 C 32.75 53.60 27.92 61.15 21.06 62.24 C 14.64 63.65 7.78 59.01 6.55 52.59 C 5.19 46.77 8.70 40.38 14.30 38.34 Z" />
-                <path fill="#616161" opacity="1.00" d=" M 45.31 38.44 C 51.73 35.63 59.91 39.46 61.87 46.18 C 64.20 52.79 59.78 60.64 52.95 62.10 C 46.51 63.87 39.31 59.44 37.89 52.95 C 36.33 47.14 39.72 40.60 45.31 38.44 Z" />
-                <path fill="#616161" opacity="1.00" d=" M 76.39 38.51 C 82.78 35.61 91.00 39.32 93.06 46.01 C 95.40 52.40 91.43 60.11 84.88 61.92 C 78.63 64.02 71.29 60.13 69.40 53.85 C 67.30 47.91 70.58 40.85 76.39 38.51 Z" />
-              </g>
-            </svg>
-          </button>
-
-          <div class="show-mini-menu hidden">
-            <ul>
-              <li>بزرگ نمایی</li>
-              <li>عدم نمایش</li>
-            </ul>
-          </div>
-
           <div class="close-mini-menu hidden"></div>
         </div>
 
-        <button class="mx-[0.5rem]">
-          <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <button class="mx-[0.5rem]" v-on:click="full = ! full" >
+          <svg v-if="! full" width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <g id="#000000ff">
               <path fill="#616161" opacity="1.00" d=" M 19.36 13.49 C 24.69 11.75 30.48 12.69 35.99 12.63 C 39.97 12.72 40.94 18.81 37.37 20.36 C 32.34 21.87 26.55 19.45 21.76 21.72 C 19.44 26.51 21.95 32.35 20.34 37.40 C 18.89 40.55 13.77 40.22 12.76 36.90 C 12.22 32.65 12.52 28.33 12.54 24.06 C 12.44 19.57 15.27 15.28 19.36 13.49 Z" />
               <path fill="#616161" opacity="1.00" d=" M 62.28 13.16 C 64.34 12.13 66.77 12.66 68.99 12.50 C 73.93 12.65 79.72 11.65 83.63 15.45 C 89.24 20.33 87.16 28.49 87.46 35.02 C 88.16 39.46 81.45 41.42 79.63 37.37 C 78.30 32.48 80.03 27.20 78.69 22.31 C 78.44 22.06 77.93 21.54 77.68 21.28 C 73.00 20.07 68.07 21.36 63.32 20.60 C 59.98 19.85 59.34 14.83 62.28 13.16 Z" />
               <path fill="#616161" opacity="1.00" d=" M 15.44 60.54 C 17.53 59.85 20.08 61.13 20.61 63.30 C 21.41 68.04 20.11 72.99 21.29 77.67 C 21.54 77.93 22.05 78.44 22.30 78.70 C 26.99 79.94 31.95 78.63 36.72 79.40 C 39.38 80.05 40.51 83.65 38.83 85.78 C 37.28 88.00 34.29 87.41 31.96 87.57 C 26.55 87.40 20.06 88.53 15.93 84.13 C 11.43 80.00 12.65 73.43 12.46 67.98 C 12.43 65.30 12.15 61.43 15.44 60.54 Z" />
               <path fill="#616161" opacity="1.00" d=" M 82.40 60.47 C 85.10 59.76 87.84 62.24 87.47 65.00 C 87.14 71.34 89.16 79.06 84.13 84.06 C 79.99 88.54 73.42 87.40 67.95 87.57 C 65.64 87.42 62.64 87.98 61.14 85.74 C 59.48 83.60 60.65 80.02 63.31 79.40 C 68.06 78.63 73.02 79.95 77.70 78.69 C 80.20 76.64 78.85 72.86 79.17 70.05 C 79.29 66.77 78.09 61.52 82.40 60.47 Z" />
+            </g>
+          </svg>
+          <svg v-else fill="#616161" width="25" height="25" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+               viewBox="0 0 385.331 385.331" xml:space="preserve">
+            <g>
+              <g id="Fullscreen_Exit">
+                <path d="M264.943,156.665h108.273c6.833,0,11.934-5.39,11.934-12.211c0-6.833-5.101-11.85-11.934-11.838h-96.242V36.181
+                  c0-6.833-5.197-12.03-12.03-12.03s-12.03,5.197-12.03,12.03v108.273c0,0.036,0.012,0.06,0.012,0.084
+                  c0,0.036-0.012,0.06-0.012,0.096C252.913,151.347,258.23,156.677,264.943,156.665z"/>
+                <path d="M120.291,24.247c-6.821,0-11.838,5.113-11.838,11.934v96.242H12.03c-6.833,0-12.03,5.197-12.03,12.03
+                  c0,6.833,5.197,12.03,12.03,12.03h108.273c0.036,0,0.06-0.012,0.084-0.012c0.036,0,0.06,0.012,0.096,0.012
+                  c6.713,0,12.03-5.317,12.03-12.03V36.181C132.514,29.36,127.124,24.259,120.291,24.247z"/>
+                <path d="M120.387,228.666H12.115c-6.833,0.012-11.934,5.39-11.934,12.223c0,6.833,5.101,11.85,11.934,11.838h96.242v96.423
+                  c0,6.833,5.197,12.03,12.03,12.03c6.833,0,12.03-5.197,12.03-12.03V240.877c0-0.036-0.012-0.06-0.012-0.084
+                  c0-0.036,0.012-0.06,0.012-0.096C132.418,233.983,127.1,228.666,120.387,228.666z"/>
+                <path d="M373.3,228.666H265.028c-0.036,0-0.06,0.012-0.084,0.012c-0.036,0-0.06-0.012-0.096-0.012
+                  c-6.713,0-12.03,5.317-12.03,12.03v108.273c0,6.833,5.39,11.922,12.223,11.934c6.821,0.012,11.838-5.101,11.838-11.922v-96.242
+                  H373.3c6.833,0,12.03-5.197,12.03-12.03S380.134,228.678,373.3,228.666z"/>
+              </g>
+              <g></g>
+              <g></g>
+              <g></g>
+              <g></g>
+              <g></g>
+              <g></g>
             </g>
           </svg>
         </button>
@@ -108,15 +116,15 @@
         </div>
       </div>
     </div>
-    <div :class="{ hidden:  !$store.state.shareScreen}">
+
+    <div :class="{ hidden:  !$store.state.shareScreen}" class="h-[85%]">
       <video class="h-full rounded my-[1rem] w-full" muted autoplay ref="screenPlayer" id="screen-player"></video>
-      <div v-if="$store.state.displayStream">
-        <hr>
-        <div class="video-controller">
-          <ul>
-            <li v-on:click="end">
-              <svg fill="#fff" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                   viewBox="0 0 512.456 512.456" xml:space="preserve">
+      <hr>
+      <div v-if="$store.state.displayStream" class="video-controller">
+        <ul>
+          <li v-on:click="end">
+            <svg fill="#fff" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                 viewBox="0 0 512.456 512.456" xml:space="preserve">
               <g transform="translate(-1)">
               <g>
                 <g>
@@ -147,9 +155,8 @@
               </g>
             </g>
             </svg>
-            </li>
-          </ul>
-        </div>
+          </li>
+        </ul>
       </div>
     </div>
   </section>
@@ -160,7 +167,8 @@ export default {
   name: "Content",
   data(){
     return {
-      showing: false
+      showing: false,
+      full: false
     }
   },
   watch:{
