@@ -182,12 +182,11 @@ export const actions = {
                         context.state.localStream.getTracks().forEach(track => {
                             context.state.peerConnections[id]['pc']['audio']['local'].addTrack(track,localStream)
                         });
-
+                        context.state.user.media.media.local.microphone = true;
                         context.state.socket.emit('control-local-media',{
                             device: 'microphone',
                             action: true
                         });
-
                         await context.dispatch('startStream',{
                             from: context.state.socket.id,
                             to: id,
@@ -331,57 +330,68 @@ export const actions = {
             })
         }
     },
-    endStream({state} , data) {
+    endStream({state , commit} , data) {
         try {
-            let streamID;
-            if (state.localStream && data.media === 'audio') {
+            let streamID , videoStreamID;
+            let media = Object.values(data.media);
+
+            if (state.localStream && media.includes('audio')) {
                 streamID = state.localStream.id;
-                state.localStream.getTracks().forEach(function(track) { track.stop(); })
+                commit('controlMicrophone',false);
                 state.localStream = null;
             }
 
-            if (state.videoStream && data.media === 'camera') {
-                streamID = state.videoStream.id;
-                state.videoStream.getTracks().forEach(function(track) { track.stop(); })
+            if (state.videoStream && media.includes('camera')) {
+                videoStreamID = state.videoStream.id;
+                commit('controlCamera',false);
                 state.videoStream = null;
-                state.showing = false;
             }
 
             for (const id in state.peerConnections) {
                 if (state.peerConnections[id]['pc']) {
-                    state.peerConnections[id][`${data.media}_shared`] = false;
+                    if (media.includes('camera')) {
+                        state.peerConnections[id]['camera_shared'] = false;
+                    }
+
+                    if (media.includes('audio')) {
+                        state.peerConnections[id]['audio_shared'] = false;
+                    }
                 }
             }
 
-            state.socket.emit('end-stream' , {
-                media: data.media,
-                streamID
-            })
-        } catch (err) {}
+            if (media.length > 0) {
+                state.socket.emit('end-stream' , {
+                    media,
+                    streamID,
+                    videoStreamID
+                })
+            }
+        } catch (err) {
+            console.log(err);
+        }
     },
     endScreen({state}  , data) {
         if (state.displayStream) {
-            const streamID = state.displayStream.id;
+            const screenStreamID = state.displayStream.id;
             state.displayStream.getTracks().forEach(function(track) { track.stop(); })
             state.displayStream.getVideoTracks()[0].enabled = false;
             state.shareScreen = false;
             state.displayStream = null;
             for (const id in state.peerConnections) {
                 if (state.peerConnections[id]['pc']) {
-                    state.peerConnections[id][`${data.media}_shared`] = false;
+                    state.peerConnections[id]['screen_shared'] = false;
                 }
             }
             state.socket.emit('end-stream' , {
-                media: data.media,
-                streamID
+                media: ['screen'],
+                screenStreamID
             })
         }
     },
     clearRemoteStream(context , data){
         if (data.data.hasOwnProperty('camera') && data.data.camera) {
-            context.commit('updateHiddenCamera',true);
+            context.state.showing = false;
         }
-
 
         if (data.data.from !== context.state.socket.id) {
             if (data.data.hasOwnProperty('screen') && data.data.screen ) {
@@ -404,17 +414,13 @@ export const actions = {
                     state.videoInputs = [];
                     state.speakers = [];
                     state.audioInputs = [];
-                    let currentVideo = true , currentAudio = true;
 
                     devices.forEach((device,key) => {
 
                         if (device.kind === 'videoinput') {
                             if (! state.selectedVideoDevice) {
                                 state.selectedVideoDevice = device.deviceId;
-                            } else if (device.deviceId === state.selectedVideoDevice) {
-                                currentVideo = false;
                             }
-
                             state.videoInputs.push({
                                 label: device.label || 'unknown camera',
                                 id: device.deviceId
@@ -422,10 +428,7 @@ export const actions = {
                         } else if (device.kind === 'audioinput') {
                             if (! state.selectedAudioDevice) {
                                 state.selectedAudioDevice = device.deviceId;
-                            } else if (device.deviceId === state.selectedAudioDevice) {
-                                currentAudio = false;
                             }
-
                             state.audioInputs.push({
                                 label: device.label || 'unknown microphone',
                                 id: device.deviceId
@@ -438,20 +441,34 @@ export const actions = {
                         }
                     });
 
-                    if (currentVideo && state.videoStream) {
-                        dispatch('endStream',{
-                            media: 'camera'
-                        });
+                    let foundCamera = false , foundAudio = false , media = [];
+
+                    for( let i = 0; i < state.videoInputs.length; i++) {
+                        if (state.audioInputs[i]?.id === state.selectedVideoDevice) {
+                            foundCamera = true;
+                            break;
+                        }
+                    }
+
+                    if (! foundCamera && state.videoStream) {
                         state.selectedVideoDevice = null;
+                        media.push('camera');
                     }
 
-                    if (currentAudio && state.localStream) {
-                        dispatch('endStream',{
-                            media: 'audio'
-                        });
+                    for( let i = 0; i < state.audioInputs.length; i++) {
+                        if (state.audioInputs[i]?.id === state.selectedAudioDevice) {
+                            foundAudio = true;
+                            break;
+                        }
+                    }
+                    if (! foundAudio && state.localStream) {
                         state.selectedAudioDevice = null;
+                        media.push('audio');
                     }
 
+                    dispatch('endStream',{
+                        media
+                    });
 
                 }).catch((err) => {
                     console.error(`${err.name}: ${err.message}`);
@@ -472,7 +489,7 @@ export const actions = {
                 state.selectedAudioDevice = value.value;
                 if (state.localStream) {
                     dispatch('endStream',{
-                        media: 'audio'
+                        media: ['audio']
                     });
                     dispatch('shareStream',{
                         video: false , audio: true , media: 'audio'

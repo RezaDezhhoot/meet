@@ -209,13 +209,29 @@ module.exports.makeAnswer = async (io,socket,data,room) => {
 
 module.exports.endStream = async (io,socket,data,room) => {
     if (users[room.key] && users[room.key][socket.id].media) {
-        users[room.key][socket.id].media.settings[data.media] = false;
+        let camera = false , screen = false , audio = false;
+        if (data.media.includes('camera')) {
+            users[room.key][socket.id].media.settings.camera = false;
+            camera = true;
+        }
+
+        if (data.media.includes('screen')) {
+            users[room.key][socket.id].media.settings.screen = false;
+            screen = true;
+        }
+
+        if (data.media.includes('audio')) {
+            users[room.key][socket.id].media.settings.audio = false;
+            audio = true;
+        }
+
+
         io.emit('end-stream',{
             data: {
-                camera: data.media === 'camera',
-                screen: data.media === 'screen',
-                audio: data.media === 'audio',
-                streamID: data.streamID,
+                camera, screen, audio,
+                streamID: data.streamID ?? null,
+                screenStreamID: data.screenStreamID ?? null,
+                videoStreamID: data.videoStreamID ?? null,
                 from: socket.id
             }
         });

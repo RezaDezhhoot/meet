@@ -44,8 +44,10 @@ export default {
   },
   watch: {
     "$store.state.showing"(value) {
-      if (this.$store.state.videoStream) {
+      if (value && this.$store.state.videoStream) {
         this.show = value;
+      } else {
+        this.show = false;
       }
     }
   },

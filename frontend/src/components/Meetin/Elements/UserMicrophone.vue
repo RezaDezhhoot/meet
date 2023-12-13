@@ -92,7 +92,7 @@ export default {
     async "$store.state.user.media.media.remote.microphone"(value){
       if (!value) {
         this.$store.dispatch('endStream',{
-          media: "audio"
+          media: ['audio']
         })
         this.status = false;
         this.socket.emit('control-local-media',{
