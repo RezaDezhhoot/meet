@@ -64,7 +64,6 @@ export default {
     height: 0,
     width: 0,
     label: null,
-    user: Object,
     responsive: false,
   },
   created() {
