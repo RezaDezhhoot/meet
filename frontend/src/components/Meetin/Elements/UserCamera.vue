@@ -37,7 +37,6 @@ export default {
     active: false,
     fill: "#dbdbdb",
     user: Object,
-    socket: Object,
     responsive: false,
     label: null,
     status: false

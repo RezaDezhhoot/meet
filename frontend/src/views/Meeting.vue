@@ -129,6 +129,8 @@ export default {
         query: {
           room
         }
+      }).then(() => {
+        location.reload();
       });
     },
     logout(){

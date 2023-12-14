@@ -24,10 +24,7 @@
 
       <div class="h-full w-full flex justify-center items-center flex-col">
         <div class="w-full text-center">
-          <span v-if="$store.state.updating" class=" text-[#b8b8b8] text-amber-500">
-            در حال تغییر منبع...
-          </span>
-          <span v-else class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
+          <span class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
           <template v-if="room.host && user.user && room.host.id === user.user.id">
 
             <div class="relative mt-[0.5rem]">
@@ -76,7 +73,6 @@ export default {
   props:{
     clients: Array,
     room: Object,
-    socket: Object,
     user: Object,
     host: null,
   },

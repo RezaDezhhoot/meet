@@ -72,7 +72,6 @@ export default {
     show: false,
     fill: "#dbdbdb",
     user: Object,
-    socket: Object,
     responsive: false,
     label: null,
     clients: Object,
@@ -81,12 +80,14 @@ export default {
   data(){
     return {
       status: false,
+      socket: Object,
       showDropdown: false,
     }
   },
   async mounted() {
     this.status = this.$props.active;
     this.wires();
+    this.socket = this.$store.state.socket;
   },
   watch:{
     async "$store.state.user.media.media.remote.microphone"(value){

@@ -14,14 +14,13 @@ export default {
   name: "Microphone",
   props:{
     client: Object,
-    socket: Object
   },
   created() {
     this.wires();
   },
   methods:{
     control(){
-      this.socket.emit('control-remote-media',{
+      this.$store.state.socket.emit('control-remote-media',{
         to: this.client.socketId,
         device: 'microphone'
       });

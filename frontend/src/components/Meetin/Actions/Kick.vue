@@ -19,7 +19,6 @@ export default {
   name: "Kick",
   props:{
     client: Object,
-    socket: Object
   },
   methods:{
     kick(){
@@ -34,7 +33,7 @@ export default {
         cancelButtonText: 'خیر'
       }).then((result) => {
         if (result.isConfirmed) {
-          this.socket.emit('kick-client',{
+          this.$store.state.socket.emit('kick-client',{
             to: this.client.socketId
           })
         }

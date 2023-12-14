@@ -56,7 +56,6 @@ export default {
     show: false,
     fill: "#dbdbdb",
     user: Object,
-    socket: Object,
     responsive: false,
     label: null,
     border: false,
@@ -68,12 +67,12 @@ export default {
   },
   methods:{
     control(){
-      this.socket.emit('hand-rising',{
+      this.$store.state.socket.emit('hand-rising',{
         to: this.user.socketId
       })
     },
     wires(){
-      this.socket.on('client-risen-hand' , async data => {
+      this.$store.state.socket.on('client-risen-hand' , async data => {
         if (data.data.status) {
           Swal.fire({
             position: 'top-start',

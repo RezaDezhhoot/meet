@@ -66,7 +66,6 @@ export default {
     label: null,
     user: Object,
     responsive: false,
-    socket: Object
   },
   created() {
     localStorage.removeItem('sound')

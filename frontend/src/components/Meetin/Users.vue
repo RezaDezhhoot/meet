@@ -36,7 +36,7 @@
                 </small>
           </span>
           <template v-if="clients[host.socketId]">
-            <UserMicrophone :peer-connections="peerConnections" width="20" height="20" fill="#616161" :socket="socket" :user="clients[host.socketId]" :show="clients[host.socketId].media.media.remote.microphone" :active="clients[host.socketId].media.media.remote.microphone && clients[host.socketId].media.media.local.microphone"></UserMicrophone>
+            <UserMicrophone width="20" height="20" fill="#616161" :user="clients[host.socketId]" :show="clients[host.socketId].media.media.remote.microphone" :active="clients[host.socketId].media.media.remote.microphone && clients[host.socketId].media.media.local.microphone"></UserMicrophone>
           </template>
 
         </li>
@@ -57,15 +57,15 @@
                   (شما)
                 </small>
               </span>
-              <UserMicrophone :peer-connections="peerConnections" width="20" height="20" fill="#616161" :socket="socket" :user="item" :show="item.media.media.remote.microphone" :active="item.media.media.remote.microphone && item.media.media.local.microphone"></UserMicrophone>
-              <UserHandRising :disabled="host && socket.id !== host.socketId && socket.id !== item.socketId" fill="#616161" width="16" height="16" :socket="socket" :user="item" :show="item.media && item.media.settings.hand_rising" :active="item.media && item.media.settings.hand_rising" ></UserHandRising>
+              <UserMicrophone width="20" height="20" fill="#616161" :user="item" :show="item.media.media.remote.microphone" :active="item.media.media.remote.microphone && item.media.media.local.microphone"></UserMicrophone>
+              <UserHandRising :disabled="host && socket.id !== host.socketId && socket.id !== item.socketId" fill="#616161" width="16" height="16" :user="item" :show="item.media && item.media.settings.hand_rising" :active="item.media && item.media.settings.hand_rising" ></UserHandRising>
 
             </div>
 
             <div class="flex" v-if="host && host.user && user.user.id === host.user.id">
-              <Kick :client="item" :socket="socket"></Kick>
-              <Microphone :client="item" :socket="socket"></Microphone>
-              <Screen :client="item" :socket="socket"></Screen>
+              <Kick :client="item"></Kick>
+              <Microphone :client="item"></Microphone>
+              <Screen :client="item"></Screen>
             </div>
           </li>
         </template>

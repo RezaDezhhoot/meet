@@ -61,7 +61,6 @@ export default {
   props:{
     clients: Array,
     room: Object,
-    socket: Object,
     user: Object,
     host: null,
   },
@@ -95,30 +94,30 @@ export default {
       chatMessages.scrollTop = chatMessages.scrollHeight;
     },
     typing(){
-      this.socket.emit('typing',{
+      this.$store.state.socket.emit('typing',{
         name: this.user.name
       });
     },
     disableTyping(){
-      this.socket.emit('no-typing');
+      this.$store.state.socket.emit('no-typing');
     },
     sendMessage(){
       if (this.message && this.message.length > 0 && this.message.length <= 100 && typeof this.message === 'string') {
-        this.socket.emit('new-message',{
+        this.$store.state.socket.emit('new-message',{
           message: this.message
         });
         this.message = null;
       }
     },
     wires() {
-      this.socket.on('get-typists',async data => {
+      this.$store.state.socket.on('get-typists',async data => {
         if (data.status === 200) {
           this.typists = data.data.typistUsers;
-          delete this.typists[this.socket.id]
+          delete this.typists[this.$store.state.socket.id]
         }
       });
 
-      this.socket.on('get-new-message',async data => {
+      this.$store.state.socket.on('get-new-message',async data => {
         if (data.status === 201) {
           this.messages.push(data.data.message);
         }

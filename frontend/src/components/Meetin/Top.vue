@@ -21,7 +21,7 @@
           <div>
             <ul>
               <li>
-                <UserHandRising :menu="true" :responsive="true" label="بلند کردن دست" :fill="(user && user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && user.media && host && user.user?.id !== host.user?.id" :active="user && user.media && user.media.settings.hand_rising" ></UserHandRising>
+                <UserHandRising :menu="true" :responsive="true" label="بلند کردن دست" :fill="(user && user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :user="user" :show="user && user.media && host && user.user?.id !== host.user?.id" :active="user && user.media && user.media.settings.hand_rising" ></UserHandRising>
               </li>
 
               <li>
@@ -29,10 +29,10 @@
               </li>
 
               <li>
-                <UserCamera :responsive="true" label="دوربین"  :fill=" (user && user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :socket="socket" :user="user" :show="user && user.media && host && user.user?.id === host.user?.id" ></UserCamera>
+                <UserCamera :responsive="true" label="دوربین"  :fill=" (user && user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :user="user" :show="user && user.media && host && user.user?.id === host.user?.id" ></UserCamera>
               </li>
               <li>
-                <UserSpeaker  width="30" height="30" :menu="true"  :responsive="true" label=" بلند گو" :user="user" :socket="socket"></UserSpeaker>
+                <UserSpeaker  width="30" height="30" :menu="true"  :responsive="true" label=" بلند گو" :user="user"></UserSpeaker>
               </li>
             </ul>
           </div>
@@ -60,10 +60,10 @@
 
     <div class="flex items-center">
       <div class="flex ml-[2rem] hidden-mobile">
-        <UserHandRising  :border="true" :fill="(user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="20" height="20" :socket="socket" :user="user" :show="user && host && user.user?.id !== host.user?.id" :active="user.media && user.media.settings?.hand_rising" ></UserHandRising>
-        <UserCamera :fill=" (user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="25" height="25" :socket="socket" :user="user" :show="user && host && user.user?.id === host.user?.id" ></UserCamera>
+        <UserHandRising  :border="true" :fill="(user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="20" height="20" :user="user" :show="user && host && user.user?.id !== host.user?.id" :active="user.media && user.media.settings?.hand_rising" ></UserHandRising>
+        <UserCamera :fill=" (user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="25" height="25" :user="user" :show="user && host && user.user?.id === host.user?.id" ></UserCamera>
         <UserMicrophone width="25" height="25" :menu="true" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
-        <UserSpeaker  width="25" height="25"  :user="user" :socket="socket"></UserSpeaker>
+        <UserSpeaker  width="25" height="25"  :user="user"></UserSpeaker>
       </div>
 
       <div>

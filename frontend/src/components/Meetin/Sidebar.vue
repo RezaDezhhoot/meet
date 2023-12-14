@@ -1,8 +1,8 @@
 <template>
   <section class="right-section w-[30%] h-full ml-[0.5rem] flex flex-col justify-between items-center">
-    <Camera :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Camera>
+    <Camera :room="room" :host="host" :user="user" :clients="clients"></Camera>
     <Users :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Users>
-    <Chat :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Chat>
+    <Chat :room="room" :host="host" :user="user" :clients="clients"></Chat>
   </section>
 
   <section class="navbar hide-pc">
