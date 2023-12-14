@@ -89,7 +89,7 @@ export const actions = {
         }
     },
     async shareStream(context , data) {
-        let constraints;
+        let constraints , media , to = [];
         if (data.hasOwnProperty('screen') && data.screen) {
             constraints = { video: true, audio: false};
             navigator.mediaDevices.getDisplayMedia(constraints).then(async function(stream){
@@ -100,19 +100,18 @@ export const actions = {
                 };
                 context.state.displayStream = stream;
                 context.state.shareScreen = true;
+                media = 'screen';
                 for (const id in context.state.peerConnections) {
                     if (context.state.peerConnections[id]['pc']) {
                         context.state.displayStream.getTracks().forEach(track => {
                             track.shareing = true;
                             context.state.peerConnections[id]['pc']['screen'].addTrack(track,stream)
                         });
-                        await context.dispatch('startStream',{
-                            from: context.state.socket.id,
-                            to: id,
-                            media: ['screen'],
-                        })
+                        to.push(id);
                     }
                 }
+            }).then(async () => {
+                await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
             }).catch(function (err) {
                 Swal.fire({
                     position: 'top-start',
@@ -132,24 +131,22 @@ export const actions = {
                 const localStream = stream;
                 context.state.videoStream = localStream;
                 context.state.showing = true;
+                media = 'camera';
+                context.state.socket.emit('control-local-media',{
+                    device: 'camera',
+                    action: true
+                });
+
                 for (const id in context.state.peerConnections) {
                     if (context.state.peerConnections[id]['pc']) {
                         context.state.videoStream.getTracks().forEach(track => {
                             context.state.peerConnections[id]['pc']['video']['local'].addTrack(track,localStream)
                         });
-
-                        context.state.socket.emit('control-local-media',{
-                            device: 'camera',
-                            action: true
-                        });
-
-                        await context.dispatch('startStream',{
-                            from: context.state.socket.id,
-                            to: id,
-                            media: ['camera'],
-                        })
+                        to.push(id);
                     }
                 }
+            }).then(async () => {
+                await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
             }).catch(function (err) {
                 context.dispatch('setDevices');
                 Swal.fire({
@@ -170,24 +167,24 @@ export const actions = {
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 const localStream = stream;
                 context.state.localStream = localStream;
+                media = 'audio';
+                context.state.user.media.media.local.microphone = true;
+                context.state.socket.emit('control-local-media',{
+                    device: 'microphone',
+                    action: true
+                });
+
                 for (const id in context.state.peerConnections) {
                     if (context.state.peerConnections[id]['pc']) {
                         context.state.localStream.getTracks().forEach(track => {
                             context.state.peerConnections[id]['pc']['audio']['local'].addTrack(track,localStream)
                         });
-                        context.state.user.media.media.local.microphone = true;
-                        context.state.socket.emit('control-local-media',{
-                            device: 'microphone',
-                            action: true
-                        });
-                        await context.dispatch('startStream',{
-                            from: context.state.socket.id,
-                            to: id,
-                            media: ['audio'],
-                        })
+                        to.push(id);
                     }
                 }
                 context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
+            }).then(async () => {
+                await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
             }).catch(function (err){
                 context.dispatch('setDevices');
                 Swal.fire({
@@ -324,7 +321,7 @@ export const actions = {
 
             await context.dispatch('startStream',{
                 from: context.state.socket.id,
-                to: data.data.from,
+                to: [data.data.from],
                 media: callbackMedia
             });
         }
@@ -347,7 +344,7 @@ export const actions = {
 
             dispatch('startStream',{
                 from: state.socket.id,
-                to: data.data.from,
+                to: [data.data.from],
                 media: data.data.media
             })
         }

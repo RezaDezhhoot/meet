@@ -193,8 +193,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
         }
     }
 
-
-    socket.to(data.to).emit("get-offer",{
+    socket.to(Object.values(data.to)).emit("get-offer",{
         data: {
             offer: data.offer,
             from: socket.id,
