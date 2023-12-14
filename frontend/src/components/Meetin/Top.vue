@@ -19,20 +19,52 @@
           </div>
 
           <div>
-            <ul>
+            <ul v-if="user.user && user.media && host">
               <li>
-                <UserHandRising :menu="true" :responsive="true" label="بلند کردن دست" :fill="(user && user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :user="user" :show="user && user.media && host && user.user?.id !== host.user?.id" :active="user && user.media && user.media.settings.hand_rising" ></UserHandRising>
+                <UserHandRising
+                    :menu="true"
+                    :responsive="true"
+                    label="بلند کردن دست"
+                    :fill="user.media.settings.hand_rising ? '#62dc82' : '#dbdbdb'"
+                    width="30"
+                    height="30"
+                    :user="user"
+                    :show="user.user.id !== host.id"
+                    :active="user.media.settings.hand_rising">
+                </UserHandRising>
               </li>
-
               <li>
-                <UserMicrophone width="30" height="30" :menu="true" :responsive="true" label=" میکروفن" :socket="socket" :user="user" :show="user && user.media && user.media.media.remote.microphone" :active="user && user.media && user.media.media.local.microphone" ></UserMicrophone>
+                <UserMicrophone
+                    :menu="true"
+                    :responsive="true"
+                    label=" میکروفن"
+                    width="30"
+                    height="30"
+                    :user="user"
+                    :show="user.media.media.remote.microphone"
+                    :active="user.media.media.remote.microphone && user.media.media.local.microphone">
+                </UserMicrophone>
               </li>
-
               <li>
-                <UserCamera :responsive="true" label="دوربین"  :fill=" (user && user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="30" height="30" :user="user" :show="user && user.media && host && user.user?.id === host.user?.id" ></UserCamera>
+                <UserCamera
+                    width="30"
+                    height="30"
+                    :responsive="true"
+                    label="دوربین"
+                    :fill=" user.media.media.local.microphone ? '#62dc82' : '#dbdbdb'"
+                    :user="user"
+                    :show="user.user.id === host.id">
+                </UserCamera>
               </li>
               <li>
-                <UserSpeaker  width="30" height="30" :menu="true"  :responsive="true" label=" بلند گو" :user="user"></UserSpeaker>
+                <UserSpeaker
+                    width="30"
+                    height="30"
+                    :menu="true"
+                    :responsive="true"
+                    label=" بلند گو"
+                    :user="user">
+                </UserSpeaker>
               </li>
             </ul>
           </div>
@@ -59,11 +91,39 @@
     </div>
 
     <div class="flex items-center">
-      <div class="flex ml-[2rem] hidden-mobile">
-        <UserHandRising  :border="true" :fill="(user.media && user.media.settings.hand_rising) ? '#62dc82' : '#dbdbdb'" width="20" height="20" :user="user" :show="user && host && user.user?.id !== host.user?.id" :active="user.media && user.media.settings?.hand_rising" ></UserHandRising>
-        <UserCamera :fill=" (user.media && user.media.media.local.microphone) ? '#62dc82' : '#dbdbdb'" width="25" height="25" :user="user" :show="user && host && user.user?.id === host.user?.id" ></UserCamera>
-        <UserMicrophone width="25" height="25" :menu="true" :socket="socket" :user="user" :show="user.media && user.media.media.remote.microphone" :active="user.media && user.media.media.local.microphone" ></UserMicrophone>
-        <UserSpeaker  width="25" height="25"  :user="user"></UserSpeaker>
+      <div class="flex ml-[2rem] hidden-mobile" v-if="user.user && user.media && host">
+        <UserHandRising
+            width="20"
+            height="20"
+            :border="true"
+            :fill="user.media.settings.hand_rising ? '#62dc82' : '#dbdbdb'"
+            :user="user"
+            :show="user.user.id !== host.id"
+            :active="user.media.settings.hand_rising">
+        </UserHandRising>
+
+        <UserCamera
+            width="25"
+            height="25"
+            :fill="user.media.media.local.microphone ? '#62dc82' : '#dbdbdb'"
+            :user="user"
+            :show="user.user.id === host.id">
+        </UserCamera>
+
+        <UserMicrophone
+            width="25"
+            height="25"
+            :menu="true"
+            :user="user"
+            :show="user.media.media.remote.microphone"
+            :active="user.media.media.remote.microphone && user.media.media.local.microphone">
+        </UserMicrophone>
+
+        <UserSpeaker
+            width="25"
+            height="25"
+            :user="user">
+        </UserSpeaker>
       </div>
 
       <div>
@@ -88,21 +148,23 @@ export default {
   components: {
     UserMicrophone , UserSpeaker , UserHandRising , UserCamera ,Recorder
   },
-  props:{
-    user: Object,
-    host: Object,
-    room: Object,
-    socket: Object,
-  },
-  async mounted(){
-    this.wires();
+  computed: {
+    room(){
+      return this.$store.state.room;
+    },
+    user() {
+      return this.$store.state.user;
+    },
+    hostClient() {
+      return this.$store.state.hostClient;
+    },
+    host() {
+      return this.$store.state.host;
+    }
   },
   methods:{
     logout(){
       this.$emit('logout');
-    },
-    wires(){
-
     }
   }
 }
