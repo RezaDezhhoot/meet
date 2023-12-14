@@ -58,11 +58,6 @@ import axios from "axios";
 
 export default {
   name: "Chat",
-  props:{
-    clients: Array,
-    room: Object,
-    host: null,
-  },
   data(){
     return {
       message: null,
