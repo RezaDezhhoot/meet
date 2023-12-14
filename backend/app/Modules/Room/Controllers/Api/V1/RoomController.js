@@ -1,4 +1,5 @@
 const Room = require('../../../Models/Room');
+const RoomResource = require('../../../Resources/Api/V1/RoomResource');
 
 module.exports.exists = async (req , res) => {
     if (req.query.room) {
@@ -18,8 +19,9 @@ module.exports.show = async (req , res) => {
     if (req.params.room) {
         const room = await Room.scope('open').findOne({where:{key: req.params.room}});
         if (room) {
+            const RoomData = await RoomResource.make(room ,[]);
             return res.status(200).json({
-                room,
+                room: RoomData,
                 message: res.__("general.success")
             });
         }

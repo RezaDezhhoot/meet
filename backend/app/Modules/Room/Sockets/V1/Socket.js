@@ -10,7 +10,6 @@ let host_socket_id = {};
 
 const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
-const RoomResource = require('../../Resources/Api/V1/RoomResource');
 const ChatResoource = require('../../Resources/Api/V1/ChatResoource');
 
 module.exports.createRoom = async (io , socket , room) => {
