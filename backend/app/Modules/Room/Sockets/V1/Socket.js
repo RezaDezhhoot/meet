@@ -117,7 +117,6 @@ module.exports.join = async (io,socket,data,room) => {
         data:{host_id: room.host_id},
         status
     });
-    socket.emit('join-stream');
 }
 
 module.exports.newMessage = async (io,socket,data,room) => {
@@ -168,24 +167,32 @@ module.exports.noTyping = async (io,socket,data,room) => {
 }
 
 module.exports.shareStream = async (io,socket,data,room) => {
+    const media = Object.values(data.media);
 
-    if (socket.id !== host_socket_id[room.key] && data.media === 'camera') {
-        return;
+    if (media.includes('camera')) {
+        if (! users[room.key][socket.id].media.media.remote.camera) {
+            delete data.offer['camera'];
+        } else {
+            users[room.key][socket.id].media.settings.camera = true;
+        }
     }
 
-    if (data.media === 'camara' && ! users[room.key][socket.id].media.media.remote.camera) {
-        return;
+    if (media.includes('audio')) {
+        if (! users[room.key][socket.id].media.media.remote.microphone) {
+            delete data.offer['audio'];
+        } else {
+            users[room.key][socket.id].media.settings.audio = true;
+        }
     }
 
-    if (data.media === 'audio' && ! users[room.key][socket.id].media.media.remote.microphone) {
-        return;
+    if (media.includes('screen')) {
+        if (! users[room.key][socket.id].media.media.remote.screen) {
+            delete data.offer['screen'];
+        } else {
+            users[room.key][socket.id].media.settings.screen = true;
+        }
     }
 
-    if (data.media === 'screen' && ! users[room.key][socket.id].media.media.remote.screen) {
-        return;
-    }
-
-    users[room.key][socket.id].media.settings[data.media] = true;
 
     socket.to(data.to).emit("get-offer",{
         data: {
@@ -240,12 +247,14 @@ module.exports.endStream = async (io,socket,data,room) => {
 }
 
 module.exports.getShared = async (io,socket,data,room) => {
-    socket.to(data.to).emit('send-shared',{
-        data:{
-            from: data.from,
-            media: data.media
-        }, status: 200
-    });
+    if (Object.values(data.media).length > 0) {
+        socket.to(data.to).emit('send-shared',{
+            data:{
+                from: data.from,
+                media: data.media
+            }, status: 200
+        });
+    }
 }
 
 module.exports.controlRemoteMedia = async (io,socket,data,room) => {
