@@ -2,6 +2,9 @@ export const mutations = {
     setLocalStream(state , stream){
         state.localStream = stream;
     },
+    setRoom(state , room) {
+        state.room = room;
+    },
     setUser(state,user){
         state.user = user;
     },

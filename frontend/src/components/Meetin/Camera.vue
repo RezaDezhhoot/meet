@@ -61,7 +61,7 @@
         </div>
       </div>
     </div>
-    <video id="video-player" class="h-full video-player rounded-b-[0.5rem] lg:rounded-[0.5rem] w-full" :class="{ 'hidden': hiddenVideo ,'self-media': user.user && host && user.user?.id === host.user?.id }" muted  ref="localVideo" autoplay>
+    <video id="video-player" class="h-full video-player rounded-b-[0.5rem] lg:rounded-[0.5rem] w-full" :class="{ 'hidden': hiddenVideo }" muted  ref="localVideo" autoplay>
     </video>
   </div>
 </template>
@@ -70,20 +70,21 @@
 
 export default {
   name: "Camera",
-  props:{
-    clients: Array,
-    room: Object,
-    user: Object,
-    host: null,
-  },
   data(){
     return {
       hiddenVideo: true,
       localStream: null,
-      peerConnections: Object,
       showDropdown: false,
       selectedOption: null,
     }
+  },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    room(){
+      return this.$store.state.room;
+    },
   },
   created() {
     this.wires();

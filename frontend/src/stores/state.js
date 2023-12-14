@@ -4,11 +4,8 @@ export const state = {
     displayStream: null,
     remoteStreams: Array,
 
-    host: {
-        user: {
-            id: false
-        }
-    },
+    room: Object,
+    host: Object,
 
     sound: false,
     user: {

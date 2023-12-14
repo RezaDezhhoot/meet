@@ -39,6 +39,7 @@ export default {
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
       this.room = res.data.room;
       document.title = this.room.title;
+      this.$store.commit('setRoom',this.room);
     }).catch(err => {
       this.redirectClientIfHappenedError(this.$route.params.key,404);
     });
