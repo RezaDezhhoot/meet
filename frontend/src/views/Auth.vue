@@ -5,7 +5,11 @@
       <div class="row justify-content-end h-100">
         <div class="col-xl-4 col-md-6 mx-md-auto mx-lg-0 col-12 d-flex align-items-center justify-content-center">
           <div class="w-100">
-            <h1 class="title mx-auto text-center text-danger mb-4 "><i class="fa fa-graduation-cap fa-xl pl-2"></i>{{app_name}}</h1>
+            <h2 class="title mx-auto text-right text-danger mb-4 ">
+              <strong>
+                {{app_name}}
+              </strong>
+            </h2>
             <div class="bg-white text-right ml-lg-5 p-4 shadow-sm rounded">
               <div class="form-navbar mb-2 d-flex align-items-center justify-content-between">
                 <div><small class="text-muted">ورود به صورت:</small></div>
