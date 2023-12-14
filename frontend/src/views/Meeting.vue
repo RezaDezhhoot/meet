@@ -10,7 +10,8 @@ import Top from "../components/Meetin/Top.vue";
 import Sidebar from "../components/Meetin/Sidebar.vue";
 import Content from "../components/Meetin/Content.vue";
 import io from 'socket.io-client';
-import { inject } from 'vue';
+import {inject} from 'vue';
+import axios from 'axios'
 
 export default {
   components: {
@@ -34,10 +35,18 @@ export default {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
     this.$store.commit('setLogo' , this.logo);
-    let conencted = false;
+
+    axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
+      this.room = res.data.room;
+      document.title = this.room.title;
+    }).catch(err => {
+      this.redirectClientIfHappenedError(this.$route.params.key,404);
+    });
+
+    let connected = false;
     do {
-      conencted = await this.connect()
-    } while (! conencted);
+      connected = await this.connect()
+    } while (! connected);
 
 
     await this.wires();
@@ -114,10 +123,10 @@ export default {
     redirectClientIfHappenedError(room = null , code = null){
       this.$router.push({
         name: "error",
-        params:{
+        params: {
           code
         },
-        query:{
+        query: {
           room
         }
       });

@@ -27,15 +27,6 @@ module.exports.createRoom = async (io , socket , room) => {
     }
 }
 
-module.exports.sendRoom = async (io,socket,data,room) => {
-    socket.emit('get-room',{
-        data:{
-            room: await RoomResource.make(room),
-        },
-        status: 200
-    });
-}
-
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
 
@@ -48,7 +39,6 @@ module.exports.join = async (io,socket,data,room) => {
         return;
     }
 
-    await this.sendRoom(io,socket,data,room);
     switch (data.type) {
         case LOGIN:
             const token = data.token;
