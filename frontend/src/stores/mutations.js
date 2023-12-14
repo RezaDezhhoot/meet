@@ -5,6 +5,9 @@ export const mutations = {
     setRoom(state , room) {
         state.room = room;
     },
+    setClients(state , clients) {
+        state.clients = clients;
+    },
     setUser(state,user){
         state.user = user;
     },

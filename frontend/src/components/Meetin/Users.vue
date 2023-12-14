@@ -90,15 +90,23 @@ export default {
     this.wires();
   },
   props:{
-    clients: Array,
-    room: Object,
-    socket: Object,
-    user: Object,
     host: null,
   },
-  data(){
-    return {
-      peerConnections: Object
+  computed: {
+    room(){
+      return this.$store.state.room;
+    },
+    user() {
+      return this.$store.state.user;
+    },
+    socket() {
+      return this.$store.state.socket;
+    },
+    clients() {
+      return this.$store.state.clients;
+    },
+    host() {
+      return this.$store.state.host;
     }
   },
   methods:{

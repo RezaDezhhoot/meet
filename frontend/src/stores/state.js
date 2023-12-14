@@ -7,6 +7,8 @@ export const state = {
     room: Object,
     host: Object,
 
+    clients: Array,
+
     sound: false,
     user: {
         media:{

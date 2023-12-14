@@ -1,7 +1,7 @@
 <template>
   <section class="right-section w-[30%] h-full ml-[0.5rem] flex flex-col justify-between items-center">
     <Camera></Camera>
-    <Users :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></Users>
+    <Users></Users>
     <Chat></Chat>
   </section>
 
@@ -30,15 +30,6 @@ export default {
   name: "Sidebar",
   components:{
     Audio , Chat , Camera , Users
-  },
-  props:{
-    clients: Array,
-    room: Object,
-    socket: Object,
-    user: Object,
-    host: null,
-  },
-  methods:{
   }
 }
 </script>

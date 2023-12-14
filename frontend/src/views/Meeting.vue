@@ -1,7 +1,7 @@
 <template>
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main">
-    <sidebar :room="room" :host="host" :user="user" :clients="clients" ref="sidebar" :socket="socket"></sidebar>
+    <sidebar></sidebar>
     <content></content>
   </main>
 </template>
@@ -74,18 +74,12 @@ export default {
       });
     },
     async wires() {
-      this.socket.on('get-room',async data => {
-        if (data.status === 200) {
-          this.room = data.data.room;
-          document.title = this.room.title;
-        }
-      });
-
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
           this.clients = data.data.users;
           this.user = data.data.users[this.socket.id];
           this.$store.commit('setUser',this.user);
+          this.$store.commit('setClients',this.clients);
         }
       });
 
@@ -100,7 +94,6 @@ export default {
         if (data.data.code !== 404) {
           this.clearCookie();
         }
-
         this.redirectClientIfHappenedError(this.$route.params.key , data.data.code);
       });
       this.socket.on('create-pc' , async data => {
