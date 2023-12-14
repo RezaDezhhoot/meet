@@ -57,5 +57,8 @@ export const mutations = {
     },
     setHost(state , value = null) {
         state.host = value;
+    },
+    setHostClient(state , value = null) {
+        state.hostClient = value;
     }
 }

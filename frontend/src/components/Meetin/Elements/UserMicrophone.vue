@@ -74,7 +74,6 @@ export default {
     user: Object,
     responsive: false,
     label: null,
-    clients: Object,
     menu: false
   },
   data(){

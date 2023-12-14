@@ -24,6 +24,7 @@ export default {
       user: Object,
       room: Object,
       host: null,
+      hostClient: null,
       clients:[],
       socket: null,
       baseUrl: inject('BaseUrl'),
@@ -40,6 +41,7 @@ export default {
       this.room = res.data.room;
       document.title = this.room.title;
       this.$store.commit('setRoom',this.room);
+      this.$store.commit('setHost',this.room.host);
     }).catch(err => {
       this.redirectClientIfHappenedError(this.$route.params.key,404);
     });
@@ -85,8 +87,8 @@ export default {
 
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
-          this.host = data.data.host;
-          this.$store.commit('setHost',this.host);
+          this.hostClient = data.data.host;
+          this.$store.commit('setHostClient',this.hostClient);
         }
       });
 

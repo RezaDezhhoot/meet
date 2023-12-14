@@ -21,7 +21,7 @@
 
     <div class="box-sidbar-users">
       <ul>
-        <li class="host-style" v-if="host && host.user">
+        <li class="host-style" v-if="hostClient && user.user">
           <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <g id="#000000ff">
               <path fill="#df1111" opacity="1.00" d=" M 46.44 8.64 C 56.42 6.70 67.10 13.24 69.88 23.01 C 72.43 30.88 69.66 40.09 63.21 45.26 C 56.96 50.52 47.53 51.49 40.34 47.61 C 33.23 43.97 28.65 35.98 29.21 28.00 C 29.55 18.57 37.14 10.10 46.44 8.64 Z" />
@@ -30,18 +30,18 @@
           </svg>
 
           <span>
-            {{ host.name }}
-            <small v-if="host.socketId === socket.id">
+            {{ hostClient.name }}
+            <small v-if="hostClient.user.id === user.user.id">
                   (شما)
                 </small>
           </span>
-          <template v-if="clients[host.socketId]">
-            <UserMicrophone width="20" height="20" fill="#616161" :user="clients[host.socketId]" :show="clients[host.socketId].media.media.remote.microphone" :active="clients[host.socketId].media.media.remote.microphone && clients[host.socketId].media.media.local.microphone"></UserMicrophone>
-          </template>
+          <UserMicrophone width="20" height="20" fill="#616161" :user="user" :show="user.media.media.remote.microphone" :active="user.media.media.remote.microphone && user.media.media.local.microphone"></UserMicrophone>
 
         </li>
-        <template v-for="(item,key) in clients">
-          <li v-if="item.user?.id !== room.host.id">
+
+
+        <template v-if="user.user" v-for="(item,key) in clients">
+          <li v-if="item.user.id !== room.host.id">
 
             <div class="flex items-center">
               <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -53,16 +53,17 @@
 
               <span>
                 {{ item.name }}
-                <small v-if="item.socketId === socket.id">
+                <small v-if="item.user.id === user.user.id">
                   (شما)
                 </small>
               </span>
+
               <UserMicrophone width="20" height="20" fill="#616161" :user="item" :show="item.media.media.remote.microphone" :active="item.media.media.remote.microphone && item.media.media.local.microphone"></UserMicrophone>
-              <UserHandRising :disabled="host && socket.id !== host.socketId && socket.id !== item.socketId" fill="#616161" width="16" height="16" :user="item" :show="item.media && item.media.settings.hand_rising" :active="item.media && item.media.settings.hand_rising" ></UserHandRising>
+              <UserHandRising :disabled="(hostClient.user && hostClient.user.id !== user.user.id) && item.user.id !== user.user.id" fill="#616161" width="16" height="16" :user="item" :show="item.media.settings.hand_rising" :active="item.media.settings.hand_rising" ></UserHandRising>
 
             </div>
 
-            <div class="flex" v-if="host && host.user && user.user.id === host.user.id">
+            <div class="flex" v-if="(hostClient.user && hostClient.user.id === user.user.id)">
               <Kick :client="item"></Kick>
               <Microphone :client="item"></Microphone>
               <Screen :client="item"></Screen>
@@ -89,9 +90,6 @@ export default {
   mounted() {
     this.wires();
   },
-  props:{
-    host: null,
-  },
   computed: {
     room(){
       return this.$store.state.room;
@@ -105,9 +103,9 @@ export default {
     clients() {
       return this.$store.state.clients;
     },
-    host() {
-      return this.$store.state.host;
-    }
+    hostClient() {
+      return this.$store.state.hostClient;
+    },
   },
   methods:{
     wires(){}

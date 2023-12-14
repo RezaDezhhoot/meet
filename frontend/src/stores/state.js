@@ -6,6 +6,7 @@ export const state = {
 
     room: Object,
     host: Object,
+    hostClient: Object,
 
     clients: Array,
 
