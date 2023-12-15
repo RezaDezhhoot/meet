@@ -23,7 +23,7 @@ class StoreUser extends BaseComponent
             $this->name = $this->user->name;
             $this->phone = $this->user->phone;
             $this->email = $this->user->email;
-            $this->status = $this->user->status->value;
+            $this->status = $this->user->status->value ?? null;
             $this->userRole = $this->user->roles()->pluck('name','id')->toArray();
         } elseif ($this->mode == self::CREATE_MODE)
             $this->header = 'کاربر جدید';

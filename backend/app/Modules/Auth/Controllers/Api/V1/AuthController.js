@@ -65,7 +65,13 @@ exports.login = (req , res ,next) => {
 
                 req.login(user, { session: false },
                     async(error) => {
-                        if (error) return res.status(422).json({message: res.__('general.error') });
+                        if (error) {
+                            errorArr.push({
+                                filed: 'phone',
+                                message:  res.__('general.error')
+                            });
+                            return res.status(422).json({data: errorArr,message: res.__('general.error') });
+                        }
                         return res.status(200).json({data:UserResource.make(user,utils.makeToken(user),['email','phone','status'],LOGIN),message:res.__('general.success')});
                     }
                 );
@@ -78,6 +84,7 @@ exports.login = (req , res ,next) => {
 }
 
 exports.guest = async (req , res , next) => {
+    const errorArr = [];
     try {
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
@@ -90,8 +97,13 @@ exports.guest = async (req , res , next) => {
             }});
 
         if (check){
+            errorArr.push({
+                filed: 'name',
+                message: res.__("general.access_denied")
+            });
             return res.status(403).json({
-                message: res.__("general.access_dined")
+                data: errorArr,
+                message: res.__("general.access_denied")
             });
         }
 

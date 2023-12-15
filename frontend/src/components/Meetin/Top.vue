@@ -14,7 +14,7 @@
         <div class="show-menu">
           <div class="flex justify-center mt-[1rem]">
             <span class="text-[1.9rem] text-black font-black">
-              <img :src="$store.state.logo" alt="لوگو">
+              <img style="max-width: 3rem" :src="$store.state.logo" alt="لوگو">
             </span>
           </div>
 
@@ -128,7 +128,7 @@
 
       <div>
         <span class="text-[1.9rem] text-white font-black">
-          <img :src="$store.state.logo" alt="لوگو">
+          <img style="max-width: 3rem" :src="$store.state.logo" alt="لوگو">
         </span>
       </div>
     </div>

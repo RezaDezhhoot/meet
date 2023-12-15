@@ -69,7 +69,9 @@ class StoreRoom extends BaseComponent
     public function searchHost()
     {
         $this->data['users'] = User::query()
-            ->search($this->user)
+            ->where('name','like','%'.$this->user.'%')
+            ->orWhere('phone','like','%'.$this->user.'%')
+            ->orWhere('email','like','%'.$this->user.'%')
             ->take(10)
             ->pluck('name','id')
             ->toArray();

@@ -31,7 +31,7 @@
               <div class="flex justify-center items-center" v-if="$store.state.videoInputs.length > 0 && ! $store.state.updating">
                 <button  @click="toggleDropdown" class="dropdown-btn border-x-2 border-y-2 border-[#d1d1d1] ">&#9662;</button>
                 <div v-show="showDropdown" class="dropdown-content">
-                  <a v-for="(video , key) in $store.state.videoInputs " @click="selectOption(video.id)">
+                  <a v-for="(video , key) in $store.state.videoInputs" v-on:click="selectOption(video.id)">
                     <small>
                       {{ video.id === $store.state.selectedVideoDevice ? '✔️' : '' }} {{video.label}}
                     </small>
@@ -86,9 +86,6 @@ export default {
       return this.$store.state.room;
     },
   },
-  created() {
-    this.wires();
-  },
   watch:{
     "$store.state.hiddenVideo"(value) {
       this.hiddenVideo = value;
@@ -112,7 +109,6 @@ export default {
         });
       }
     },
-    wires(){},
     toggleDropdown() {
       this.showDropdown = !this.showDropdown;
     },
