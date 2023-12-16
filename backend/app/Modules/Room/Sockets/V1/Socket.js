@@ -24,6 +24,10 @@ module.exports.createRoom = async (io , socket , room) => {
     if (! host[room.key]) {
         host[room.key] = {};
     }
+
+    if (! host_socket_id[room.key]) {
+        host_socket_id[room.key] = {};
+    }
 }
 
 module.exports.join = async (io,socket,data,room) => {
@@ -55,19 +59,20 @@ module.exports.join = async (io,socket,data,room) => {
                     };
 
                     if (user.id === room.host_id) {
-                        host[room.key] = users[room.key][socket.id];
-                        host_socket_id[room.key] = socket.id;
+                        host[room.key][socket.id] = users[room.key][socket.id];
+                        host_socket_id[room.key][socket.id] = socket.id;
 
                         io.emit('host-joined',{
                             data:{
                                 host: host[room.key]
-                            },status
+                            }, status
                         });
+
                     } else if (host[room.key]) {
                         socket.emit('host-joined',{
                             data:{
                                 host: host[room.key]
-                            },status
+                            }, status
                         });
                     }
                 }
@@ -275,9 +280,10 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
         users[room.key][socket.id].media.media.local[data.device] = status;
 
         if (user.user.id === room.host_id) {
+            host[room.key][socket.id] = user;
             io.emit('host-joined',{
                 data:{
-                    host: user
+                    host: host[room.key]
                 },status: 200
             });
         }
@@ -296,8 +302,10 @@ module.exports.handRising = async (io,socket,data,room) => {
         const user = users[room.key][data.to];
         users[room.key][data.to].media.settings.hand_rising = ! user.media.settings.hand_rising;
 
-        if (socket.id !== host_socket_id[room.key] && host[room.key]) {
-            socket.to(host_socket_id[room.key]).emit('client-risen-hand',{
+        if (users[room.key][socket.id].user.id !== room.host_id && Object.entries(host[room.key]).length > 0) {
+            socket.to(
+                Object.values(host_socket_id[room.key])
+            ).emit('client-risen-hand',{
                 data:{
                     sender: user.name,
                     status: users[room.key][data.to].media.settings.hand_rising
@@ -316,12 +324,13 @@ module.exports.handRising = async (io,socket,data,room) => {
 
 module.exports.disconnect = async (io,socket,data,room) => {
     if (users[room.key][socket.id]) {
-        if (users[room.key][socket.id] === host[room.key]) {
-            delete host[room.key];
-            delete host_socket_id[room.key];
+        if (users[room.key][socket.id].user.id === room.host_id) {
+            delete host[room.key][socket.id];
+            delete host_socket_id[room.key][socket.id];
+
             io.emit('host-joined',{
                 data:{
-                    host: null
+                    host: host[room.key]
                 },status: 200
             });
         }
