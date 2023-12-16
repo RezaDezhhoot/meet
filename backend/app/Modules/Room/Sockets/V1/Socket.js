@@ -75,13 +75,15 @@ module.exports.join = async (io,socket,data,room) => {
             break;
         case GUEST:
             status = 200;
+            const ip = socket.handshake.address;
             const user= {
                 name: data.name,
+                id: ip
             }
             users[room.key][socket.id] = {
                 socketId: socket.id,
                 name: user.name,
-                ip: socket.handshake.address,
+                ip,
                 user: UserResource.make(user,null,['id','email','phone','status']),
                 media: MediaResource.make(user,room,data.type),
             };
