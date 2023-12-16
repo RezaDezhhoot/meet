@@ -53,6 +53,9 @@ export default {
   methods:{
     control(){
       this.$store.commit('controlCamera',false);
+      this.$store.dispatch('endStream',{
+        media: ['camera']
+      })
     }
   }
 }
