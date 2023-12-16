@@ -24,7 +24,7 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => 'admin@gmail.com',
-            'phone' => fake()->phoneNumber(),
+            'phone' => '00123456789',
             'password' => '123456', // password
             'remember_token' => Str::random(10),
         ];

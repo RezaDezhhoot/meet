@@ -24,5 +24,6 @@ bash deployer.sh
 4. [x] Frontend service will available on **http://server-ip:4173**
 ---
 ### **Default access:**
-* Admin username: **admin@gmail.com**
+* Admin phone: **00123456789**
+* Admin email: **admin@gmail.com**
 * Admin password: **123456**
