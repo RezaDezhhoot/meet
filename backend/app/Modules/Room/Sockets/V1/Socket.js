@@ -262,14 +262,23 @@ module.exports.controlRemoteMedia = async (io,socket,data,room) => {
 module.exports.controlLocalMedia = async (io,socket,data,room) => {
     const user = users[room.key][socket.id];
     let status;
-    if (data.hasOwnProperty('action')) {
-        status = data.action;
-    } else {
-        status = ! user.media.media.local[data.device];
-    }
 
     if (user) {
+        if (data.hasOwnProperty('action')) {
+            status = data.action;
+        } else {
+            status = ! user.media.media.local[data.device];
+        }
+
         users[room.key][socket.id].media.media.local[data.device] = status;
+
+        if (user.user.id === room.host_id) {
+            io.emit('host-joined',{
+                data:{
+                    host: user
+                },status: 200
+            });
+        }
 
         io.emit('get-users',{
             data:{

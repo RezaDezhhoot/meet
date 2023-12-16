@@ -157,7 +157,7 @@ export const actions = {
                 });
                 Swal.fire({
                     position: 'top-start',
-                    text: "دوربینی یافت نشد!",
+                    text: "عدم دسترسی به دوربین!",
                     icon: 'warning',
                     showConfirmButton: false,
                     backdrop: false,
@@ -197,9 +197,11 @@ export const actions = {
                 context.dispatch('endStream',{
                     media: ['audio']
                 });
+                let text = 'عدم دسترسی به میکروفون!';
+
                 Swal.fire({
                     position: 'top-start',
-                    text: "میکروفونی یافت نشد!",
+                    text,
                     icon: 'warning',
                     showConfirmButton: false,
                     backdrop: false,
@@ -456,7 +458,6 @@ export const actions = {
                     state.videoInputs = [];
                     state.speakers = [];
                     state.audioInputs = [];
-
                     devices.forEach((device,key) => {
 
                         if (device.kind === 'videoinput') {
@@ -464,7 +465,7 @@ export const actions = {
                                 state.selectedVideoDevice = device.deviceId;
                             }
                             state.videoInputs.push({
-                                label: device.label || 'unknown camera',
+                                label: device.label || 'Unknown camera',
                                 id: device.deviceId
                             });
                         } else if (device.kind === 'audioinput') {
@@ -472,12 +473,12 @@ export const actions = {
                                 state.selectedAudioDevice = device.deviceId;
                             }
                             state.audioInputs.push({
-                                label: device.label || 'unknown microphone',
+                                label: device.label || 'Unknown microphone',
                                 id: device.deviceId
                             });
                         } else if (device.kind === 'audiooutput') {
                             state.speakers.push({
-                                label: device.label || 'unknown speaker',
+                                label: device.label || 'Unknown speaker',
                                 id: device.deviceId
                             });
                         }

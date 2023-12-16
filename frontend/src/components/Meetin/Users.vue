@@ -36,9 +36,9 @@
               width="20"
               height="20"
               fill="#616161"
-              :user="user"
-              :show="user.media.media.remote.microphone"
-              :active="user.media.media.remote.microphone && user.media.media.local.microphone">
+              :user="hostClient"
+              :show="hostClient.media.media.remote.microphone"
+              :active="hostClient.media.media.remote.microphone && hostClient.media.media.local.microphone">
           </UserMicrophone>
         </li>
 
