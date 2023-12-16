@@ -119,7 +119,6 @@
 
     <div :class="{ hidden:  !$store.state.shareScreen}" class="h-[85%]">
       <video class="h-full rounded my-[1rem] w-full" muted autoplay ref="screenPlayer" id="screen-player"></video>
-      <hr>
       <div v-if="$store.state.displayStream" class="video-controller">
         <ul>
           <li v-on:click="end">
