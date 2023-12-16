@@ -1,12 +1,14 @@
 import Swal from "sweetalert2";
 export const actions = {
     fillRTCs({state , dispatch} , clients){
+        // Creating RTC connection for each user to local
         for (const index in clients) {
             if (state.user.user && index !== state.socket.id) {
                 if ( ! state.peerConnections[index] || ! state.peerConnections[index]['pc'] ) {
                     state.peerConnections[index] = {
                         user_id: clients[index].user.id,
                         pc: {
+                            // Audio RTC peer connection
                             audio:{
                                 local: new RTCPeerConnection({
                                     iceServers: [
@@ -19,6 +21,7 @@ export const actions = {
                                     ],
                                 }),
                             },
+                            // Video RTC peer connection
                             video:{
                                 local: new RTCPeerConnection({
                                     iceServers: [
@@ -31,6 +34,7 @@ export const actions = {
                                     ],
                                 }),
                             },
+                            // Screen RTC peer connection
                             screen: new RTCPeerConnection({
                                 iceServers: [
                                     { urls: 'stun:stun.l.google.com:19302' },
@@ -38,6 +42,7 @@ export const actions = {
                             })
                         }
                     };
+                    // Set remote video stream
                     state.peerConnections[index]['pc']['video']['remote'].ontrack = async function (stream) {
                         if (stream.track.kind === 'video') {
                             let video = document.getElementById('video-player');
@@ -45,11 +50,11 @@ export const actions = {
                             video.load();
                         }
                     };
+                    // Set remote audio stream
                     state.peerConnections[index]['pc']['audio']['remote'].ontrack = async function (stream) {
                         if(stream.track.kind === 'audio') {
                             const audio = document.createElement('audio');
                             audio.autoplay = 1;
-                            audio.controls = 1;
                             audio.classList.add('hidden');
                             audio.id = stream.streams[0].id;
                             audio.muted = ! (localStorage.getItem('sound') == 'true');
@@ -58,11 +63,12 @@ export const actions = {
                             document.getElementById('main').appendChild(audio);
                         }
                     };
+                    // Set remote screen stream
                     state.peerConnections[index]['pc']['screen'].ontrack = async function (stream) {
                         document.getElementById('screen-player').srcObject = stream.streams[0];
                     };
                 }
-
+                // If the user has started a stream, it joins the old stream
                 dispatch('joinStream',clients[index]);
             }
         }
