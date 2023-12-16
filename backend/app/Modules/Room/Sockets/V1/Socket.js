@@ -205,7 +205,7 @@ module.exports.makeAnswer = async (io,socket,data,room) => {
 }
 
 module.exports.endStream = async (io,socket,data,room) => {
-    if (users[room.key] && users[room.key][socket.id].media) {
+    if (users[room.key] && users[room.key][socket.id]) {
         let camera = false , screen = false , audio = false;
         if (data.media.includes('camera')) {
             users[room.key][socket.id].media.settings.camera = false;
@@ -248,7 +248,7 @@ module.exports.getShared = async (io,socket,data,room) => {
 }
 
 module.exports.controlRemoteMedia = async (io,socket,data,room) => {
-    if (host[room.key] && socket.id === host_socket_id[room.key]) {
+    if (users[room.key][socket.id].user.id === room.host_id) {
         const user = users[room.key][data.to];
         users[room.key][data.to].media.media.remote[data.device] = !user.media.media.remote[data.device];
 
@@ -292,7 +292,7 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
 }
 
 module.exports.handRising = async (io,socket,data,room) => {
-    if (socket.id === host_socket_id[room.key] || data.to === socket.id) {
+    if (users[room.key][socket.id].user.id === room.host_id || data.to === socket.id) {
         const user = users[room.key][data.to];
         users[room.key][data.to].media.settings.hand_rising = ! user.media.settings.hand_rising;
 
@@ -349,31 +349,35 @@ module.exports.disconnect = async (io,socket,data,room) => {
 }
 
 module.exports.kickClient = async (io,socket,data,room) => {
-    if (host[room.key] && socket.id === host_socket_id[room.key] && host_socket_id[room.key] !== data.to) {
-        const user = users[room.key][data.to];
+    if (data.hasOwnProperty('to')) {
+        const user = users[room.key][socket.id];
+        const targetUser = users[room.key][data.to];
+        if (user.user.id === room.host_id && targetUser.user.id !== room.host_id) {
+            const user = users[room.key][data.to];
 
-        await Penalty.create({
-            kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
-            room_id: room.id,
-            user_id: user?.user?.id,
-            user_ip: user.ip,
-        });
+            await Penalty.create({
+                kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
+                room_id: room.id,
+                user_id: user?.user?.id,
+                user_ip: user.ip,
+            });
 
-        delete users[room.key][data.to];
-        delete typistUsers[room.key][data.to];
+            delete users[room.key][data.to];
+            delete typistUsers[room.key][data.to];
 
 
-        socket.to(data.to).emit('error',{
-            data:{
-                code: 403
-            }
-        });
+            socket.to(data.to).emit('error',{
+                data:{
+                    code: 403
+                }
+            });
 
-        io.emit('get-users',{
-            data:{
-                users: users[room.key]
-            },
-            status: 200
-        });
+            io.emit('get-users',{
+                data:{
+                    users: users[room.key]
+                },
+                status: 200
+            });
+        }
     }
 }
