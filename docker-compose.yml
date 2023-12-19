@@ -82,12 +82,15 @@ services:
     networks:
       - main
   rabbitmq:
+    image: rabbitmq:3.8-management-alpine
     container_name: rabbitmq
-    image: rabbitmq:3.12-management
     restart: on-failure
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     volumes:
-      - ./shared/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
-      - /shared/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./shared/rabbitmq/data:/var/lib/rabbitmq/
+      - ./shared/rabbitmq/log:/var/log/rabbitmq
     ports:
       - '5672:5672'
       - '15672:15672'
