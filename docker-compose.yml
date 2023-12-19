@@ -81,6 +81,18 @@ services:
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - main
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.12-management
+    restart: on-failure
+    volumes:
+      - ./shared/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
+      - /shared/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - main
 networks:
   main:
     driver: bridge

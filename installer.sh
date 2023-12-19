@@ -2,7 +2,7 @@
 
 SLEEP_VAL=3
 
-if docker info -ne 0 >/dev/null 2>&1; then
+if ! docker info >/dev/null 2>&1; then
   echo -e "${CYAN}Docker is not running."
 
   exit 1
@@ -12,9 +12,12 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
-read -r -p 'Database config? (no/yes)? no ' CONFIG_DATABASE
+function installer() {
+  echo "$1" "installer"
+  bash  ./scripts/"$1"/installer.sh
+}
 
-read -r -p 'Install specified service? (admin,backend,frontend,shared): ' SPECIFIED_SERVICE
+read -r -p 'Database config? (no/yes)? no ' CONFIG_DATABASE
 
 if [[ $CONFIG_DATABASE == "yes" || $CONFIG_DATABASE == "YES" ]];then
   read -r -p 'ENTER DATABASE USER: ' DATABASE_USER
@@ -28,29 +31,27 @@ fi
 
 echo -e "\n"
 
-if [ -z "$SPECIFIED_SERVICE" ]; then
-  echo "Shared Installer"
-  bash ./scripts/shared/installer.sh
-
-  sleep $SLEEP_VAL
-
-  echo "Admin installer"
-  bash  ./scripts/admin/installer.sh
-
-  sleep $SLEEP_VAL
-
-  echo "Backend Installer"
-  bash ./scripts/backend/installer.sh
-
-  sleep $SLEEP_VAL
-
-  echo "Frontend Installer"
-  bash ./scripts/client/installer.sh
-else
-  echo "$SPECIFIED_SERVICE" "installer"
-  bash ./scripts/"$SPECIFIED_SERVICE"/installer.sh
-fi
-
+select service in shared admin backend frontend all; do
+  case $REPLY in
+    1)
+      installer $service
+    ;;
+    2)
+      installer $service
+    ;;
+    3)
+      installer $service
+    ;;
+    4)
+      installer $service
+    ;;
+    5)
+      installer "shared"
+      installer "admin"
+      installer "backend"
+      installer "frontend"
+  esac
+done
 
 
 
