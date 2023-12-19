@@ -17,7 +17,7 @@ function installer() {
   bash  ./scripts/"$1"/installer.sh
 }
 
-read -r -p 'Database config? (no/yes)? no ' CONFIG_DATABASE
+read -r -p 'Database config?(no/yes) no ' CONFIG_DATABASE
 
 if [[ $CONFIG_DATABASE == "yes" || $CONFIG_DATABASE == "YES" ]];then
   read -r -p 'ENTER DATABASE USER: ' DATABASE_USER
@@ -30,6 +30,8 @@ if [[ $CONFIG_DATABASE == "yes" || $CONFIG_DATABASE == "YES" ]];then
 fi
 
 echo -e "\n"
+
+echo "Select service to install:"
 
 select service in shared admin backend frontend all; do
   case $REPLY in
@@ -50,6 +52,11 @@ select service in shared admin backend frontend all; do
       installer "admin"
       installer "backend"
       installer "frontend"
+    ;;
+    *)
+      echo -e "\n"
+      echo "Invalid service"
+      exit 1
   esac
 done
 
