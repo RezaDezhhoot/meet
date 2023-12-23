@@ -12,12 +12,7 @@ fi
 
 function installer() {
   echo "$1" "installer"
-
-  if [[ $1 == "rabbitmq" ]]; then
-      bash  ./scripts/shared/rabbit_installer.sh
-  else
-      bash  ./scripts/"$1"/installer.sh
-  fi
+  bash  ./scripts/"$1"/installer.sh
 }
 
 read -r -p 'Database config?[no/yes] no ' CONFIG_DATABASE
@@ -56,7 +51,7 @@ select service in shared admin backend frontend all; do
             installer $shared_service
           ;;
           3)
-            installer mysql
+            installer shared
             installer rabbitmq
           ;;
           *)
