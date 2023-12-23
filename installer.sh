@@ -22,17 +22,6 @@ function installer() {
 
 read -r -p 'Database config?[no/yes] no ' CONFIG_DATABASE
 
-read -r -p 'RabbitMQ config?[no/yes] no ' CONFIG_RABBITMQ
-
-if [[ CONFIG_RABBITMQ == "yes" || CONFIG_RABBITMQ == "YES" ]];then
-  read -r -p 'ENTER RABBITMQ USER: ' RABBITMQ_USER
-  read -r -sp 'ENTER RABBITMQ PASSWORD: ' RABBITMQ_PASSWORD
-
-  sed -i "s/^RABBITMQ_USER=.*/RABBITMQ_USER=$RABBITMQ_USER/" "./.env"
-  sed -i "s/^RABBITMQ_PASSWORD=.*/RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD/" "./.env"
-fi
-
-
 if [[ $CONFIG_DATABASE == "yes" || $CONFIG_DATABASE == "YES" ]];then
   read -r -p 'ENTER DATABASE USER: ' DATABASE_USER
   read -r -p 'ENTER DATABASE DB: ' DATABASE_DB
@@ -41,6 +30,17 @@ if [[ $CONFIG_DATABASE == "yes" || $CONFIG_DATABASE == "YES" ]];then
   sed -i "s/^DATABASE_USER=.*/DATABASE_USER=$DATABASE_USER/" "./.env"
   sed -i "s/^DATABASE_DB=.*/DATABASE_DB=$DATABASE_DB/" "./.env"
   sed -i "s/^DATABASE_PASSWORD=.*/DATABASE_PASSWORD=$DATABASE_PASSWORD/" "./.env"
+fi
+
+
+read -r -p 'RabbitMQ config?[no/yes] no ' CONFIG_RABBITMQ
+
+if [[ $CONFIG_RABBITMQ == "yes" || $CONFIG_RABBITMQ == "YES" ]];then
+  read -r -p 'ENTER RABBITMQ USER: ' RABBITMQ_USER
+  read -r -sp 'ENTER RABBITMQ PASSWORD: ' RABBITMQ_PASSWORD
+
+  sed -i "s/^RABBITMQ_USER=.*/RABBITMQ_USER=$RABBITMQ_USER/" "./.env"
+  sed -i "s/^RABBITMQ_PASSWORD=.*/RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD/" "./.env"
 fi
 
 echo -e "\n"
