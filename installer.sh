@@ -22,9 +22,9 @@ function installer() {
   fi
 }
 
-read -r -p 'Database config?(no/yes) no ' CONFIG_DATABASE
+read -r -p 'Database config?[no/yes] no ' CONFIG_DATABASE
 
-read -r -p 'RabbitMQ config?(no/yes) no ' CONFIG_RABBITMQ
+read -r -p 'RabbitMQ config?[no/yes] no ' CONFIG_RABBITMQ
 
 if [[ CONFIG_RABBITMQ == "yes" || CONFIG_RABBITMQ == "YES" ]];then
   read -r -p 'ENTER RABBITMQ USER: ' RABBITMQ_USER
@@ -67,15 +67,18 @@ select service in shared admin backend frontend all; do
         esac
       done
     ;;
-    [2,3,4])
+    [2,3])
       installer $service
+    ;;
+    4)
+      installer client
     ;;
     5)
       installer shared
       installer rabbitmq
       installer admin
       installer backend
-      installer frontend
+      installer client
     ;;
     *)
       echo -e "\n"
