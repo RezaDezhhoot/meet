@@ -1,7 +1,5 @@
 #!/bin/bash
 
-SLEEP_VAL=3
-
 if ! docker info >/dev/null 2>&1; then
   echo -e "${CYAN}Docker is not running."
 
