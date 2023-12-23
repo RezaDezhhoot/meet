@@ -4,8 +4,6 @@ source ./.env
 
 set -e
 
-COMPOSE_FILE="docker-compose.yml"
-
 docker-compose -f $COMPOSE_FILE down rabbitmq
 
 docker-compose -f $COMPOSE_FILE up -d rabbitmq

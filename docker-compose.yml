@@ -7,6 +7,13 @@ services:
     container_name: admin
     restart: on-failure
     image: admin
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: ${DATABASE_CONTAINER}
+      DB_PORT: ${DATABASE_PORT}
+      DB_DATABASE: ${DATABASE_DB}
+      DB_USERNAME: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       - mysql
     ports:
@@ -42,6 +49,12 @@ services:
       - ./backend:/app
       - /app/node_modules
     command: npm start
+    environment:
+      DB_HOST: ${DATABASE_CONTAINER}
+      DB_DATABASE: ${DATABASE_DB}
+      DB_USERNAME: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      DB_PORT: ${DATABASE_PORT}
     deploy:
       replicas: 1
       update_config:

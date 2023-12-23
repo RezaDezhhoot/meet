@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+// const amqp = require("amqp");
 const {GUEST, LOGIN} = require("../../../Auth/Enums/LoginTypes");
 const User = require('../../../User/Models/User');
 const Penalty = require('../../../User/Models/Penalty');
