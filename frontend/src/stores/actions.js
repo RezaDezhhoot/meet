@@ -524,7 +524,7 @@ export const actions = {
                 });
         }
 
-        if (navigator.mediaDevices.hasOwnProperty('ondevicechange')) {
+        if (navigator && navigator.mediaDevices && navigator.mediaDevices.hasOwnProperty('ondevicechange')) {
             navigator.mediaDevices.ondevicechange = function(event) {
                 updateDevice();
             }
