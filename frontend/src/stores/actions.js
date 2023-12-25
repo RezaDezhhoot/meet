@@ -458,70 +458,72 @@ export const actions = {
     },
     setDevices({state,dispatch}) {
         function updateDevice() {
-            navigator.mediaDevices
-                .enumerateDevices()
-                .then((devices) => {
-                    state.videoInputs = [];
-                    state.speakers = [];
-                    state.audioInputs = [];
-                    devices.forEach((device,key) => {
+            if (navigator.mediaDevices) {
+                navigator.mediaDevices
+                    .enumerateDevices()
+                    .then((devices) => {
+                        state.videoInputs = [];
+                        state.speakers = [];
+                        state.audioInputs = [];
+                        devices.forEach((device,key) => {
 
-                        if (device.kind === 'videoinput') {
-                            if (! state.selectedVideoDevice) {
-                                state.selectedVideoDevice = device.deviceId;
+                            if (device.kind === 'videoinput') {
+                                if (! state.selectedVideoDevice) {
+                                    state.selectedVideoDevice = device.deviceId;
+                                }
+                                state.videoInputs.push({
+                                    label: device.label || 'Unknown camera',
+                                    id: device.deviceId
+                                });
+                            } else if (device.kind === 'audioinput') {
+                                if (! state.selectedAudioDevice) {
+                                    state.selectedAudioDevice = device.deviceId;
+                                }
+                                state.audioInputs.push({
+                                    label: device.label || 'Unknown microphone',
+                                    id: device.deviceId
+                                });
+                            } else if (device.kind === 'audiooutput') {
+                                state.speakers.push({
+                                    label: device.label || 'Unknown speaker',
+                                    id: device.deviceId
+                                });
                             }
-                            state.videoInputs.push({
-                                label: device.label || 'Unknown camera',
-                                id: device.deviceId
-                            });
-                        } else if (device.kind === 'audioinput') {
-                            if (! state.selectedAudioDevice) {
-                                state.selectedAudioDevice = device.deviceId;
+                        });
+
+                        let foundCamera = false , foundAudio = false , media = [];
+
+                        for( let i = 0; i < state.videoInputs.length; i++) {
+                            if (state.audioInputs[i]?.id === state.selectedVideoDevice) {
+                                foundCamera = true;
+                                break;
                             }
-                            state.audioInputs.push({
-                                label: device.label || 'Unknown microphone',
-                                id: device.deviceId
-                            });
-                        } else if (device.kind === 'audiooutput') {
-                            state.speakers.push({
-                                label: device.label || 'Unknown speaker',
-                                id: device.deviceId
-                            });
                         }
-                    });
 
-                    let foundCamera = false , foundAudio = false , media = [];
-
-                    for( let i = 0; i < state.videoInputs.length; i++) {
-                        if (state.audioInputs[i]?.id === state.selectedVideoDevice) {
-                            foundCamera = true;
-                            break;
+                        if (! foundCamera && state.videoStream) {
+                            state.selectedVideoDevice = null;
+                            media.push('camera');
                         }
-                    }
 
-                    if (! foundCamera && state.videoStream) {
-                        state.selectedVideoDevice = null;
-                        media.push('camera');
-                    }
-
-                    for( let i = 0; i < state.audioInputs.length; i++) {
-                        if (state.audioInputs[i]?.id === state.selectedAudioDevice) {
-                            foundAudio = true;
-                            break;
+                        for( let i = 0; i < state.audioInputs.length; i++) {
+                            if (state.audioInputs[i]?.id === state.selectedAudioDevice) {
+                                foundAudio = true;
+                                break;
+                            }
                         }
-                    }
-                    if (! foundAudio && state.localStream) {
-                        state.selectedAudioDevice = null;
-                        media.push('audio');
-                    }
+                        if (! foundAudio && state.localStream) {
+                            state.selectedAudioDevice = null;
+                            media.push('audio');
+                        }
 
-                    dispatch('endStream',{
-                        media
-                    });
+                        dispatch('endStream',{
+                            media
+                        });
 
-                }).catch((err) => {
+                    }).catch((err) => {
                     console.error(`${err.name}: ${err.message}`);
                 });
+            }
         }
 
         if (navigator && navigator.mediaDevices && navigator.mediaDevices.hasOwnProperty('ondevicechange')) {
