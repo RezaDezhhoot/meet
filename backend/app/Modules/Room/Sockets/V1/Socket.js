@@ -33,6 +33,7 @@ module.exports.createRoom = async (io , socket , room) => {
 
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
+    console.log('join ok!');
 
     if (room.capacity === Object.entries(users[room.key]).length) {
         socket.emit('error',{

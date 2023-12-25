@@ -35,6 +35,7 @@ export default {
   async created() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
+    console.log(this.user);
     this.$store.commit('setLogo' , this.logo);
 
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
@@ -64,6 +65,7 @@ export default {
       return this.socket;
     },
     async join(){
+      console.log(this.user.type);
       this.socket.emit('join',{
         token: this.user.token,
         type: this.user.type,

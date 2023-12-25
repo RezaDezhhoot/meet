@@ -4,6 +4,8 @@ const SocketV1 = require('../Sockets/V1/Socket');
 
 module.exports.ChannelV1 = async (io) => {
     io.on('connection', async  socket => {
+        console.log('connection ok!');
+
         const transport = socket.conn.transport.name; // in most cases, "polling"
         socket.conn.on("upgrade", () => {
             const upgradedTransport = socket.conn.transport.name; // in most cases, "websocket"
