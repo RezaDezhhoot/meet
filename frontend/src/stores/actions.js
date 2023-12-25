@@ -524,8 +524,10 @@ export const actions = {
                 });
         }
 
-        navigator.mediaDevices.ondevicechange = function(event) {
-            updateDevice();
+        if (navigator.mediaDevices.hasOwnProperty('ondevicechange')) {
+            navigator.mediaDevices.ondevicechange = function(event) {
+                updateDevice();
+            }
         }
         updateDevice();
     },
