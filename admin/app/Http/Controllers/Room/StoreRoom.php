@@ -49,7 +49,7 @@ class StoreRoom extends BaseComponent
         $this->validate([
             'title' => ['required','string','max:250'],
             'capacity' => ['required','integer','between:2,100000'],
-            'status' => ['required',Rule::in(RoomStatus::cases())],
+            'status' => ['required'],
             'host_id' => ['required','exists:users,id']
         ],[],[
             'title' => 'عنوان',

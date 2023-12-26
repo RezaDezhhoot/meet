@@ -47,7 +47,10 @@ select service in shared admin backend frontend all; do
     1)
       select shared_service in mysql rabbitmq both; do
         case $REPLY in
-          [1,2] )
+          1)
+            installer shared
+          ;;
+          1)
             installer $shared_service
           ;;
           3)
