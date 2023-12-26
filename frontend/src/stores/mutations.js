@@ -60,5 +60,8 @@ export const mutations = {
     },
     setHostClient(state , value = null) {
         state.hostClient = value;
+    },
+    controlMainLoader(state , value = true) {
+        state.mainLoading = value;
     }
 }

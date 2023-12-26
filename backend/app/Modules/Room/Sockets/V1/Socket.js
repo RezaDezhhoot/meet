@@ -44,7 +44,6 @@ module.exports.join = async (io,socket,data,room) => {
         return;
     }
 
-    console.log(data.type);
 
     switch (data.type) {
         case LOGIN:

@@ -1,4 +1,5 @@
 export const state = {
+    mainLoading: false,
     localStream: null,
     videoStream: null,
     displayStream: null,

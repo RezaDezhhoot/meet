@@ -1,4 +1,17 @@
 <template>
+  <div v-if="mainLoading" class="loader">
+    <div class="lds-roller">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main">
     <sidebar></sidebar>
@@ -19,6 +32,14 @@ export default {
     sidebar: Sidebar,
     content: Content
   },
+  beforeCreate() {
+    this.$store.commit('controlMainLoader' , true);
+  },
+  computed:{
+    mainLoading() {
+      return this.$store.state.mainLoading
+    }
+  },
   data(){
     return {
       user: Object,
@@ -35,7 +56,6 @@ export default {
   async created() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
-    console.log(this.user);
     this.$store.commit('setLogo' , this.logo);
 
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
@@ -43,15 +63,14 @@ export default {
       document.title = this.room.title;
       this.$store.commit('setRoom',this.room);
       this.$store.commit('setHost',this.room.host);
+
     }).catch(err => {
       this.redirectClientIfHappenedError(this.$route.params.key,404);
     });
-
     let connected = false;
     do {
       connected = await this.connect()
     } while (! connected);
-
 
     await this.wires();
     await this.join();
@@ -65,7 +84,6 @@ export default {
       return this.socket;
     },
     async join(){
-      console.log(this.user.type);
       this.socket.emit('join',{
         token: this.user.token,
         type: this.user.type,
@@ -104,6 +122,9 @@ export default {
         if (data.status === 200) {
           this.$store.dispatch('fillRTCs',this.clients);
         }
+        setTimeout(() => {
+          this.$store.commit('controlMainLoader' , false);
+        },2000);
       });
       this.socket.on('get-offer' , async data => {
         this.$store.dispatch('getOffer',data);
