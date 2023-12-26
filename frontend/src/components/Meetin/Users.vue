@@ -59,7 +59,7 @@
               </svg>
               <span>
                 {{ item.name }}
-                <small v-if="item.user.id === user.user.id">
+                <small v-if="item.socketId === socket.id">
                   (شما)
                 </small>
               </span>
