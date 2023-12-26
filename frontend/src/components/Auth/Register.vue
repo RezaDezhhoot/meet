@@ -24,7 +24,10 @@
         </small>
       </div>
       <div class="form-group d-flex align-items-center justify-content-between">
-        <button v-on:click.prevent="getToken" class="btn btn-sm py-1 px-3 btn-primary rounded-pill"><small>مرحله بعد</small></button>
+        <button v-bind:disabled="loading" v-on:click.prevent="getToken" class="btn btn-sm py-1 px-3 btn-primary rounded-pill">
+          <small>مرحله بعد</small>
+          <small v-if="loading"> ... </small>
+        </button>
       </div>
     </div>
     <div v-else-if="step === 'verify-number'">
@@ -142,6 +145,7 @@ export default {
     return {
       step: null,
       status: false,
+      loading: false,
       user:{
         name: null,
         phone: null,
@@ -165,10 +169,12 @@ export default {
       verifyTokenSchema.validate(this.user,{abortEarly: false})
           .then(() => {
             this.resetErrors();
+            this.loading = true;
             axios.post(`/v1/auth/register/verify-token?room=${this.$route.query.room}&lang=fa`,{
               phone: this.user.phone,
               code: this.user.code
             }).then(res => {
+              this.loading = false;
               this.status = true;
               this.$router.push({
                 name: 'register',
@@ -180,14 +186,18 @@ export default {
                 }
               });
             }).catch(err => {
+              this.loading = false;
+              if (err.response.status === 429) {
+                return this.errors['code'] = 'زیادی تلاش کردی ، پس دوباره تلاش نمایید'
+              }
               if (err.response.data.data) {
                 err.response.data.data.forEach(error => {
                   return this.errors[error.filed] = error.message;
                 });
               }
-
             });
           }).catch(err => {
+            this.loading = false;
             this.resetErrors()
             err.inner.forEach(error => {
               return this.errors[error.path] = error.message;
@@ -197,11 +207,13 @@ export default {
     getToken(){
       getTokenSchema.validate(this.user,{abortEarly: false})
           .then(() => {
+            this.loading = true;
             this.resetErrors();
             axios.post(`/v1/auth/register/get-token?room=${this.$route.query.room}&lang=fa`,{
               phone: this.user.phone
             }).then(res => {
               this.status = true;
+              this.loading = false;
               this.$router.push({
                 name: 'register',
                 params:{
@@ -212,22 +224,29 @@ export default {
                 }
               });
             }).catch(err => {
-              err.response.data.data.forEach(error => {
-                return this.errors[error.filed] = error.message;
-              });
-              if (err.response.status === 403) {
-                this.$router.push({
-                  name: 'register',
-                  params:{
-                    step:  'verify-number',
-                  },
-                  query:{
-                    room: this.$route.query.room
-                  }
+              this.loading = false;
+              if (err.response) {
+                if (err.response.status === 429) {
+                  return this.errors['phone'] = 'زیادی تلاش کردی ، پس دوباره تلاش نمایید'
+                }
+                err.response.data.data.forEach(error => {
+                  return this.errors[error.filed] = error.message;
                 });
+                if (err.response.status === 403) {
+                  this.$router.push({
+                    name: 'register',
+                    params:{
+                      step:  'verify-number',
+                    },
+                    query:{
+                      room: this.$route.query.room
+                    }
+                  });
+                }
               }
             });
           }).catch(err => {
+            this.loading = false;
             this.resetErrors()
             err.inner.forEach(error => {
               return this.errors[error.path] = error.message;
@@ -237,17 +256,26 @@ export default {
     register(){
       registerSchema.validate(this.user,{abortEarly: false})
         .then(() => {
+          this.loading = true;
           this.resetErrors();
           axios.post(`/v1/auth/register?room=${this.$route.query.room}&lang=fa`,this.user).then(res => {
+            this.loading = false;
             this.$cookies.set('auth',res.data.data);
             this.$emit('redirect-to-meet',this.$route.query.room);
           }).catch(err => {
-            console.log(err)
+            this.loading = false;
+            if (err.response.status === 429) {
+              return this.errors['phone'] = 'زیادی تلاش کردی ، پس دوباره تلاش نمایید'
+            }
             err.response.data.data.forEach(error => {
               return this.errors[error.filed] = error.message;
             });
           })
         }).catch(err => {
+        this.loading = false;
+        if (err.response.status === 429) {
+          return this.errors['name'] = 'زیادی تلاش کردی ، پس دوباره تلاش نمایید'
+        }
         this.resetErrors()
         err.inner.forEach(error => {
           return this.errors[error.path] = error.message;

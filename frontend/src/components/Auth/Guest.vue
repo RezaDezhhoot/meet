@@ -17,7 +17,7 @@
 <!--      <Checkbox  v-model="user.recaptcha" />-->
     </div>
     <div class="form-group">
-      <button v-on:click.prevent="login" class="btn btn-sm py-1 px-3 btn-primary rounded-pill"><small>ورود به اتاق</small></button>
+      <button v-bind:disabled="loading" v-on:click.prevent="login" class="btn btn-sm py-1 px-3 btn-primary rounded-pill"><small>ورود به اتاق</small></button>
     </div>
   </form>
 </template>
@@ -31,6 +31,7 @@ export default {
   name: "Guest",
   data(){
     return {
+      loading: false,
       user: {
         name: null,
         recaptcha: null
@@ -45,22 +46,26 @@ export default {
     login(){
       GuestSchema.validate(this.user,{abortEarly: false})
           .then(() => {
+            this.loading = true;
             this.resetErrors();
             axios.post(`/v1/auth/guest?room=${this.$route.query.room}&lang=fa`,{
               name: this.user.name
             }).then((res) => {
+              this.loading = false;
               this.$cookies.set('auth',res.data.data);
               this.$emit('redirect-to-meet',this.$route.query.room);
             }).catch(err =>{
+              this.loading = false;
               err.response.data.data.forEach(error => {
                 return this.errors[error.filed] = error.message;
               });
             })
           }).catch(err => {
-        this.resetErrors();
-        err.inner.forEach(error => {
-          return this.errors[error.path] = error.message;
-        });
+            this.loading = false;
+            this.resetErrors();
+            err.inner.forEach(error => {
+              return this.errors[error.path] = error.message;
+            });
       })
     },
     validate(input) {

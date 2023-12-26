@@ -43,9 +43,10 @@
     <div class="form-group d-flex align-items-center justify-content-between">
 
       <button
-          v-on:click.prevent="login"
+          v-on:click.prevent="login" v-bind:disabled="loading"
           class="btn btn-sm py-1 px-3 btn-primary rounded-pill"
       ><small>ورود به اتاق</small>
+        <small v-if="loading"> ... </small>
       </button>
     </div>
   </form>
@@ -59,6 +60,7 @@ export default {
   name: "login",
   data(){
     return {
+      loading: false,
       user:{
         phone: '',
         password: '',
@@ -73,22 +75,25 @@ export default {
     login(){
       loginSchema.validate(this.user,{abortEarly: false})
         .then(() => {
+          this.loading = true;
           this.resetErrors();
           axios.post(`/v1/auth/login?room=${this.$route.query.room}&lang=fa`,this.user).then((res) => {
             this.$cookies.set('auth',res.data.data);
             this.$emit('redirect-to-meet',this.$route.query.room);
           }).catch(err => {
+            this.loading = false;
             err.response.data.data.forEach(error => {
               return this.errors[error.filed] = error.message;
             });
           });
         }).catch(err => {
-        this.resetErrors()
-        if (err.inner) {
-          err.inner.forEach(error => {
-            return this.errors[error.path] = error.message;
-          });
-        }
+          this.loading = false;
+          this.resetErrors()
+          if (err.inner) {
+            err.inner.forEach(error => {
+              return this.errors[error.path] = error.message;
+            });
+          }
       })
     },
     validate(input) {

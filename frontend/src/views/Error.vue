@@ -35,6 +35,7 @@ export default {
   },
   mounted() {
     let code;
+    this.$cookies.remove('auth');
     if (code = this.$route.params.code) {
       this.code = code;
     }

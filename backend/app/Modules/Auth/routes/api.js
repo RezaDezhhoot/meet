@@ -10,7 +10,7 @@ const routerV1 = new Router().use(guest);
 routerV1.use('/register/get-token',
     rateLimit({
         windowMs: 3 * 60 * 60 * 1000,
-        max: 3,
+        max: 6,
         message: {
             message: 'too many requests'
         },
@@ -29,7 +29,7 @@ routerV1.post('/guest',AuthController.guest);
 routerV1.use('/forget-password',
     rateLimit({
         windowMs: 3 * 60 * 60 * 1000,
-        max: 3,
+        max: 6,
         message: {
             message: 'too many requests'
         },

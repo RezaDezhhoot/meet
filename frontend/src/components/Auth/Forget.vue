@@ -75,7 +75,10 @@
         <small class="text-primary py-3 fa-xs" role="button">ارسال مجدد</small>
       </a>
       <div class="form-group d-flex align-items-center justify-content-between">
-        <button v-on:click.prevent="reset" class="btn btn-sm py-1 px-3 btn-primary rounded-pill"><small>تغییر رمز</small></button>
+        <button v-bind:disabled="loading" v-on:click.prevent="reset" class="btn btn-sm py-1 px-3 btn-primary rounded-pill">
+          <small>تغییر رمز</small>
+          <small> ... </small>
+        </button>
       </div>
     </div>
   </form>
@@ -97,6 +100,7 @@ export default {
     return {
       step: null,
       status: false,
+      loading: false,
       user:{
         phone: null,
         password: null,
@@ -115,11 +119,13 @@ export default {
     getToken(){
       forgetSchema.validate(this.user,{abortEarly: false})
           .then(() => {
+            this.loading = true;
             this.resetErrors();
             axios.post(`/v1/auth/forget-password?room=${this.$route.query.room}&lang=fa`,{
               phone: this.user.phone
             }).then(res => {
               this.status = true;
+              this.loading = false;
               this.$router.push({
                 name: 'forget',
                 params:{
@@ -130,6 +136,10 @@ export default {
                 }
               });
             }).catch(err => {
+              this.loading = false;
+              if (err.response.status === 429) {
+                return this.errors['phone'] = 'زیادی تلاش کردی ، پس دوباره تلاش نمایید'
+              }
               err.response.data.data.forEach(error => {
                 return this.errors[error.filed] = error.message;
               });
@@ -146,17 +156,20 @@ export default {
               }
             });
           }).catch(err => {
-        this.resetErrors()
-        err.inner.forEach(error => {
-          return this.errors[error.path] = error.message;
-        });
+            this.loading = false;
+            this.resetErrors()
+            err.inner.forEach(error => {
+              return this.errors[error.path] = error.message;
+            });
       })
     },
     reset(){
       resetPasswordSchema.validate(this.user,{abortEarly: false})
         .then(() => {
+          this.loading = true;
           this.resetErrors();
           axios.patch(`/v1/auth/reset-password?room=${this.$route.query.room}&lang=fa`,this.user).then(res => {
+            this.loading = false;
             this.$router.push({
               name:'login_action',
               query:{
@@ -164,11 +177,13 @@ export default {
               }
             });
           }).catch(err => {
+            this.loading = false;
             err.response.data.data.forEach(error => {
               return this.errors[error.filed] = error.message;
             });
           })
         }).catch(err => {
+        this.loading = false;
         this.resetErrors()
         err.inner.forEach(error => {
           return this.errors[error.path] = error.message;
