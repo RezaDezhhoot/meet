@@ -340,11 +340,13 @@ export const actions = {
                 }
             }
 
-            await context.dispatch('startStream',{
-                from: context.state.socket.id,
-                to: [data.data.from],
-                media: callbackMedia
-            });
+            if (callbackMedia.length > 0) {
+                await context.dispatch('startStream',{
+                    from: context.state.socket.id,
+                    to: [data.data.from],
+                    media: callbackMedia
+                });
+            }
         }
     },
     async sendShared({state , dispatch} , data) {
