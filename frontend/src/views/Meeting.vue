@@ -1,15 +1,6 @@
 <template>
   <div v-if="mainLoading" class="loader">
-    <div class="lds-roller">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
+    <loader></loader>
   </div>
 
   <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
@@ -20,6 +11,7 @@
 </template>
 <script>
 import Top from "../components/Meetin/Top.vue";
+import Loader from "../components/Meetin/Elements/Loader.vue";
 import Sidebar from "../components/Meetin/Sidebar.vue";
 import Content from "../components/Meetin/Content.vue";
 import io from 'socket.io-client';
@@ -30,7 +22,8 @@ export default {
   components: {
     top: Top,
     sidebar: Sidebar,
-    content: Content
+    content: Content,
+    loader: Loader
   },
   beforeCreate() {
     this.$store.commit('controlMainLoader' , true);

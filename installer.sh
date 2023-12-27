@@ -30,6 +30,9 @@ fi
 
 read -r -p 'RabbitMQ config?[no/yes] no ' CONFIG_RABBITMQ
 
+echo -e "\n"
+
+
 if [[ $CONFIG_RABBITMQ == "yes" || $CONFIG_RABBITMQ == "YES" ]];then
   read -r -p 'ENTER RABBITMQ USER: ' RABBITMQ_USER
   read -r -sp 'ENTER RABBITMQ PASSWORD: ' RABBITMQ_PASSWORD
@@ -41,6 +44,8 @@ fi
 echo -e "\n"
 
 echo "Select service to install:"
+
+echo -e "\n"
 
 select service in shared admin backend frontend all; do
   case $REPLY in

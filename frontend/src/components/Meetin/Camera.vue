@@ -1,8 +1,5 @@
 <template>
   <div class="video-tab w-full h-[32%] mr-[0.5rem] bg-white rounded-b-[0.5rem] lg:rounded-[0.5rem] px-[1.2rem] py-[1rem] hidden-mobile">
-
-
-
     <div v-if="hiddenVideo" class="w-full h-full">
       <div class="flex w-full justify-between border-b-[1px] border-[#aaaaaa]">
         <div class="text-[#616161] font-bold flex justify-center items-center pb-[0.5rem]">
@@ -23,7 +20,7 @@
       </div>
 
       <div class="h-full w-full flex justify-center items-center flex-col">
-        <div class="w-full text-center">
+        <div v-if="! loading" class="w-full text-center">
           <span class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
           <template v-if="room.host && user.user && room.host.id === user.user.id">
 
@@ -59,6 +56,7 @@
             </div>
           </template>
         </div>
+        <loader v-else-if="loading"></loader>
       </div>
     </div>
     <video id="video-player" class="h-full video-player rounded-b-[0.5rem] lg:rounded-[0.5rem] w-full" :class="{ 'hidden': hiddenVideo }" muted  ref="localVideo" autoplay>
@@ -67,7 +65,7 @@
 </template>
 
 <script>
-
+import Loader from "@/components/Meetin/Elements/Loader.vue";
 export default {
   name: "Camera",
   data(){
@@ -78,6 +76,9 @@ export default {
       selectedOption: null,
     }
   },
+  components:{
+    loader: Loader
+  },
   computed: {
     user() {
       return this.$store.state.user;
@@ -85,6 +86,9 @@ export default {
     room(){
       return this.$store.state.room;
     },
+    loading() {
+      return this.$store.state.cameraLoading;
+    }
   },
   watch:{
     "$store.state.hiddenVideo"(value) {

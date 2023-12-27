@@ -48,19 +48,22 @@ axios.get('/v1/settings/base?lang=fa').then(base => {
         const icon = useFavicon();
         icon.value = base.data.data.logo;
     }
+
+}).then(() => {
+    app.provide('BaseUrl',baseURL);
+
+    app.use(PrimeVue);
+    app.use(createPinia())
+    app.use(router)
+    app.use(store)
+    app.use(VueCookies,{
+        path: '/',
+        secure: false,
+    })
+
+    app.$cookies.config('7d');
+
+    app.mount('#app')
 }).catch(err => {});
 
-app.provide('BaseUrl',baseURL);
 
-app.use(PrimeVue);
-app.use(createPinia())
-app.use(router)
-app.use(store)
-app.use(VueCookies,{
-    path: '/',
-    secure: false,
-})
-
-app.$cookies.config('7d');
-
-app.mount('#app')

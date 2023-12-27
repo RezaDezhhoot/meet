@@ -63,5 +63,11 @@ export const mutations = {
     },
     controlMainLoader(state , value = true) {
         state.mainLoading = value;
+    },
+    controlMediaLoader(state , value = true) {
+        state.mediaLoading = value;
+    },
+    controlCameraLoader(state , value = true) {
+        state.cameraLoading = value;
     }
 }
