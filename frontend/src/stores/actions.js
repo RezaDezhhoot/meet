@@ -10,36 +10,16 @@ export const actions = {
                         pc: {
                             // Audio RTC peer connection
                             audio:{
-                                local: new RTCPeerConnection({
-                                    iceServers: [
-                                        { urls: 'stun:stun.l.google.com:19302' },
-                                    ],
-                                }),
-                                remote: new RTCPeerConnection({
-                                    iceServers: [
-                                        { urls: 'stun:stun.l.google.com:19302' },
-                                    ],
-                                }),
+                                local: new RTCPeerConnection(),
+                                remote: new RTCPeerConnection(),
                             },
                             // Video RTC peer connection
                             video:{
-                                local: new RTCPeerConnection({
-                                    iceServers: [
-                                        { urls: 'stun:stun.l.google.com:19302' },
-                                    ],
-                                }),
-                                remote: new RTCPeerConnection({
-                                    iceServers: [
-                                        { urls: 'stun:stun.l.google.com:19302' },
-                                    ],
-                                }),
+                                local: new RTCPeerConnection(),
+                                remote: new RTCPeerConnection(),
                             },
                             // Screen RTC peer connection
-                            screen: new RTCPeerConnection({
-                                iceServers: [
-                                    { urls: 'stun:stun.l.google.com:19302' },
-                                ],
-                            })
+                            screen: new RTCPeerConnection()
                         }
                     };
                     // Set remote video stream
@@ -175,6 +155,11 @@ export const actions = {
                 video: false,
                 audio: data.audio ? ( {deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined} ) : false,
             };
+
+            navigator.getUserMedia = ( navigator.getUserMedia       ||
+                navigator.webkitGetUserMedia ||
+                navigator.mozGetUserMedia    ||
+                navigator.msGetUserMedia );
 
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 const localStream = stream;
@@ -312,10 +297,10 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.screen)
                 );
                 shared_status['screen'] = 'screen_shared';
-                // if (! context.state.peerConnections[data.data.from][ shared_status['screen'] ]) {
+                if (! context.state.peerConnections[data.data.from][ shared_status['screen'] ]) {
                     context.state.peerConnections[data.data.from][ shared_status['screen'] ] = true;
                     callbackMedia.push('screen');
-                // }
+                }
             }
 
             if (media.includes('audio')) {
@@ -323,10 +308,10 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.audio)
                 );
                 shared_status['audio'] = 'audio_shared';
-                // if (! context.state.peerConnections[data.data.from][ shared_status['audio'] ]) {
+                if (! context.state.peerConnections[data.data.from][ shared_status['audio'] ]) {
                     context.state.peerConnections[data.data.from][ shared_status['audio'] ] = true;
                     callbackMedia.push('audio');
-                // }
+                }
             }
 
             if (media.includes('camera')) {
@@ -334,10 +319,10 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.camera)
                 );
                 shared_status['camera'] = 'camera_shared';
-                // if (! context.state.peerConnections[data.data.from][ shared_status['camera'] ]) {
+                if (! context.state.peerConnections[data.data.from][ shared_status['camera'] ]) {
                     context.state.peerConnections[data.data.from][ shared_status['camera'] ] = true;
                     callbackMedia.push('camera');
-                // }
+                }
             }
 
             if (callbackMedia.length > 0) {
