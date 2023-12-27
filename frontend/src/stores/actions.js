@@ -1,6 +1,15 @@
 import Swal from "sweetalert2";
 export const actions = {
     fillRTCs({state , dispatch} , clients){
+        const iceConfiguration = {
+            iceServers: [
+                {
+                    urls: 'turn:159.69.243.68:3478',
+                    username: 'stun',
+                    credential: 'ARd123456Abcd'
+                }
+            ]
+        }
         // Creating RTC connection for each user to local
         for (const index in clients) {
             if (state.user.user && index !== state.socket.id) {
@@ -10,16 +19,16 @@ export const actions = {
                         pc: {
                             // Audio RTC peer connection
                             audio:{
-                                local: new RTCPeerConnection(),
-                                remote: new RTCPeerConnection(),
+                                local: new RTCPeerConnection(iceConfiguration),
+                                remote: new RTCPeerConnection(iceConfiguration),
                             },
                             // Video RTC peer connection
                             video:{
-                                local: new RTCPeerConnection(),
-                                remote: new RTCPeerConnection(),
+                                local: new RTCPeerConnection(iceConfiguration),
+                                remote: new RTCPeerConnection(iceConfiguration),
                             },
                             // Screen RTC peer connection
-                            screen: new RTCPeerConnection()
+                            screen: new RTCPeerConnection(iceConfiguration)
                         }
                     };
                     // Set remote video stream
