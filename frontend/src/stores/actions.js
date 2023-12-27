@@ -312,10 +312,10 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.screen)
                 );
                 shared_status['screen'] = 'screen_shared';
-                if (! context.state.peerConnections[data.data.from][ shared_status['screen'] ]) {
+                // if (! context.state.peerConnections[data.data.from][ shared_status['screen'] ]) {
                     context.state.peerConnections[data.data.from][ shared_status['screen'] ] = true;
                     callbackMedia.push('screen');
-                }
+                // }
             }
 
             if (media.includes('audio')) {
@@ -323,10 +323,10 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.audio)
                 );
                 shared_status['audio'] = 'audio_shared';
-                if (! context.state.peerConnections[data.data.from][ shared_status['audio'] ]) {
+                // if (! context.state.peerConnections[data.data.from][ shared_status['audio'] ]) {
                     context.state.peerConnections[data.data.from][ shared_status['audio'] ] = true;
                     callbackMedia.push('audio');
-                }
+                // }
             }
 
             if (media.includes('camera')) {
@@ -334,10 +334,10 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.camera)
                 );
                 shared_status['camera'] = 'camera_shared';
-                if (! context.state.peerConnections[data.data.from][ shared_status['camera'] ]) {
+                // if (! context.state.peerConnections[data.data.from][ shared_status['camera'] ]) {
                     context.state.peerConnections[data.data.from][ shared_status['camera'] ] = true;
                     callbackMedia.push('camera');
-                }
+                // }
             }
 
             if (callbackMedia.length > 0) {
