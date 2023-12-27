@@ -25,14 +25,6 @@ export default {
     content: Content,
     loader: Loader
   },
-  beforeCreate() {
-    this.$store.commit('controlMainLoader' , true);
-  },
-  computed:{
-    mainLoading() {
-      return this.$store.state.mainLoading
-    }
-  },
   data(){
     return {
       user: Object,
@@ -42,15 +34,16 @@ export default {
       clients:[],
       socket: null,
       baseUrl: inject('BaseUrl'),
-      logo: inject('LogoAddr')
+      logo: inject('LogoAddr'),
     };
   },
-  name: "Meeting",
-  async created() {
+  beforeCreate() {
+    this.$store.commit('controlMainLoader' , true);
+  },
+  beforeMount() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
     this.$store.commit('setLogo' , this.logo);
-
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
       this.room = res.data.room;
       document.title = this.room.title;
@@ -60,13 +53,19 @@ export default {
     }).catch(err => {
       this.redirectClientIfHappenedError(this.$route.params.key,404);
     });
+    this.wires();
+  },
+  async created() {
     let connected = false;
     do {
       connected = await this.connect()
     } while (! connected);
-
-    await this.wires();
-    await this.join();
+    this.join();
+  },
+  computed:{
+    mainLoading() {
+      return this.$store.state.mainLoading
+    }
   },
   methods:{
     async connect(){
@@ -76,7 +75,7 @@ export default {
 
       return this.socket;
     },
-    async join(){
+    join(){
       this.socket.emit('join',{
         token: this.user.token,
         type: this.user.type,
@@ -88,13 +87,23 @@ export default {
         media: ['camera','audio']
       });
     },
-    async wires() {
+    wires() {
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
           this.clients = data.data.users;
           this.user = data.data.users[this.socket.id];
           this.$store.commit('setUser',this.user);
           this.$store.commit('setClients',this.clients);
+
+          if (data.data.event === 'joined') {
+            this.$store.dispatch('fillRTCs', {
+              clients: this.clients,
+              from: data.data.from
+            });
+            setTimeout(() => {
+              this.$store.commit('controlMainLoader' , false);
+            },2000);
+          }
         }
       });
 
@@ -110,14 +119,6 @@ export default {
           this.clearCookie();
         }
         this.redirectClientIfHappenedError(this.$route.params.key , data.data.code);
-      });
-      this.socket.on('create-pc' , async data => {
-        if (data.status === 200) {
-          this.$store.dispatch('fillRTCs',this.clients);
-        }
-        setTimeout(() => {
-          this.$store.commit('controlMainLoader' , false);
-        },2000);
       });
       this.socket.on('get-offer' , async data => {
         this.$store.dispatch('getOffer',data);
@@ -152,9 +153,6 @@ export default {
     clearCookie(){
       this.$cookies.remove('auth');
     }
-  },
-  async onbeforeunload() {
-    await this.disconnect();
   }
 }
 </script>

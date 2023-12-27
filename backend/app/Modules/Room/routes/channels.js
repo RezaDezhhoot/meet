@@ -4,8 +4,6 @@ const SocketV1 = require('../Sockets/V1/Socket');
 
 module.exports.ChannelV1 = async (io) => {
     io.on('connection', async  socket => {
-        console.log('connection ok!');
-
         const transport = socket.conn.transport.name; // in most cases, "polling"
         socket.conn.on("upgrade", () => {
             const upgradedTransport = socket.conn.transport.name; // in most cases, "websocket"
@@ -18,7 +16,7 @@ module.exports.ChannelV1 = async (io) => {
 
             const nsp = socket.nsp;
 
-            await SocketV1.createRoom(nsp,socket,room)
+            SocketV1.createRoom(nsp,socket,room)
             // Client join.
             socket.on('join', async data => await SocketV1.join(nsp,socket,data,room))
 

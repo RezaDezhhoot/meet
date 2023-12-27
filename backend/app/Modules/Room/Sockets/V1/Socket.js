@@ -13,7 +13,7 @@ const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
 const ChatResoource = require('../../Resources/Api/V1/ChatResoource');
 
-module.exports.createRoom = async (io , socket , room) => {
+module.exports.createRoom = (io , socket , room) => {
     if (! users[room.key]) {
         users[room.key] = {};
     }
@@ -33,7 +33,6 @@ module.exports.createRoom = async (io , socket , room) => {
 
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
-    console.log('join ok!');
 
     if (room.capacity === Object.entries(users[room.key]).length) {
         socket.emit('error',{
@@ -43,7 +42,6 @@ module.exports.join = async (io,socket,data,room) => {
         });
         return;
     }
-
 
     switch (data.type) {
         case LOGIN:
@@ -109,11 +107,11 @@ module.exports.join = async (io,socket,data,room) => {
     }
 
     io.emit('get-users',{
-        data:{users: users[room.key] , from: socket.id},
-        status
-    });
-    io.emit('create-pc',{
-        data:{host_id: room.host_id},
+        data:{
+            users: users[room.key] ,
+            from: socket.id,
+            event: 'joined'
+        },
         status
     });
 }

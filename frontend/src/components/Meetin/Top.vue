@@ -19,7 +19,7 @@
           </div>
 
           <div>
-            <ul v-if="user.user && user.media && host">
+            <ul v-if="user && user.hasOwnProperty('user') && user.media && host">
               <li>
                 <UserHandRising
                     :menu="true"

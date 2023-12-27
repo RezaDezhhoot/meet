@@ -1,6 +1,7 @@
 import Swal from "sweetalert2";
 export const actions = {
-    fillRTCs({state , dispatch} , clients){
+    fillRTCs({state , dispatch} , data){
+        const clients = data.clients
         const iceConfiguration = {
             iceServers: [
                 {
@@ -11,55 +12,62 @@ export const actions = {
             ]
         }
         // Creating RTC connection for each user to local
-        for (const index in clients) {
-            if (state.user.user && index !== state.socket.id) {
-                if ( ! state.peerConnections[index] || ! state.peerConnections[index]['pc'] ) {
-                    state.peerConnections[index] = {
-                        user_id: clients[index].user.id,
-                        pc: {
-                            // Audio RTC peer connection
-                            audio:{
-                                local: new RTCPeerConnection(iceConfiguration),
-                                remote: new RTCPeerConnection(iceConfiguration),
-                            },
-                            // Video RTC peer connection
-                            video:{
-                                local: new RTCPeerConnection(iceConfiguration),
-                                remote: new RTCPeerConnection(iceConfiguration),
-                            },
-                            // Screen RTC peer connection
-                            screen: new RTCPeerConnection(iceConfiguration)
-                        }
-                    };
-                    // Set remote video stream
-                    state.peerConnections[index]['pc']['video']['remote'].ontrack = async function (stream) {
-                        if (stream.track.kind === 'video') {
-                            let video = document.getElementById('video-player');
-                            video.srcObject = stream.streams[0];
-                            video.load();
-                        }
-                    };
-                    // Set remote audio stream
-                    state.peerConnections[index]['pc']['audio']['remote'].ontrack = async function (stream) {
-                        if(stream.track.kind === 'audio') {
-                            const audio = document.createElement('audio');
-                            audio.autoplay = 1;
-                            audio.classList.add('hidden');
-                            audio.id = stream.streams[0].id;
-                            audio.muted = ! (localStorage.getItem('sound') == 'true');
-                            audio.srcObject = stream.streams[0];
-                            audio.load();
-                            document.getElementById('main').appendChild(audio);
-                        }
-                    };
-                    // Set remote screen stream
-                    state.peerConnections[index]['pc']['screen'].ontrack = async function (stream) {
-                        document.getElementById('screen-player').srcObject = stream.streams[0];
-                    };
+        function makeNewPc(id , user_id) {
+            state.peerConnections[id] = {
+                user_id,
+                pc: {
+                    // Audio RTC peer connection
+                    audio:{
+                        local: new RTCPeerConnection(iceConfiguration),
+                        remote: new RTCPeerConnection(iceConfiguration),
+                    },
+                    // Video RTC peer connection
+                    video:{
+                        local: new RTCPeerConnection(iceConfiguration),
+                        remote: new RTCPeerConnection(iceConfiguration),
+                    },
+                    // Screen RTC peer connection
+                    screen: new RTCPeerConnection(iceConfiguration)
                 }
-                // If the user has started a stream, it joins the old stream
-                dispatch('joinStream',clients[index]);
             }
+            // Set remote video stream
+            state.peerConnections[id]['pc']['video']['remote'].ontrack = async function (stream) {
+                if (stream.track.kind === 'video') {
+                    let video = document.getElementById('video-player');
+                    video.srcObject = stream.streams[0];
+                    video.load();
+                }
+            };
+            // Set remote audio stream
+            state.peerConnections[id]['pc']['audio']['remote'].ontrack = async function (stream) {
+                if(stream.track.kind === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.autoplay = 1;
+                    audio.classList.add('hidden');
+                    audio.id = stream.streams[0].id;
+                    audio.muted = ! (localStorage.getItem('sound') == 'true');
+                    audio.srcObject = stream.streams[0];
+                    audio.load();
+                    document.getElementById('main').appendChild(audio);
+                }
+            };
+            // Set remote screen stream
+            state.peerConnections[id]['pc']['screen'].ontrack = async function (stream) {
+                document.getElementById('screen-player').srcObject = stream.streams[0];
+            };
+        }
+        if (data.from === state.socket.id) {
+            for (const index in clients) {
+                if (state.user && state.user.hasOwnProperty('user') && index !== state.socket.id) {
+                    if ( ! state.peerConnections[index] || ! state.peerConnections[index]['pc'] ) {
+                        makeNewPc(index,clients[index].user.id);
+                    }
+                    // If the user has started a stream, it joins the old stream
+                    dispatch('joinStream',clients[index]);
+                }
+            }
+        } else {
+            makeNewPc(data.from,clients[data.from].user.id)
         }
     },
     joinStream({state , dispatch} , client){

@@ -20,7 +20,7 @@
     <div class="box-sidbar-users">
       <ul>
         <template v-if="Object.entries(hostClient).length > 0">
-          <li class="host-style mb-2" v-for="item in hostClient" v-if="user && user.user">
+          <li class="host-style mb-2" v-for="item in hostClient" v-if="user && user.hasOwnProperty('user')">
             <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
               <g id="#000000ff">
                 <path fill="#df1111" opacity="1.00" d=" M 46.44 8.64 C 56.42 6.70 67.10 13.24 69.88 23.01 C 72.43 30.88 69.66 40.09 63.21 45.26 C 56.96 50.52 47.53 51.49 40.34 47.61 C 33.23 43.97 28.65 35.98 29.21 28.00 C 29.55 18.57 37.14 10.10 46.44 8.64 Z" />
@@ -48,7 +48,7 @@
         </template>
 
 
-        <template v-if="user && user.user" v-for="(item,key) in clients">
+        <template v-if="user && user.hasOwnProperty('user')" v-for="(item,key) in clients">
           <li v-if="item.user.id !== room.host.id">
             <div class="flex items-center">
               <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
