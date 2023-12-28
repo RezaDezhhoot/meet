@@ -107,6 +107,10 @@ export default {
         }
       });
 
+      this.socket.on('add-candidate',async data => {
+        this.$store.dispatch('addIceCandidate',data);
+      });
+
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
           this.hostClient = data.data.host;

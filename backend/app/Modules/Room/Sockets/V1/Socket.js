@@ -391,3 +391,9 @@ module.exports.kickClient = async (io,socket,data,room) => {
         }
     }
 }
+
+module.exports.sendCandidate = async (io,socket,data,room) => {
+    socket.broadcast.emit('add-candidate',{
+        data
+    });
+}

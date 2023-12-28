@@ -91,7 +91,7 @@
     </div>
 
     <div class="flex items-center">
-      <div class="flex ml-[2rem] hidden-mobile" v-if="user.user && user.media && host">
+      <div class="flex ml-[2rem] hidden-mobile" v-if="user && user.hasOwnProperty('user') && user.media && host">
         <UserHandRising
             width="20"
             height="20"

@@ -53,6 +53,7 @@ module.exports.ChannelV1 = async (io) => {
 
             socket.on('get-shared', async data => await SocketV1.getShared(nsp,socket,data,room))
             // End stream
+            socket.on('send-candidate', async data => await SocketV1.sendCandidate(nsp,socket,data,room))
         } else {
             socket.emit('error',{
                 data:{
