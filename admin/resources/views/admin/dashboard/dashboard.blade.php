@@ -84,6 +84,7 @@
                                         <th>#</th>
                                         <th>عنوان اتاق</th>
                                         <th>ظرفیت اتاق</th>
+                                        <th>وضعیت اتاق</th>
                                         <th> تعداد کاربران آنلاین</th>
                                         <th>مشخصات میزبان</th>
                                         <th class="d-flex align-items-center"><i class="flaticon2-gear px-2"></i> <span>جزئیات</span> </th>
@@ -95,17 +96,19 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $room->room->title }}</td>
                                             <td>{{ $room->room->capacity }} نفر </td>
+                                            <td>{{ $room->room->status->label() }}</td>
                                             <td>  {{ count($room->data) }} کاربر انلاین وجود دارد </td>
                                             <td>
                                                 <ui>
-                                                    <li>نام :  <strong>{{ $room->room->host->name ?? '' }}</strong></li>
-                                                    <li> شماره همراه : <strong>{{ $room->room->host->phone ?? '' }}</strong></li>
+                                                    <li class="border-bottom pb-1">نام :  <strong>{{ $room->room->host->name ?? '' }}</strong></li>
+                                                    <li class="border-bottom  pb-1"> شماره همراه : <strong>{{ $room->room->host->phone ?? '' }}</strong></li>
                                                     <li> ایمیل :  <strong>{{ $room->room->host->email ?? '' }}</strong></li>
                                                 </ui>
                                             </td>
                                             <td>
                                                 <button data-toggle="collapse" data-target="#room{{$room->room_id}}"  class="btn btn-sm">
-                                                    <i class="flaticon2-gear"></i><strong>مشاهده کاربران</strong>
+                                                    <i class="flaticon2-gear"></i><strong>مشاهده کاربران
+                                                    </strong>
                                                 </button>
                                             </td>
                                         </tr>
