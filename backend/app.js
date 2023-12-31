@@ -4,8 +4,7 @@ const express = require('express');
 const app = express();
 const appDir = path.dirname(require.main.filename);
 const sequelize = require('./config/database');
-const Room = require('./app/Modules/Room/Models/Room');
-const User = require('./app/Modules/User/Models/User');
+const RabbitMQ = require("./app/Libraries/Rabbitmq");
 
 app.use(express.urlencoded({limit: '5000mb',extended: false}));
 app.use(express.json({limit: '5000mb'}));
@@ -16,12 +15,12 @@ require(path.join(appDir,'app/Providers/LibraryServiceProvider')).load(app);
 require(path.join(appDir,'app/Providers/RouteServiceProvider')).loadApiRoutes(app);
 require(path.join(appDir,'app/Providers/SocketServiceProvider')).load(server);
 
-
 app.use(function( req, res, next){
     return res.status(404).json({
         'message': 'Fallback'
     });
 });
+
 sequelize.sync().then(async res => {
     server.listen(process.env.PORT, () => {
         console.log(`Server running in ${process.env.APP_DOMAIN}:${process.env.PORT}`);

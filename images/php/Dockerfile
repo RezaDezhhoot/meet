@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     libonig-dev \
-    curl
+    curl \
+    supervisor
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -25,7 +26,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install gd
-
+RUN docker-php-ext-install sockets
 
 WORKDIR /home/app
 
@@ -35,7 +36,18 @@ RUN chown -R www-data:www-data \
         /home/app/storage \
         /home/app/bootstrap/cache
 
-RUN composer install
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN composer install --ignore-platform-reqs
+
+COPY ./supervisors/admin /etc/supervisor/conf.d/
+
+CMD ["/usr/bin/supervisord"]
+
+CMD supervisorctl reread
+CMD supervisorctl update
+CMD supervisorctl start all
 
 CMD php artisan serve --host=0.0.0.0
+
 EXPOSE 8000

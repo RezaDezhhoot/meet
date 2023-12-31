@@ -14,6 +14,10 @@ services:
       DB_DATABASE: ${DATABASE_DB}
       DB_USERNAME: ${DATABASE_USER}
       DB_PASSWORD: ${DATABASE_PASSWORD}
+
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     depends_on:
       - mysql
     ports:
@@ -55,6 +59,10 @@ services:
       DB_USERNAME: ${DATABASE_USER}
       DB_PASSWORD: ${DATABASE_PASSWORD}
       DB_PORT: ${DATABASE_PORT}
+
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     deploy:
       replicas: 1
       update_config:
@@ -96,7 +104,8 @@ services:
       - main
   rabbitmq:
     image: rabbitmq:3.8-management-alpine
-    container_name: rabbitmq
+    hostname: ${RABBITMQ_HOST}
+    container_name: ${RABBITMQ_HOST}
     restart: on-failure
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
@@ -105,7 +114,9 @@ services:
       - ./shared/rabbitmq/data:/var/lib/rabbitmq/
       - ./shared/rabbitmq/log:/var/log/rabbitmq
     ports:
-      - '5672:5672'
+      - '5671:5671'
+      - "5672:5672"
+      - '15671:15671'
       - '15672:15672'
     networks:
       - main

@@ -48,6 +48,7 @@ export default {
       this.room = res.data.room;
       document.title = this.room.title;
       this.$store.commit('setRoom',this.room);
+      console.log(this.room.host);
       this.$store.commit('setHost',this.room.host);
 
     }).catch(err => {

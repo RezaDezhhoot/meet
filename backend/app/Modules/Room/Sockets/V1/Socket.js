@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const RabbitMQ = require('../../../../Libraries/Rabbitmq');
 // const amqp = require("amqp");
 const {GUEST, LOGIN} = require("../../../Auth/Enums/LoginTypes");
 const User = require('../../../User/Models/User');
@@ -54,8 +55,9 @@ module.exports.join = async (io,socket,data,room) => {
                     users[room.key][socket.id] = {
                         socketId: socket.id,
                         name: user.name,
+                        room: room.title,
                         ip: socket.handshake.address,
-                        user: UserResource.make(user,null,['email','phone','status']),
+                        user: UserResource.make(user,null,['email','phone','status'],LOGIN),
                         media: MediaResource.make(user,room,data.type),
                     };
 
@@ -89,11 +91,11 @@ module.exports.join = async (io,socket,data,room) => {
             users[room.key][socket.id] = {
                 socketId: socket.id,
                 name: user.name,
+                room: room.title,
                 ip,
-                user: UserResource.make(user,null,['id','email','phone','status']),
+                user: UserResource.make(user,null,['id','email','phone','status'],GUEST),
                 media: MediaResource.make(user,room,data.type),
             };
-
             if (host[room.key]) {
                 socket.emit('host-joined',{
                     data:{
@@ -105,7 +107,10 @@ module.exports.join = async (io,socket,data,room) => {
         default:
             return;
     }
-
+    await RabbitMQ.directPublish('rooms',`users`,JSON.stringify({
+        users: users[room.key],
+        room_id: room.id
+    }),'lists');
     io.emit('get-users',{
         data:{
             users: users[room.key] ,
@@ -323,12 +328,56 @@ module.exports.handRising = async (io,socket,data,room) => {
     }
 }
 
+module.exports.kickClient = async (io,socket,data,room) => {
+    if (data.hasOwnProperty('to')) {
+        const user = users[room.key][socket.id];
+        const targetUser = users[room.key][data.to];
+        if (user.user.id === room.host_id && targetUser.user.id !== room.host_id) {
+            const user = users[room.key][data.to];
+
+            await Penalty.create({
+                kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
+                room_id: room.id,
+                user_id: user?.user?.id,
+                user_ip: user.ip,
+            });
+
+            delete users[room.key][data.to];
+            delete typistUsers[room.key][data.to];
+
+            await RabbitMQ.directPublish('rooms',`users`,JSON.stringify({
+                users: users[room.key],
+                room_id: room.id
+            }),'lists');
+
+            socket.to(data.to).emit('error',{
+                data:{
+                    code: 403
+                }
+            });
+
+            await RabbitMQ.directPublish('rooms',`users`,JSON.stringify(users),'list');
+            io.emit('get-users',{
+                data:{
+                    users: users[room.key]
+                },
+                status: 200
+            });
+        }
+    }
+}
+
+module.exports.sendCandidate = async (io,socket,data,room) => {
+    socket.broadcast.emit('add-candidate',{
+        data
+    });
+}
+
 module.exports.disconnect = async (io,socket,data,room) => {
     if (users[room.key][socket.id]) {
         if (users[room.key][socket.id].user.id === room.host_id) {
             delete host[room.key][socket.id];
             delete host_socket_id[room.key][socket.id];
-
             io.emit('host-joined',{
                 data:{
                     host: host[room.key]
@@ -348,6 +397,14 @@ module.exports.disconnect = async (io,socket,data,room) => {
         if (typistUsers[room.key][socket.id]) {
             delete typistUsers[room.key][socket.id];
         }
+        await RabbitMQ.directPublish('rooms',`users`,JSON.stringify({
+            users: users[room.key],
+            room_id: room.id
+        }),'lists');
+
+        if (Object.entries(users[room.key]).length === 0) {
+            delete users[room.key];
+        }
 
         io.emit('get-users',{
             data:{
@@ -356,44 +413,4 @@ module.exports.disconnect = async (io,socket,data,room) => {
             status: 200
         });
     }
-}
-
-module.exports.kickClient = async (io,socket,data,room) => {
-    if (data.hasOwnProperty('to')) {
-        const user = users[room.key][socket.id];
-        const targetUser = users[room.key][data.to];
-        if (user.user.id === room.host_id && targetUser.user.id !== room.host_id) {
-            const user = users[room.key][data.to];
-
-            await Penalty.create({
-                kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
-                room_id: room.id,
-                user_id: user?.user?.id,
-                user_ip: user.ip,
-            });
-
-            delete users[room.key][data.to];
-            delete typistUsers[room.key][data.to];
-
-
-            socket.to(data.to).emit('error',{
-                data:{
-                    code: 403
-                }
-            });
-
-            io.emit('get-users',{
-                data:{
-                    users: users[room.key]
-                },
-                status: 200
-            });
-        }
-    }
-}
-
-module.exports.sendCandidate = async (io,socket,data,room) => {
-    socket.broadcast.emit('add-candidate',{
-        data
-    });
 }

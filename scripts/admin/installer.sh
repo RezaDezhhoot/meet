@@ -13,7 +13,7 @@ fi
 
 docker-compose -f $COMPOSE_FILE up --build -d admin
 
-docker-compose -f $COMPOSE_FILE exec -T admin bash <<EOF
+docker-compose -f $COMPOSE_FILE exec -T admin bash << EOF
   echo "Generating key..."
   php artisan key:generate
 
@@ -25,6 +25,14 @@ docker-compose -f $COMPOSE_FILE exec -T admin bash <<EOF
 
   echo "Link storage."
   php artisan storage:link
+
+  "/usr/bin/supervisord"
+
+  supervisorctl reread
+
+  supervisorctl update
+
+  supervisorctl start all
 EOF
 
 echo "🔴 Installing npm dependencies..."

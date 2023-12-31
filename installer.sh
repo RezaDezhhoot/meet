@@ -55,7 +55,7 @@ select service in shared admin backend frontend all; do
           1)
             installer shared
           ;;
-          1)
+          2)
             installer $shared_service
           ;;
           3)
