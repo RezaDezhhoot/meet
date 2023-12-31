@@ -130,7 +130,7 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        @foreach($room->data as $key => $user)
+                                                        @forelse($room->data as $key => $user)
                                                             <tr>
                                                                 <td>{{ $loop->iteration  }}</td>
                                                                 <td class="d-flex align-items-center">
@@ -144,7 +144,11 @@
                                                                 <td>{{ $user['user']['type'] }}</td>
                                                                 <td>{{ $key }}</td>
                                                             </tr>
-                                                        @endforeach
+                                                        @empty
+                                                            <td class="text-center" colspan="6">
+                                                                <strong>هیچ کاربری در این اتاق انلاین نمی باشد</strong>
+                                                            </td>
+                                                        @endforelse
                                                         </tbody>
                                                     </table>
                                                 </div>
