@@ -73,6 +73,32 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h3 class="pb-3">
+                                    نمودار جریان اتاق ها
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="card card-custom gutter-b">
+                                    <div class="card-header">
+                                        <div class="card-title">
+                                            <h3 class="card-label">Column Chart</h3>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" wire:ignore>
+                                        <!--begin::Chart-->
+                                        <div id="chart_3"></div>
+                                        <!--end::Chart-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="pb-3">
                                     جزئیات اتاق ها
                                 </h3>
                             </div>
