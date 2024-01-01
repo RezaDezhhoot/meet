@@ -26,12 +26,9 @@ docker-compose -f $COMPOSE_FILE exec -T admin bash << EOF
   echo "Link storage."
   php artisan storage:link
 
-  "/usr/bin/supervisord"
-
+  service supervisor start
   supervisorctl reread
-
   supervisorctl update
-
   supervisorctl start all
 EOF
 

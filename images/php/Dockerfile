@@ -40,14 +40,6 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN composer install --ignore-platform-reqs
 
-COPY ./supervisors/admin /etc/supervisor/conf.d/
-
-CMD ["/usr/bin/supervisord"]
-
-CMD supervisorctl reread
-CMD supervisorctl update
-CMD supervisorctl start all
-
 CMD php artisan serve --host=0.0.0.0
 
 EXPOSE 8000

@@ -34,3 +34,9 @@ else
   echo "$1" "Deployer"
   bash ./scripts/"$1"/deployer.sh
 fi
+
+echo "🔴 Remove old images"
+if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then
+  # shellcheck disable=SC2046
+  docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
+fi;

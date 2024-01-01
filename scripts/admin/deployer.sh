@@ -11,12 +11,6 @@ echo "🔴 Building images"
 docker-compose -f $COMPOSE_FILE down admin
 docker-compose -f $COMPOSE_FILE up -d --build admin
 
-echo "🔴 Remove old images"
-if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then
-  # shellcheck disable=SC2046
-  docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
-fi;
-
 echo "🔴 Installing dependencies..."
 docker-compose -f $COMPOSE_FILE exec -T admin bash <<EOF
   echo "🔴 Migrating"
@@ -24,6 +18,11 @@ docker-compose -f $COMPOSE_FILE exec -T admin bash <<EOF
 
   echo "🔴 Optimizing"
   php artisan optimize
+
+  service supervisor start
+  supervisorctl reread
+  supervisorctl update
+  supervisorctl start all
 EOF
 
 echo "🔴 Installing npm dependencies..."

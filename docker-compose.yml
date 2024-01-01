@@ -26,6 +26,7 @@ services:
       - ./images/php/php.ini:/usr/local/etc/php/php.ini
       - ./admin:/home/app
       - /home/app/vendor
+      - ./supervisors/admin:/etc/supervisor/conf.d/
     networks:
       - main
   npm:

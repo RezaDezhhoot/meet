@@ -13,6 +13,12 @@ fi
 function installer() {
   echo "$1" "installer"
   bash  ./scripts/"$1"/installer.sh
+
+  echo "🔴 Remove old images"
+  if [[ $(docker images --filter "dangling=true" -q --no-trunc) ]]; then
+    # shellcheck disable=SC2046
+    docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
+  fi;
 }
 
 read -r -p 'Database config?[no/yes] no ' CONFIG_DATABASE
@@ -87,6 +93,3 @@ select service in shared admin backend frontend all; do
       exit 1
   esac
 done
-
-
-
