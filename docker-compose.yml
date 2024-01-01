@@ -106,6 +106,8 @@ services:
     image: phpmyadmin
     container_name: phpmyadmin
     restart: always
+    depends_on:
+      - mysql
     ports:
       - 5050:80
     environment:
