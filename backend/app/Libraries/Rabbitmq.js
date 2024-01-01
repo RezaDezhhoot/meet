@@ -1,7 +1,7 @@
 const amqp = require('amqplib/callback_api');
 
 module.exports.directPublish = async (exchangeName, routingKey  , msg , queue  , options = {}) => {
-    const opt = { credentials: require('amqplib').credentials.plain(process.env.RABBITMQ_USER, process.env.RABBITMQ_PASSWORD) };
+    const opt = { credentials: require('amqplib/callback_api').credentials.plain(process.env.RABBITMQ_USER, process.env.RABBITMQ_PASSWORD) };
     amqp.connect(`amqp://${process.env.RABBITMQ_HOST}`,opt, function(error0, connection) {
         if (error0) {
             throw error0;

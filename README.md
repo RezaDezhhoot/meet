@@ -20,8 +20,11 @@ bash deployer.sh
 
 1. [x] Admin service will available on **http://server-ip:8000**
 2. [x] Backend service will available on **http://server-ip:3000**
-3. [x] Database service will available on port **3306**
-4. [x] Frontend service will available on **http://server-ip:4173**
+3. [x] Frontend service will available on **http://server-ip:4173**
+4. [x] Database service will available on port **3306**
+5. [x] Phpmyadmin service will available on **http://server-ip:5050**
+6. [x] RabbitMQ service will available on **http://server-ip:5672**
+7. [x] RabbitMQ control panel service will available on **http://server-ip:15672**
 ---
 ### **Default access:**
 * Admin phone: **00123456789**

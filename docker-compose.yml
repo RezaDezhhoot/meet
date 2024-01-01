@@ -102,8 +102,19 @@ services:
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - main
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - 5050:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - main
   rabbitmq:
     image: rabbitmq:3.8-management-alpine
+    tty: true
     hostname: ${RABBITMQ_HOST}
     container_name: ${RABBITMQ_HOST}
     restart: on-failure
