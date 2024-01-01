@@ -20,7 +20,7 @@ echo "Database connected successfully."
 read -r -p "Would you like to install phpmyadmin?[yes/no] no " PHPMYADMIN
 
 if [[ $PHPMYADMIN == 'yes' || $PHPMYADMIN == 'YES' || $PHPMYADMIN == "y" || $PHPMYADMIN == "Y" ]]; then
-  docker-compose -f $COMPOSE_FILE up -d $phpmyadmin
+  docker-compose -f $COMPOSE_FILE up -d phpmyadmin
 
   echo -e "\n"
 

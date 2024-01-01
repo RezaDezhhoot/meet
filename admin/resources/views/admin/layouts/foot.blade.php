@@ -70,7 +70,7 @@
 <script src="{{asset('admin/js/select2.min.js')}}"></script>
 <script src="{{asset('/vendor/laravel-filemanager/js/stand-alone-button.js')}}"></script>
 <script src="{{asset('bower_components/jquery.countdown/dist/jquery.countdown.js')}}"></script>
-<script src="{{asset('admin/js/pages/features/charts/apexcharts.js')}}"></script>
+{{--<script src="{{asset('admin/js/pages/features/charts/apexcharts.js')}}"></script>--}}
 <script src="{{asset('admin/js/pages/crud/forms/widgets/bootstrap-datepicker.js') }}"></script>
 {{--<script src="{{asset('admin/js/pages/custom/wizard/wizard-2.js') }}"></script>--}}
 @livewireScripts

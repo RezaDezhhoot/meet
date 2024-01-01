@@ -44,6 +44,5 @@
     <!--end::Page-->
 </div>
 @include('admin.layouts.foot')
-@stack('scripts')
 </body>
 </html>

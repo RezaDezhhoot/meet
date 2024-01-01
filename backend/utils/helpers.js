@@ -3,7 +3,6 @@ const moment = require('jalali-moment');
 const path = require("path");
 const appDir = path.dirname(require.main.filename);
 const fs = require('fs');
-const multer = require('multer');
 const User = require('../app/Modules/User/Models/User');
 const crypto = require('crypto');
 
