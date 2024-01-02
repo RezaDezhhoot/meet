@@ -9,6 +9,7 @@ let users = {};
 let typistUsers = {};
 let host = {};
 let host_socket_id = {};
+const validator = require('validator');
 
 const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
@@ -125,10 +126,11 @@ module.exports.newMessage = async (io,socket,data,room) => {
     let status = 201;
     let message;
     try {
-        if (data.message && data.message.length > 0 && data.message.length <= 100 && typeof data.message === 'string') {
+        if (data.message && data.message.length > 0 && data.message.length <= 200 && typeof data.message === 'string') {
             const user = users[room.key][socket.id];
             message = await Chat.create({
                 text: Buffer.from(data.message,'utf-8').toString('base64'),
+                // text: Buffer.from(validator.escape(data.message),'utf-8').toString('base64'),
                 room_id: room.id,
                 sender: user.name,
                 user_id: user.user.id ?? null,

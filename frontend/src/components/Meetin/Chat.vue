@@ -27,7 +27,7 @@
           <span class="mx-[0.5rem]">:</span>
 
           <div class="message">
-            <p>{{ chat.text }}</p>
+            <p v-html="setLinks(chat.text)"></p>
           </div>
         </li>
       </ul>
@@ -85,6 +85,10 @@ export default {
     });
   },
   methods:{
+    setLinks(text) {
+      const Rexp = /(\b(https?|ftp|file):\/\/([-A-Z0-9+&@#%?=~_|!:,.;]*)([-A-Z0-9+&@#%?\/=~_|!:,.;]*)[-A-Z0-9+&@#\/%=~_|])/ig;
+      return text.replace(Rexp, "<a href='$1' class='text-cyan-500' target='_blank'>$1</a>");
+    },
     loadOldChats(){
       axios.get(`/v1/chats?room=${this.$route.params.key}`).then(res => {
         this.messages = res.data.data.chats.reverse();
@@ -104,7 +108,7 @@ export default {
       this.socket.emit('no-typing');
     },
     sendMessage(){
-      if (this.message && this.message.length > 0 && this.message.length <= 100 && typeof this.message === 'string') {
+      if (this.message && this.message.length > 0 && this.message.length <= 200 && typeof this.message === 'string') {
         this.socket.emit('new-message',{
           message: this.message
         });

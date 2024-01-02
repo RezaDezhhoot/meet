@@ -28,7 +28,7 @@
                                 <td>{{ $item->room->title }}</td>
                                 <td>{{ $item->sender }}</td>
                                 <td>{{ $item->user_ip }}</td>
-                                <td>{{ $item->text }}</td>
+                                <td>{!! $item->text !!}</td>
                                 <td>
                                     @if($item->user)
                                         <ul>
