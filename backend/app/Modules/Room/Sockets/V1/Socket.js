@@ -128,7 +128,7 @@ module.exports.newMessage = async (io,socket,data,room) => {
         if (data.message && data.message.length > 0 && data.message.length <= 100 && typeof data.message === 'string') {
             const user = users[room.key][socket.id];
             message = await Chat.create({
-                text: data.message,
+                text: Buffer.from(data.message,'utf-8').toString('base64'),
                 room_id: room.id,
                 sender: user.name,
                 user_id: user.user.id ?? null,
