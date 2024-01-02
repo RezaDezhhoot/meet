@@ -37,6 +37,14 @@ Route::group(['prefix' => 'admin' , 'as' => 'admin.' , 'middleware' => ['auth','
         Route::get('',\App\Http\Controllers\Subscription\IndexSubscription::class)->name('index');
         Route::get('/{action}/{id?}',\App\Http\Controllers\Subscription\StoreSubscription::class)->name('store');
     });
+    Route::group(['prefix' => 'chats' , 'as' => 'chat.'],function () {
+        Route::get('',\App\Http\Controllers\Chats\Chats::class)->name('index');
+    });
+
+    Route::group(['prefix' => 'feed'],function () {
+        Route::get('rooms',[\App\Http\Controllers\FeedController::class,'rooms']);
+        Route::get('users',[\App\Http\Controllers\FeedController::class,'users']);
+    });
 
     Route::group(['prefix' => 'settings' , 'as' => 'setting.'],function () {
         Route::get('base',\App\Http\Controllers\Setting\Base::class)->name('base');

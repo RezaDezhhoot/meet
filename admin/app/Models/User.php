@@ -71,4 +71,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Subscription::class,'users_has_subscriptions');
     }
+
+    public function scopeConcat($q)
+    {
+        return $q->selectRaw("id , CONCAT_WS(' > ' , name , phone , email) as text");
+    }
 }

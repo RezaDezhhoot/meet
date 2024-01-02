@@ -60,7 +60,7 @@
                                 <span class="card-title font-weight-bolder text-dark-75 font-size-h2 mb-0 mt-6 d-block">
                                 {{ $users_count }}عدد
                             </span>
-                                <span class="font-weight-bold text-dark font-size-lg">کاربران</span>
+                                <span class="font-weight-bold text-dark font-size-lg">کاربران ثبت نام شده</span>
                             </div>
                             <!--end::Body-->
                         </div>

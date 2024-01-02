@@ -20,7 +20,9 @@ class StoreRoom extends BaseComponent
         $this->authorizing('edit_rooms');
         self::set_mode($action);
         if ($this->mode == self::UPDATE_MODE) {
-            $this->room = Room::query()->findOrFail($id);
+            $this->room = Room::query()->with('host' , function($q) {
+                return $q->concat();
+            })->findOrFail($id);
             $this->title = $this->room->title;
             $this->capacity = $this->room->capacity;
             $this->status = $this->room->status;

@@ -11,7 +11,9 @@
                 <x-admin.forms.input with="6" type="text" id="title" label="عنوان*" wire:model.defer="title"/>
                 <x-admin.forms.input with="6" type="number" id="capacity" label="ظرفیت*" wire:model.defer="capacity"/>
                 <x-admin.forms.dropdown with="6" id="status" :data="$data['status']" label="وضعیت*" wire:model="status"/>
-                <x-admin.forms.searchable-dropdown help="{{$room->host->name ?? ''}}" wire:keydown="searchHost" with="6" id="host_id" :data="$data['users']" label="میزبان*" wire:model="host_id"/>
+{{--                <x-admin.forms.searchable-dropdown help="{{$room->host->name ?? ''}}" wire:keydown="searchHost" with="6" id="host_id" :data="$data['users']" label="میزبان*" wire:model="host_id"/>--}}
+                <x-admin.forms.select2 id="host_id" :data="$room->host->toArray()"  width="6" label="میزبان*" ajaxUrl="/admin/feed/users" wire:model.defer="host_id"/>
+
             </div>
         </div>
     </div>
