@@ -1,4 +1,4 @@
-<div wire:poll.6s>
+<div wire:poll.6s >
     @section('title','داشبورد')
     @if(auth()->user()->hasPermissionTo('show_dashboard'))
         <div class="subheader py-2 py-lg-6 subheader-solid" id="kt_subheader">
@@ -78,6 +78,7 @@
                             </div>
                             <div class="panel-body">
                                 @include('admin.layouts.advance-table')
+                                <x-admin.loader />
                                 <table class="table table-bordered">
                                     <thead class="thead-dark">
                                     <tr >
@@ -158,7 +159,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            {{$rooms->links('admin.layouts.paginate')}}
+                            {{ sizeof($rooms) > 0 ? $rooms->links('admin.layouts.paginate') : ''}}
                         </div>
                     </div>
                 </div>
@@ -172,14 +173,7 @@
                                         <div class="card-title">
                                             <div class="d-flex align-items-center">
                                                 <h3 class="card-label">
-                                                    <span>
-                                                        نمودار جریان اتاق ها
-                                                         <button wire:click="refresh" class="btn mt-2 mx-0 p-0">
-                                                            <i class="flaticon-refresh"></i>
-                                                        </button>
-                                                    </span>
-                                                    <br>
-                                                    <small>(بروزرسانی خودکار در هر 35 ثانیه)</small>
+                                                    نمودار جریان اتاق ها
                                                 </h3>
                                             </div>
                                             <div>
@@ -208,35 +202,25 @@
             // Shared Colors Definition
             const primary = '#6993FF';
             const success = '#1BC5BD';
-            const info = '#8950FC';
             const warning = '#FFA800';
-            const danger = '#F64E60';
-
             // Class definition
-
             var KTApexChartsDemo = function () {
                 // Private functions
                 var _demo3 = function () {
                     const apexChart = "#chart_3";
                     var options = {
                         series: [{
-                            name: 'تعداد کل',
+                            name: 'تعداد کل کاربران انلاین',
                             data: data.total
-                        }, {
-                            name: 'ورود به صورت لاگین',
-                            data:  data.login
-                        }, {
-                            name: 'ورود به صورت مهمان',
-                            data: data.guest
                         }],
                         chart: {
                             type: 'bar',
-                            height: 350
+                            height: 450
                         },
                         plotOptions: {
                             bar: {
                                 horizontal: false,
-                                columnWidth: '55%',
+                                columnWidth: '30%',
                                 endingShape: 'rounded'
                             },
                         },
@@ -271,6 +255,18 @@
 
                     var chart = new ApexCharts(document.querySelector(apexChart), options);
                     chart.render();
+
+                    Livewire.on('updateChart' , function (data){
+                        chart.updateSeries([{
+                            data: data.total,
+                            xaxis: [],
+                        }])
+                        chart.updateOptions({
+                            xaxis: {
+                                categories: data.x,
+                            },
+                        })
+                    });
                 }
                 return {
                     // public functions

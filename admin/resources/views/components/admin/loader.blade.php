@@ -1,7 +1,7 @@
 @props(['text'=>'در حال پردازش'])
-<div class="form-group col-12">
+<div class="form-group p-0 m-0 col-12">
     <div class="middle" wire:loading {{ $attributes }} >
-        <small class="text-gray"> {{$text}} </small>
+        <span class="text-gray"> {{$text}}...</span>
         <div class="bar bar1"></div>
         <div class="bar bar2"></div>
         <div class="bar bar3"></div>

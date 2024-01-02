@@ -15,7 +15,9 @@ class Dashboard extends BaseComponent
 {
     public $rooms_count = 0 , $users_count , $placeholder = 'عنوان اتاق اطلاعات میزبان(نام شماره ایمیل)';
 
-    public $loaded = false , $chart_timer = 0 , $force = false;
+    public $loaded = false , $chart_timer = 0 , $emit_chart = false , $chartData = [];
+
+    protected $rooms = [];
 
     use WithPagination;
 
@@ -26,13 +28,18 @@ class Dashboard extends BaseComponent
     }
     public function render()
     {
-        $rooms = $this->getRoom();
-        return view('admin.dashboard.dashboard' , get_defined_vars())->extends('admin.layouts.admin');
+        $this->getRoom();
+        if ($this->emit_chart) {
+            $this->chart();
+        }
+        $this->emit_chart = true;
+
+        return view('admin.dashboard.dashboard' , ['rooms' => $this->rooms])->extends('admin.layouts.admin');
     }
 
     public function getRoom()
     {
-        $rooms = RoomDetails::query()
+        $this->rooms = RoomDetails::query()
             ->latest()
             ->when($this->search , function ($q) {
                 return $q->whereHas('room',function ($q) {
@@ -43,44 +50,32 @@ class Dashboard extends BaseComponent
                 });
             })->with(['room','room.host'])
             ->paginate($this->per_page);
-
-        if ($this->loaded && ($this->chart_timer < time() || $this->force)) {
-            $this->chart($rooms);
-        }
-
-        $this->loaded = true;
-
-        return $rooms;
     }
 
-    public function refresh() {
-        $this->force = true;
-    }
 
-    public function chart($rooms)
+    public function getChartData()
     {
-        $x = [];
-        $total = [];
-        $guest = [];
-        $login = [];
-
-        foreach ($rooms as $room) {
-            $x[] = $room->room->title;
-            $total[] = count($room->data);
-            $login_count = collect($room->data)->filter(function ($v) {
-                return $v['media']['type'] == 'login';
-            })->count();
-            $guest[] = max(count($room->data) - $login_count , 0);
-            $login[] = $login_count;
+        $data = [];
+        foreach ($this->rooms as $room) {
+            $data['x'][] = $room->room->title;
+            $data['total'][] = count($room->data);
         }
-
         $this->chart_timer = time() + 35;
-        $this->force = false;
-        $this->emit('chart',[
-            'x' => $x,
-            'total' => $total,
-            'guest' => $guest,
-            'login' => $login,
-        ]);
+        $this->chartData = $data;
+
+        if ($this->loaded) {
+            $this->emit('updateChart',$data);
+        }
+        return $data;
+    }
+
+
+    public function chart()
+    {
+        $data = $this->getChartData();
+        if (! $this->loaded) {
+            $this->loaded = true;
+            $this->emit('chart',$data);
+        }
     }
 }
