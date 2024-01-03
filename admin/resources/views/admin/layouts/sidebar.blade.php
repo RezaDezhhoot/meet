@@ -73,6 +73,9 @@
                 @can('index_penalties')
                     <x-admin.menu-item href="{{route('admin.penalty.index')}}" icon="fa fa-user-times" :active="request()->routeIs(['admin.penalty.index'])" label="جریمه ها" />
                 @endcan
+                @can('index_logs')
+                    <x-admin.menu-item href="{{route('admin.log.index')}}" icon="flaticon-list-1" :active="request()->routeIs(['admin.log.index'])" label="فعالیت های کاربران" />
+                @endcan
                 @can('show_users')
                     <x-admin.menu-item href="{{route('admin.user.index')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user.index','admin.user.store'])" label="کاربر" />
                 @endcan

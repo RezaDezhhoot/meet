@@ -1,6 +1,6 @@
 <div>
-    @section('title','جریمه ها ')
-    <x-admin.form-control   title="جریمه ها"/>
+    @section('title','فعالیت کاربران')
+    <x-admin.form-control   title="فعالیت کاربران"/>
     <div class="card card-custom">
         <div class="card-body">
             <x-admin.forms.select2 id="room" :data="$room_detail" label="اتاق" ajaxUrl="/admin/feed/rooms" wire:model.defer="room"/>
@@ -11,17 +11,18 @@
                         <thead>
                         <tr>
                             <th>#</th>
+                            <th>رویداد</th>
                             <th>IP کاربر</th>
                             <th>عنوان اتاق</th>
                             <th>اطلاعات کاربر</th>
-                            <th>پایان جریمه</th>
-                            <th>عملیات</th>
+                            <th>تاریخ </th>
                         </tr>
                         </thead>
                         <tbody>
                         @forelse($items as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <th>{{ $item->action }}</th>
                                 <th>{{ $item->user_ip }}</th>
                                 <td>{{ $item->room->title }}</td>
                                 <td>
@@ -36,10 +37,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    {{ $item->kicked_date }}
-                                </td>
-                                <td>
-                                    <x-admin.delete-btn onclick="deleteItem('{{$item->id}}')" />
+                                    {{ $item->created_at }}
                                 </td>
                             </tr>
                         @empty
@@ -55,23 +53,3 @@
         </div>
     </div>
 </div>
-@push('scripts')
-    <script>
-        function deleteItem(id) {
-            Swal.fire({
-                title: 'حذف !',
-                text: 'آیا از حذف این مورد اطمینان دارید؟',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                cancelButtonText: 'خیر',
-                confirmButtonText: 'بله'
-            }).then((result) => {
-                if (result.value) {
-                @this.call('delete', id)
-                }
-            })
-        }
-    </script>
-@endpush

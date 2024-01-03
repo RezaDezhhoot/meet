@@ -27,6 +27,7 @@ docker-compose -f $COMPOSE_FILE exec -T admin bash << EOF
   php artisan storage:link
 
   service supervisor start
+
   supervisorctl reread
   supervisorctl update
   supervisorctl start all

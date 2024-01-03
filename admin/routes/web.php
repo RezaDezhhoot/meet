@@ -45,6 +45,10 @@ Route::group(['prefix' => 'admin' , 'as' => 'admin.' , 'middleware' => ['auth','
         Route::get('',\App\Http\Controllers\Penalties\Penalties::class)->name('index');
     });
 
+    Route::group(['prefix' => 'logs' , 'as' => 'log.'],function () {
+        Route::get('',\App\Http\Controllers\Logs\Logs::class)->name('index');
+    });
+
     Route::group(['prefix' => 'feed'],function () {
         Route::get('rooms',[\App\Http\Controllers\FeedController::class,'rooms']);
         Route::get('users',[\App\Http\Controllers\FeedController::class,'users']);

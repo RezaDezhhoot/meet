@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Penalties;
+namespace App\Http\Controllers\Logs;
 
 use App\Http\Controllers\BaseComponent;
-use App\Models\Penalty;
 use App\Models\Room;
+use App\Models\UserLog;
 use Livewire\WithPagination;
 
-class Penalties extends BaseComponent
+class Logs extends BaseComponent
 {
     use WithPagination;
 
@@ -19,14 +19,14 @@ class Penalties extends BaseComponent
 
     public function mount()
     {
-        $this->authorizing('index_penalties');
+        $this->authorizing('index_logs');
     }
 
     public function render()
     {
-        $items = Penalty::query()
-            ->latest()
+        $items = UserLog::query()
             ->with(['room','user'])
+            ->latest()
             ->when($this->room , function ($q) {
                 return $q->whereHas('room',function ($q){
                     $this->room_detail = Room::query()->concat()->find($this->room)->toArray();
@@ -34,15 +34,10 @@ class Penalties extends BaseComponent
                 });
             })->when($this->search , function ($q){
                 return $q->whereHas('user',function ($q){
-                   return $q->search($this->search);
+                    return $q->search($this->search);
                 });
             })->paginate($this->per_page);
-        return view('admin.penalties.penalties' , get_defined_vars())->extends('admin.layouts.admin');
-    }
 
-    public function delete($id)
-    {
-        $this->authorizing('delete_penalties');
-        Penalty::destroy($id);
+        return view('admin.logs.logs' , get_defined_vars())->extends('admin.layouts.admin');
     }
 }

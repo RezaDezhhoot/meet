@@ -128,6 +128,14 @@ module.exports.newMessage = async (io,socket,data,room) => {
     try {
         if (data.message && data.message.length > 0 && data.message.length <= 200 && typeof data.message === 'string') {
             const user = users[room.key][socket.id];
+            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+                room_id: room.id,
+                action: 'new-message',
+                user_id: user.user.id ?? null,
+                user_ip: socket.handshake.address,
+                user_name: user.name,
+            }),'logLists');
+
             message = await Chat.create({
                 text: Buffer.from(data.message,'utf-8').toString('base64'),
                 // text: Buffer.from(validator.escape(data.message),'utf-8').toString('base64'),
@@ -178,6 +186,13 @@ module.exports.shareStream = async (io,socket,data,room) => {
             delete data.offer['camera'];
         } else {
             users[room.key][socket.id].media.settings.camera = true;
+            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+                room_id: room.id,
+                action: 'share-camera',
+                user_id: users[room.key][socket.id].user.id ?? null,
+                user_ip: socket.handshake.address,
+                user_name: users[room.key][socket.id].name,
+            }),'logLists');
         }
     }
 
@@ -186,6 +201,13 @@ module.exports.shareStream = async (io,socket,data,room) => {
             delete data.offer['audio'];
         } else {
             users[room.key][socket.id].media.settings.audio = true;
+            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+                room_id: room.id,
+                action: 'share-audio',
+                user_id: users[room.key][socket.id].user.id ?? null,
+                user_ip: socket.handshake.address,
+                user_name: users[room.key][socket.id].name,
+            }),'logLists');
         }
     }
 
@@ -194,8 +216,16 @@ module.exports.shareStream = async (io,socket,data,room) => {
             delete data.offer['screen'];
         } else {
             users[room.key][socket.id].media.settings.screen = true;
+            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+                room_id: room.id,
+                action: 'share-screen',
+                user_id: users[room.key][socket.id].user.id ?? null,
+                user_ip: socket.handshake.address,
+                user_name: users[room.key][socket.id].name,
+            }),'logLists');
         }
     }
+
 
     socket.to(Object.values(data.to)).emit("get-offer",{
         data: {
@@ -335,35 +365,24 @@ module.exports.kickClient = async (io,socket,data,room) => {
         const user = users[room.key][socket.id];
         const targetUser = users[room.key][data.to];
         if (user.user.id === room.host_id && targetUser.user.id !== room.host_id) {
-            const user = users[room.key][data.to];
-
             await Penalty.create({
                 kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
                 room_id: room.id,
-                user_id: user?.user?.id,
-                user_ip: user.ip,
+                user_id: targetUser?.user?.id,
+                user_ip: targetUser.ip,
             });
-
-            delete users[room.key][data.to];
-            delete typistUsers[room.key][data.to];
-
-            await RabbitMQ.directPublish('rooms',`users`,JSON.stringify({
-                users: users[room.key],
-                room_id: room.id
-            }),'lists');
+            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+                room_id: room.id,
+                action: 'kicked-out',
+                user_id: targetUser.user.id ?? null,
+                user_ip: targetUser.ip,
+                user_name: targetUser.name,
+            }),'logLists');
 
             socket.to(data.to).emit('error',{
                 data:{
                     code: 403
                 }
-            });
-
-            await RabbitMQ.directPublish('rooms',`users`,JSON.stringify(users),'list');
-            io.emit('get-users',{
-                data:{
-                    users: users[room.key]
-                },
-                status: 200
             });
         }
     }
