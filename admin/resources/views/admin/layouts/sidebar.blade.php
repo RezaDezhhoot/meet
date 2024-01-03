@@ -65,10 +65,13 @@
                 @endif
                 <li class="menu-section">
                     <h4 class="menu-text">بخش کاربر</h4>
-                    <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+                    <i class="menu-icon ki ki-bold-more-hor icon-md "></i>
                 </li>
                 @can('index_chats')
                     <x-admin.menu-item href="{{route('admin.chat.index')}}" icon="flaticon-chat" :active="request()->routeIs(['admin.chat.index'])" label="چت ها" />
+                @endcan
+                @can('index_penalties')
+                    <x-admin.menu-item href="{{route('admin.penalty.index')}}" icon="fa fa-user-times" :active="request()->routeIs(['admin.penalty.index'])" label="جریمه ها" />
                 @endcan
                 @can('show_users')
                     <x-admin.menu-item href="{{route('admin.user.index')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user.index','admin.user.store'])" label="کاربر" />

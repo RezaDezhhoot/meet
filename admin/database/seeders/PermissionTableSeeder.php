@@ -35,6 +35,9 @@ class PermissionTableSeeder extends Seeder
             ['name' => 'index_chats' , 'guard_name'=> 'web'],
             ['name' => 'delete_chats' , 'guard_name'=> 'web'],
 
+            ['name' => 'index_penalties' , 'guard_name'=> 'web'],
+            ['name' => 'delete_penalties' , 'guard_name'=> 'web'],
+
             ['name' => 'show_settings' , 'guard_name'=> 'web'],
             ['name' => 'edit_base_settings' , 'guard_name'=> 'web'],
         ];
