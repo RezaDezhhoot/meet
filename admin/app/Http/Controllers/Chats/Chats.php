@@ -22,7 +22,7 @@ class Chats extends BaseComponent
         $this->authorizing('index_chats');
         $items = Chat::query()->with(['room','user'])->latest()
             ->when($this->room , function ($q) {
-                $this->room_detail = Room::query()->select(['id','title as text'])->findOrFail($this->room)->toArray();
+                $this->room_detail = Room::query()->concat()->findOrFail($this->room)->toArray();
                 return $q->where('room_id',$this->room);
             })->search($this->search)->paginate($this->per_page);
 

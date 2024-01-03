@@ -1,6 +1,6 @@
 <div>
-    @section('title','چت ها ')
-    <x-admin.form-control   title="چت ها"/>
+    @section('title','جریمه ها ')
+    <x-admin.form-control   title="جریمه ها"/>
     <div class="card card-custom">
         <div class="card-body">
             <x-admin.forms.select2 id="room" :data="$room_detail" label="اتاق" ajaxUrl="/admin/feed/rooms" wire:model.defer="room"/>
@@ -11,12 +11,10 @@
                         <thead>
                         <tr>
                             <th>#</th>
-                            <th>شماره شناسه</th>
-                            <th>عنوان اتاق</th>
-                            <th>نام کاربر</th>
                             <th>IP کاربر</th>
-                            <th>متن چت</th>
+                            <th>عنوان اتاق</th>
                             <th>اطلاعات کاربر</th>
+                            <th>پایان جریمه</th>
                             <th>عملیات</th>
                         </tr>
                         </thead>
@@ -24,21 +22,20 @@
                         @forelse($items as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item->id }}</td>
+                                <th>{{ $item->user_ip }}</th>
                                 <td>{{ $item->room->title }}</td>
-                                <td>{{ $item->sender }}</td>
-                                <td>{{ $item->user_ip }}</td>
-                                <td>{{ $item->text }}</td>
                                 <td>
                                     @if($item->user)
                                         <ul>
-                                            <li>نام کاربر : {{ $item->user->name }}</li>
                                             <li>شماره همراه : {{ $item->user->phone }}</li>
                                             <li>ایمیل : {{ $item->user->email }}</li>
                                         </ul>
                                     @else
                                         کاربر مهمان
                                     @endif
+                                </td>
+                                <td>
+                                    {{ $item->kicked_date }}
                                 </td>
                                 <td>
                                     <x-admin.delete-btn onclick="deleteItem('{{$item->id}}')" />

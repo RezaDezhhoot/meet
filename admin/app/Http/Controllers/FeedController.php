@@ -13,7 +13,7 @@ class FeedController extends Controller
     {
         $items = Room::query()->when($request->filled('search'),function ($q) use ($request){
             return $q->search($request->get('search'));
-        })->select(['id','title as text'])->take(10)->get()->toArray();
+        })->concat()->take(10)->get()->toArray();
         return response()->json($items);
     }
 

@@ -44,6 +44,11 @@ class Room extends Model
         });
     }
 
+    public function scopeConcat($q)
+    {
+        return $q->select(['id','title as text']);
+    }
+
     public function host(): BelongsTo
     {
         return  $this->belongsTo(User::class,'host_id');
