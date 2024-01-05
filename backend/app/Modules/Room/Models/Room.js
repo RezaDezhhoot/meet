@@ -23,7 +23,11 @@ const Room = sequelize.define('Room',{
     host_id: {
         type: DataTypes.BIGINT,
         allowNull: true,
-    }
+    },
+    owner_id: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
+    },
 },{
     tableName: 'rooms',
     createdAt: 'created_at',

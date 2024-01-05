@@ -24,6 +24,9 @@ router.beforeEach((to, from, next) => {
         case 'error':
             import ('../src/assets/error/css/style.css');
             break;
+        case 'oauth':
+            import ('../src/assets/meet/styles/custom.css');
+            break;
         default:
             import ('../src/assets/auth/css/bootstrap.min.css');
             import ('../src/assets/auth/css/style.css');

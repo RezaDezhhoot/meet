@@ -2,6 +2,7 @@ const {Router} = require('express');
 const {guest} = require('../Middlewares/Guest');
 const AuthController = require('../Controllers/Api/V1/AuthController');
 const TokenController = require('../Controllers/Api/V1/TokenController');
+const OAuthController = require('../Controllers/Api/V1/OAuthController');
 const ForgetPasswordController = require('../Controllers/Api/V1/ForgetPasswordController');
 const rateLimit = require("express-rate-limit");
 
@@ -38,5 +39,9 @@ routerV1.use('/forget-password',
 ).post('/forget-password',ForgetPasswordController.store);
 
 routerV1.patch('/reset-password',ForgetPasswordController.reset);
+
+routerV1.post('/oauth/generate',OAuthController.generate);
+
+routerV1.post('/oauth/verify',OAuthController.verify);
 
 exports.routerV1 = routerV1;

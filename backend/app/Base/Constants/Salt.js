@@ -1,0 +1,1 @@
+exports.ACCESS_TOKEN = '#Q$r-o12^7&kLp@2';

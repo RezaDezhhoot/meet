@@ -40,6 +40,10 @@ class PermissionTableSeeder extends Seeder
 
             ['name' => 'index_logs' , 'guard_name'=> 'web'],
 
+            ['name' => 'show_tokens' , 'guard_name'=> 'web'],
+            ['name' => 'edit_tokens' , 'guard_name'=> 'web'],
+            ['name' => 'delete_tokens' , 'guard_name'=> 'web'],
+
             ['name' => 'show_settings' , 'guard_name'=> 'web'],
             ['name' => 'edit_base_settings' , 'guard_name'=> 'web'],
         ];

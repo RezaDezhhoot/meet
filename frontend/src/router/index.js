@@ -45,6 +45,11 @@ const router = createRouter({
       path: '/error/:code?',
       name: 'error',
       component: () => import('../views/Error.vue')
+    },
+    {
+      path :'/oauth/:token',
+      name: 'oauth',
+      component: () => import('../views/OAuth.vue')
     }
   ],
   scrollBehavior(to, from, savePosition) {

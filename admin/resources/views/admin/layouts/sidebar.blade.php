@@ -70,6 +70,9 @@
                 @can('index_chats')
                     <x-admin.menu-item href="{{route('admin.chat.index')}}" icon="flaticon-chat" :active="request()->routeIs(['admin.chat.index'])" label="چت ها" />
                 @endcan
+                @can('show_tokens')
+                    <x-admin.menu-item href="{{route('admin.token.index')}}" icon="fas fa-key" :active="request()->routeIs(['admin.token.index','admin.token.store'])" label="کلید های دسترسی " />
+                @endcan
                 @can('index_penalties')
                     <x-admin.menu-item href="{{route('admin.penalty.index')}}" icon="fa fa-user-times" :active="request()->routeIs(['admin.penalty.index'])" label="جریمه ها" />
                 @endcan

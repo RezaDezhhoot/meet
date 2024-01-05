@@ -76,10 +76,10 @@ class StoreUser extends BaseComponent
             $model->verified_at = null;
         }
 
-        $model->save();
         if ($this->mode == self::CREATE_MODE || !empty($this->password))
             $model->password = $this->password;
 
+        $model->save();
         if ((auth()->user()->hasRole('super_admin') && !$model->hasRole('administrator')) || auth()->user()->hasRole('administrator'))
         {
             $model->syncRoles($this->userRole);

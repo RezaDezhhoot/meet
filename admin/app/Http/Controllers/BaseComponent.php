@@ -7,6 +7,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Morilog\Jalali\Jalalian;
 
 class BaseComponent extends Component
 {

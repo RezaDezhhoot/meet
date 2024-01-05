@@ -31,6 +31,8 @@
 	"fields.country_code": "کد کشور",
 	"fields.code": "کد تأیید",
 	"fields.image": "تصویر",
+	"fields.token": "توکن",
+	"fields.room-address": "ادرس اتاق",
 	"fields.floating_confirmation": "تأیید شناور",
 
 	"sms.error": "خطا در ارسال پیامک",

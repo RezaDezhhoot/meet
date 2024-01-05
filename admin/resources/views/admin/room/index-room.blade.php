@@ -15,6 +15,7 @@
                                 <th>کلید اختصاصی</th>
                                 <th>لینک اتاق</th>
                                 <th>ظرفیت</th>
+                                <th>مالک</th>
                                 <th>وضعیت</th>
                                 <th>عملیات</th>
                             </tr>
@@ -29,6 +30,15 @@
                                         <a target="_blank" href="{{ $item->room_link }}">ورود به اتاق</a>
                                     </td>
                                     <td>{{ $item->capacity }} نفر </td>
+                                    <td>
+                                        @if($item->owner)
+                                            <ul>
+                                                <li>نام : {{ $item->owner->name }}</li>
+                                                <li>شماره همراه : {{ $item->owner->phone }}</li>
+                                                <li>ایمیل : {{ $item->owner->email }}</li>
+                                            </ul>
+                                        @endif
+                                    </td>
                                     <td>{{ $item->status_label }}</td>
                                     <td>
                                         <x-admin.edit-btn href="{{ route('admin.room.store',['edit', $item->id]) }}" />

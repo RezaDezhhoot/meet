@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\AccessToken;
+use App\Observers\TokenObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -37,5 +39,7 @@ class RouteServiceProvider extends ServiceProvider
 //                ->domain(config('site.domains.admin'))
                 ->group(base_path('routes/web.php'));
         });
+
+        AccessToken::observe(TokenObserver::class);
     }
 }

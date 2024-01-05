@@ -19,7 +19,7 @@ exports.loadApiRoutes = (app) => {
 
     // Authentication API routes V1:
     const {routerV1} = require(path.join(appDir,'app','Modules/Auth/routes/api.js'));
-    app.use('/api/v1/auth',ValidRoom,routerV1);
+    app.use('/api/v1/auth',routerV1);
 
     // Room API routes V1:
     const {RoomRouterV1} = require(path.join(appDir,'app','Modules/Room/routes/api.js'));

@@ -49,6 +49,11 @@ Route::group(['prefix' => 'admin' , 'as' => 'admin.' , 'middleware' => ['auth','
         Route::get('',\App\Http\Controllers\Logs\Logs::class)->name('index');
     });
 
+    Route::group(['prefix' => 'access-tokens' , 'as' => 'token.'],function () {
+        Route::get('',\App\Http\Controllers\AccessTokens\AccessToken::class)->name('index');
+        Route::get('/{action}/{id?}',\App\Http\Controllers\AccessTokens\StoreAccessToken::class)->name('store');
+    });
+
     Route::group(['prefix' => 'feed'],function () {
         Route::get('rooms',[\App\Http\Controllers\FeedController::class,'rooms']);
         Route::get('users',[\App\Http\Controllers\FeedController::class,'users']);

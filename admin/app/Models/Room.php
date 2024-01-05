@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed $title
  * @property mixed $capacity
  * @property mixed $host_id
+ * @property mixed $owner_id
  */
 class Room extends Model
 {
@@ -52,5 +53,10 @@ class Room extends Model
     public function host(): BelongsTo
     {
         return  $this->belongsTo(User::class,'host_id');
+    }
+
+    public function owner(): BelongsTo
+    {
+        return  $this->belongsTo(User::class,'owner_id');
     }
 }
