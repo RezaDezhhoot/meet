@@ -269,9 +269,6 @@ module.exports.endStream = async (io,socket,data,room) => {
         io.emit('end-stream',{
             data: {
                 camera, screen, audio,
-                streamID: data.streamID ?? null,
-                screenStreamID: data.screenStreamID ?? null,
-                videoStreamID: data.videoStreamID ?? null,
                 from: socket.id
             }
         });

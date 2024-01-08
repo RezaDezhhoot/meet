@@ -110,6 +110,16 @@
             :show="user.user.id === host.id">
         </UserCamera>
 
+        <OtherCamera
+            width="25"
+            height="25"
+            :menu="true"
+            :user="user"
+            :isUser="user.user.id !== host.id"
+            :show="user.media.media.remote.camera"
+            :active="user.media.media.remote.camera && user.media.media.local.camera">
+        </OtherCamera>
+
         <UserMicrophone
             width="25"
             height="25"
@@ -138,6 +148,7 @@
 <script>
 
 import UserMicrophone from "./Elements/UserMicrophone.vue";
+import OtherCamera from "./Elements/OtherCamera.vue";
 import UserSpeaker from "./Elements/UserSpeaker.vue";
 import UserHandRising from "./Elements/UserHandRising.vue";
 import UserCamera from "./Elements/UserCamera.vue";
@@ -146,7 +157,7 @@ import Recorder from "./Recorder.vue";
 export default {
   name: "Top",
   components: {
-    UserMicrophone , UserSpeaker , UserHandRising , UserCamera ,Recorder
+    UserMicrophone , UserSpeaker , UserHandRising , UserCamera ,Recorder , OtherCamera
   },
   computed: {
     room(){

@@ -78,13 +78,15 @@
                   height="16"
                   :user="item"
                   :show="item.media.settings.hand_rising"
-                  :active="item.media.settings.hand_rising"></UserHandRising>
+                  :active="item.media.settings.hand_rising">
+              </UserHandRising>
             </div>
 
             <div class="flex" v-if="(host.id === user.user.id)">
               <Kick :client="item"></Kick>
               <Microphone :client="item"></Microphone>
               <Screen :client="item"></Screen>
+              <Camera :client="item"></Camera>
             </div>
           </li>
         </template>
@@ -99,11 +101,11 @@ import UserHandRising from "./Elements/UserHandRising.vue";
 import Kick from "./Actions/Kick.vue";
 import Microphone from "./Actions/Microphone.vue";
 import Screen from "./Actions/Screen.vue";
-
+import Camera from "./Actions/Camera.vue";
 export default {
   name: "Users",
   components:{
-    UserMicrophone , UserHandRising , Kick , Microphone , Screen
+    UserMicrophone , UserHandRising , Kick , Microphone , Screen , Camera
   },
   mounted() {
     this.wires();

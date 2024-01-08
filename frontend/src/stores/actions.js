@@ -34,9 +34,16 @@ export const actions = {
             // Set remote video stream
             state.peerConnections[id]['pc']['video'].ontrack = async function (stream) {
                 if (stream.track.kind === 'video') {
-                    let video = document.getElementById('video-player');
+                    // let video = document.getElementById('video-player');
+                    // video.srcObject = stream.streams[0];
+                    // video.load();
+
+                    const video = document.createElement('audio');
+                    video.id = stream.streams[0].id;
+                    video.muted = "muted";
                     video.srcObject = stream.streams[0];
                     video.load();
+                    document.getElementById('main').appendChild(video);
                 }
             };
             state.peerConnections[id]['pc']['video'].onicecandidate = function ({candidate}) {
@@ -275,6 +282,7 @@ export const actions = {
     async getOffer({state , commit} , data) {
         const media = Object.values(data.data.media);
         let answer = {};
+
         if (state.peerConnections[data.data.from] && state.peerConnections[data.data.from]['pc'] && media.length > 0) {
             // Make RTC screen answer
             if (media.includes('screen') && data.data.offer.hasOwnProperty('screen')) {
@@ -286,8 +294,12 @@ export const actions = {
                 await state.peerConnections[data.data.from]['pc']['screen'].setLocalDescription(new RTCSessionDescription(answer['screen']));
                 state.shareScreen = true;
 
-                if (! state.remoteStreams[data.data.streamID.screen] && data.data.streamID.hasOwnProperty('screen')) {
-                    state.remoteStreams[data.data.streamID.screen] = data.data.streamID.screen;
+                if (! state.remoteStreams['screen'] ) {
+                    state.remoteStreams['screen'] = {}
+                }
+
+                if (data.data.streamID.hasOwnProperty('screen')) {
+                    state.remoteStreams['screen'][data.data.from] = data.data.streamID['screen'];
                 }
             }
             // Make RTC video answer
@@ -299,10 +311,13 @@ export const actions = {
                 answer['camera'] = await state.peerConnections[data.data.from]['pc']['video'].createAnswer();
                 await state.peerConnections[data.data.from]['pc']['video'].setLocalDescription(new RTCSessionDescription(answer['camera']));
 
-                if (! state.remoteStreams[data.data.streamID.camera] && data.data.streamID.hasOwnProperty('camera')) {
-                    state.remoteStreams[data.data.streamID.camera] = data.data.streamID.camera;
+                if (! state.remoteStreams['camera'] ) {
+                    state.remoteStreams['camera'] = {}
                 }
-                state.showing = true;
+
+                if (data.data.streamID.hasOwnProperty('camera')) {
+                    state.remoteStreams['camera'][data.data.from] = data.data.streamID['camera'];
+                }
             }
             // Make RTC audio answer
             if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
@@ -312,8 +327,12 @@ export const actions = {
                 answer['audio'] = await state.peerConnections[data.data.from]['pc']['audio'].createAnswer();
                 await state.peerConnections[data.data.from]['pc']['audio'].setLocalDescription(new RTCSessionDescription(answer['audio']));
 
-                if (! state.remoteStreams[data.data.streamID.audio] && data.data.streamID.hasOwnProperty('audio')) {
-                    state.remoteStreams[data.data.streamID.audio] = data.data.streamID.audio;
+                if (! state.remoteStreams['audio'] ) {
+                    state.remoteStreams['audio'] = {}
+                }
+
+                if (data.data.streamID.hasOwnProperty('audio')) {
+                    state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
                 }
             }
             // Broadcast answers
@@ -380,12 +399,10 @@ export const actions = {
     },
     endStream({state , commit} , data) {
         try {
-            let streamID , videoStreamID;
             let media = Object.values(data.media);
 
             if (media.includes('audio')) {
                 if (state.localStream) {
-                    streamID = state.localStream.id;
                     state.localStream = null;
                 }
                 commit('controlMicrophone',false);
@@ -393,7 +410,6 @@ export const actions = {
 
             if (media.includes('camera')) {
                 if (state.videoStream) {
-                    videoStreamID = state.videoStream.id;
                     state.videoStream = null;
                 }
                 commit('controlCamera',false);
@@ -403,8 +419,6 @@ export const actions = {
             if (media.length > 0) {
                 state.socket.emit('end-stream' , {
                     media,
-                    streamID,
-                    videoStreamID
                 })
             }
         } catch (err) {
@@ -413,22 +427,27 @@ export const actions = {
     },
     endScreen({state , commit}  , data) {
         if (state.displayStream) {
-            const screenStreamID = state.displayStream.id;
             state.displayStream.getTracks().forEach(function(track) { track.stop(); })
             state.displayStream.getVideoTracks()[0].enabled = false;
             state.shareScreen = false;
             state.displayStream = null;
             state.socket.emit('end-stream' , {
                 media: ['screen'],
-                screenStreamID
             })
             commit('controlMediaLoader',false);
         }
     },
     clearRemoteStream(context , data){
+        let el;
         if (data.data.hasOwnProperty('camera') && data.data.camera) {
             context.state.showing = false;
             context.commit('controlCameraLoader',false);
+            el = document.getElementById(context.state.remoteStreams['camera'][data.data.from]);
+            if (el) {
+                el.remove();
+            }
+            el = null;
+            delete context.state.remoteStreams['camera'][data.data.from];
         }
 
         if (data.data.from !== context.state.socket.id) {
@@ -436,12 +455,15 @@ export const actions = {
                 context.state.shareScreen = false;
                 context.commit('controlMediaLoader',false);
             }
-            if (data.data.hasOwnProperty('streamID')) {
-                delete context.state.remoteStreams[data.data.streamID];
-                const el = document.getElementById(data.data.streamID);
+            if (data.data.hasOwnProperty('audio') && data.data.audio ) {
+                context.state.shareScreen = false;
+                context.commit('controlMediaLoader',false);
+                el = document.getElementById(context.state.remoteStreams['audio'][data.data.from]);
                 if (el) {
                     el.remove();
                 }
+                el = null;
+                delete context.state.remoteStreams['audio'][data.data.from];
             }
         }
     },
