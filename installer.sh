@@ -49,14 +49,6 @@ fi
 
 echo -e "\n"
 
-read -r -p 'Enter your backend baseurl(default: http://backend.localhost:3000) ' BASE_URL
-
-if [[  ! -z $BASE_URL ]]; then
-  sed -i "s/^VITE_BASE_URL=.*/VITE_BASE_URL=$BASE_URL/" "./.env"
-fi
-
-echo -e "\n"
-
 echo "Select service to install:"
 
 echo -e "\n"
