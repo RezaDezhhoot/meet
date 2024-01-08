@@ -11,14 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('access_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('value')->nullable()->unique();
-            $table->timestamp('expire_at')->nullable();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('access_tokens')) {
+            Schema::create('access_tokens', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('value')->nullable()->unique();
+                $table->timestamp('expire_at')->nullable();
+                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                $table->timestamps();
+            });
+        }
+
     }
 
     /**

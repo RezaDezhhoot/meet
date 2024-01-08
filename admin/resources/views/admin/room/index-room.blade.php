@@ -27,7 +27,7 @@
                                     <td>{{ $item->title }}</td>
                                     <td>{{ $item->key }}</td>
                                     <td>
-                                        <a target="_blank" href="{{ $item->room_link }}">ورود به اتاق</a>
+                                        <button class="btn btn-sm btn-outline-warning" wire:click="loginToRoom({{ $item->id }})">ورود به اتاق</button>
                                     </td>
                                     <td>{{ $item->capacity }} نفر </td>
                                     <td>

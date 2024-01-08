@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('o_auths', function (Blueprint $table) {
-            $table->id();
-            $table->string('token')->unique();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('room_id')->constrained('rooms')->cascadeOnDelete();
-            $table->timestamp('expire_at');
-            $table->boolean('status')->default(false);
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('o_auths')) {
+            Schema::create('o_auths', function (Blueprint $table) {
+                $table->id();
+                $table->string('token')->unique();
+                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                $table->foreignId('room_id')->constrained('rooms')->cascadeOnDelete();
+                $table->timestamp('expire_at');
+                $table->boolean('status')->default(false);
+                $table->timestamps();
+            });
+        }
     }
 
     /**
