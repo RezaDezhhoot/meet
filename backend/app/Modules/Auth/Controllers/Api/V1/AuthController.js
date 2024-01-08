@@ -121,6 +121,7 @@ exports.guest = async (req , res , next) => {
             message: res.__("general.success")
         });
     } catch (err) {
+        console.log(err);
         const errors = utils.getErrors(err);
         return res.status(errors.status).json({ data: errors.errors, message: res.__('general.error') });
     }

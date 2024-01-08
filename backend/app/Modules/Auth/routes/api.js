@@ -5,10 +5,11 @@ const TokenController = require('../Controllers/Api/V1/TokenController');
 const OAuthController = require('../Controllers/Api/V1/OAuthController');
 const ForgetPasswordController = require('../Controllers/Api/V1/ForgetPasswordController');
 const rateLimit = require("express-rate-limit");
+const ValidRoom = require('../../../Base/Middlewares/ValidRoom');
 
 const routerV1 = new Router().use(guest);
 
-routerV1.use('/register/get-token',
+routerV1.use(ValidRoom).use('/register/get-token',
     rateLimit({
         windowMs: 3 * 60 * 60 * 1000,
         max: 6,
@@ -19,15 +20,15 @@ routerV1.use('/register/get-token',
     })
 ).post('/register/get-token',TokenController.store);
 
-routerV1.post('/register/verify-token',TokenController.verify);
+routerV1.use(ValidRoom).post('/register/verify-token',TokenController.verify);
 
-routerV1.post('/register',AuthController.register);
+routerV1.use(ValidRoom).post('/register',AuthController.register);
 
-routerV1.post('/login',AuthController.login);
+routerV1.use(ValidRoom).post('/login',AuthController.login);
 
-routerV1.post('/guest',AuthController.guest);
+routerV1.use(ValidRoom).post('/guest',AuthController.guest);
 
-routerV1.use('/forget-password',
+routerV1.use(ValidRoom).use('/forget-password',
     rateLimit({
         windowMs: 3 * 60 * 60 * 1000,
         max: 6,
@@ -38,7 +39,7 @@ routerV1.use('/forget-password',
     })
 ).post('/forget-password',ForgetPasswordController.store);
 
-routerV1.patch('/reset-password',ForgetPasswordController.reset);
+routerV1.use(ValidRoom).patch('/reset-password',ForgetPasswordController.reset);
 
 routerV1.post('/oauth/generate',OAuthController.generate);
 
