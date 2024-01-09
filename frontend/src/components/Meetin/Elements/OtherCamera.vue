@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isUser">
+  <div >
     <div v-if="! responsive && menu && show" class="flex mx-2 relative align-center">
       <button  @click="showDropdown=!showDropdown" class="dropdown-btn border-x-2 border-y-2 border-[#d1d1d1] text-white">&#9662;</button>
       <div v-show="showDropdown" class="dropdown-content">
@@ -112,14 +112,12 @@ export default {
   watch:{
     async "$store.state.user.media.media.remote.camera"(value){
       if (!value) {
-        this.$store.dispatch('endStream',{
-          media: ['camera']
-        })
-        this.status = false;
-        this.socket.emit('control-local-media',{
-          device: 'camera',
-          action: false
-        });
+        if (this.$store.state.videoStream) {
+          this.$store.dispatch('endStream',{
+            media: ['camera']
+          })
+          this.status = false;
+        }
       }
     },
     "$store.state.user.media.media.local.camera"(value){

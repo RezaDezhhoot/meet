@@ -292,6 +292,10 @@ module.exports.controlRemoteMedia = async (io,socket,data,room) => {
         const user = users[room.key][data.to];
         users[room.key][data.to].media.media.remote[data.device] = !user.media.media.remote[data.device];
 
+        if (! users[room.key][data.to].media.media.remote[data.device]) {
+            users[room.key][data.to].media.media.local[data.device] = users[room.key][data.to].media.media.remote[data.device];
+        }
+
         io.emit('get-users',{
             data:{
                 users: users[room.key] , from: socket.id
@@ -313,15 +317,15 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
         }
 
         users[room.key][socket.id].media.media.local[data.device] = status;
-
-        if (user.user.id === room.host_id) {
-            host[room.key][socket.id] = user;
-            io.emit('host-joined',{
-                data:{
-                    host: host[room.key]
-                },status: 200
-            });
-        }
+        //
+        // if (user.user.id === room.host_id) {
+        //     host[room.key][socket.id] = user;
+        //     io.emit('host-joined',{
+        //         data:{
+        //             host: host[room.key]
+        //         },status: 200
+        //     });
+        // }
 
         io.emit('get-users',{
             data:{

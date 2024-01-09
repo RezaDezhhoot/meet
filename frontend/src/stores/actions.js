@@ -38,12 +38,9 @@ export const actions = {
                     // video.srcObject = stream.streams[0];
                     // video.load();
 
-                    const video = document.createElement('audio');
-                    video.id = stream.streams[0].id;
-                    video.muted = "muted";
+                    const video = document.getElementById(stream.streams[0].id);
                     video.srcObject = stream.streams[0];
                     video.load();
-                    document.getElementById('main').appendChild(video);
                 }
             };
             state.peerConnections[id]['pc']['video'].onicecandidate = function ({candidate}) {
@@ -144,7 +141,7 @@ export const actions = {
                 await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
             }).catch(function (err) {
                 console.log(err);
-                context.dispatch('endScreen');
+                context.commit('controlMediaLoader' , false);
                 Swal.fire({
                     position: 'top-start',
                     text: "مشکلی در عملیات اشتراک گذاری رخ داده است!",
@@ -182,11 +179,8 @@ export const actions = {
                 await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
             }).catch(function (err) {
                 console.log(err);
-                context.commit('controlCameraLoader');
+                context.commit('controlCameraLoader' , false);
                 context.dispatch('setDevices');
-                context.dispatch('endStream',{
-                    media: ['camera']
-                });
                 Swal.fire({
                     position: 'top-start',
                     text: "عدم دسترسی به دوربین!",
@@ -228,9 +222,6 @@ export const actions = {
             }).catch(function (err){
                 console.log(err);
                 context.dispatch('setDevices');
-                context.dispatch('endStream',{
-                    media: ['audio']
-                });
                 let text = 'عدم دسترسی به میکروفون!';
 
                 Swal.fire({

@@ -46,15 +46,16 @@
                 </UserMicrophone>
               </li>
               <li>
-                <UserCamera
+                <OtherCamera
+                    :menu="true"
+                    :responsive="true"
+                    label=" دوربین"
                     width="30"
                     height="30"
-                    :responsive="true"
-                    label="دوربین"
-                    :fill=" user.media.media.local.microphone ? '#62dc82' : '#dbdbdb'"
                     :user="user"
-                    :show="user.user.id === host.id">
-                </UserCamera>
+                    :show="user.media.media.remote.camera"
+                    :active="user.media.media.remote.camera && user.media.media.local.camera">
+                </OtherCamera>
               </li>
               <li>
                 <UserSpeaker
@@ -101,14 +102,6 @@
             :show="user.user.id !== host.id"
             :active="user.media.settings.hand_rising">
         </UserHandRising>
-
-        <UserCamera
-            width="25"
-            height="25"
-            :fill="user.media.media.local.microphone ? '#62dc82' : '#dbdbdb'"
-            :user="user"
-            :show="user.user.id === host.id">
-        </UserCamera>
 
         <OtherCamera
             width="25"

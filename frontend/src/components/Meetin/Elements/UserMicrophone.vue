@@ -91,14 +91,12 @@ export default {
   watch:{
     async "$store.state.user.media.media.remote.microphone"(value){
       if (!value) {
-        this.$store.dispatch('endStream',{
-          media: ['audio']
-        })
-        this.status = false;
-        this.socket.emit('control-local-media',{
-          device: 'microphone',
-          action: false
-        });
+        if (this.$store.state.localStream) {
+          this.$store.dispatch('endStream',{
+            media: ['audio']
+          })
+          this.status = false;
+        }
       }
     },
     "$store.state.user.media.media.local.microphone"(value){
