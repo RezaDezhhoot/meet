@@ -37,10 +37,20 @@ export const actions = {
                     // let video = document.getElementById('video-player');
                     // video.srcObject = stream.streams[0];
                     // video.load();
+                    const parent = document.getElementById('video-grid-container')
+                    const div  = document.createElement('div');
+                    div.id = stream.streams[0].id;
+                    div.classList.add("grid-item")
 
-                    const video = document.getElementById(stream.streams[0].id);
+                    const video = document.createElement('video')
                     video.srcObject = stream.streams[0];
+                    video.muted = "muted";
+                    video.autoplay = "1";
+                    video.classList.add("h-full","w-full");
                     video.load();
+
+                    parent.appendChild(div);
+                    div.appendChild(video);
                 }
             };
             state.peerConnections[id]['pc']['video'].onicecandidate = function ({candidate}) {
@@ -177,6 +187,7 @@ export const actions = {
                 }
             }).then(async () => {
                 await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
+                context.commit('controlCameraLoader' , false);
             }).catch(function (err) {
                 console.log(err);
                 context.commit('controlCameraLoader' , false);
@@ -242,20 +253,32 @@ export const actions = {
             for (const v of data.to) {
                 // Make RTC screen offer
                 if (media.includes('screen')) {
+                    if (! state.remoteStreams['screen'] ) {
+                        state.remoteStreams['screen'] = {}
+                    }
                     offer['screen'] = await state.peerConnections[v]['pc']['screen'].createOffer();
                     streamID['screen'] = state.displayStream.id;
+                    state.remoteStreams['screen'][data.from] = streamID['screen'];
                     await state.peerConnections[v]['pc']['screen'].setLocalDescription(new RTCSessionDescription(offer['screen']));
                 }
                 // Make RTC audio offer
                 if (media.includes('audio')) {
+                    if (! state.remoteStreams['audio'] ) {
+                        state.remoteStreams['audio'] = {}
+                    }
                     offer['audio'] = await state.peerConnections[v]['pc']['audio'].createOffer();
                     streamID['audio'] = state.localStream.id;
+                    state.remoteStreams['audio'][data.from] = streamID['audio'];
                     await state.peerConnections[v]['pc']['audio'].setLocalDescription(new RTCSessionDescription(offer['audio']));
                 }
                 // Make RTC video offer
                 if (media.includes('camera')) {
+                    if (! state.remoteStreams['camera'] ) {
+                        state.remoteStreams['camera'] = {}
+                    }
                     offer['camera'] = await state.peerConnections[v]['pc']['video'].createOffer();
                     streamID['camera'] = state.videoStream.id;
+                    state.remoteStreams['camera'][data.from] = streamID['camera'];
                     await state.peerConnections[v]['pc']['video'].setLocalDescription(new RTCSessionDescription(offer['camera']));
                 }
 
@@ -309,6 +332,8 @@ export const actions = {
                 if (data.data.streamID.hasOwnProperty('camera')) {
                     state.remoteStreams['camera'][data.data.from] = data.data.streamID['camera'];
                 }
+
+                commit('controlCameraLoader',false);
             }
             // Make RTC audio answer
             if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
@@ -433,12 +458,15 @@ export const actions = {
         if (data.data.hasOwnProperty('camera') && data.data.camera) {
             context.state.showing = false;
             context.commit('controlCameraLoader',false);
-            el = document.getElementById(context.state.remoteStreams['camera'][data.data.from]);
-            if (el) {
-                el.remove();
+            if (context.state.remoteStreams['camera'] && context.state.remoteStreams['camera'].hasOwnProperty(data.data.from)) {
+                el = document.getElementById(context.state.remoteStreams['camera'][data.data.from]);
+                if (el) {
+                    el.remove();
+                }
+                el = null;
+                delete context.state.remoteStreams['camera'][data.data.from];
             }
-            el = null;
-            delete context.state.remoteStreams['camera'][data.data.from];
+
         }
 
         if (data.data.from !== context.state.socket.id) {

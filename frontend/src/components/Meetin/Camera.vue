@@ -1,6 +1,6 @@
 <template>
   <div  :class="{'full-screen': full}" v-if="user" class="video-tab overflow-y-auto w-full h-[32%] mr-[0.5rem] bg-white rounded-b-[0.5rem]   lg:rounded-[0.5rem]  hidden-mobile">
-    <div v-if="videoStreams.length === 0" class="w-full h-full ">
+    <div v-if="Object.entries(this.$store.state.remoteStreams['camera'] ?? {}).length === 0" class="w-full h-full ">
       <div  class="h-full w-full flex justify-center items-center flex-col">
         <div v-if="! loading" class="w-full text-center">
           <span class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
@@ -8,11 +8,9 @@
         <loader v-else-if="loading"></loader>
       </div>
     </div>
-    <div v-else class="h-full box-content">
+    <div :class="{hidden: Object.entries(this.$store.state.remoteStreams['camera'] ?? {}).length === 0}" class="h-full box-content">
       <div class="grid-container" id="video-grid-container">
-        <div v-for="(item , key) in videoStreams" class="grid-item" :style="`flex-basis: calc(${videoGrid}%);`">
-          <video class="h-full w-full" v-bind:id="item" autoplay muted></video>
-        </div>
+
       </div>
     </div>
   </div>
@@ -45,30 +43,27 @@ export default {
     },
     loading() {
       return this.$store.state.cameraLoading;
-    },
-    videoStreams() {
-      return Object.entries(this.$store.state.remoteStreams['camera'] ?? {})
-    },
-    videoGrid()
-    {
-      // const itemCount = this.videoStreams.length;
-      const itemCount = 12  ;
-      const top = Math.ceil(itemCount / 10);
-      return 100 / Math.ceil(itemCount / (top + 1))
     }
   },
-  watch:{
-    "$store.state.hiddenVideo"(value) {
-      this.hiddenVideo = value;
-    },
-    "$store.state.showing"(value) {
-      this.hiddenVideo = ! value;
-    },
-    "$store.state.videoStream"(value) {
-      if (value) {
-        this.$refs.localVideo.srcObject = value;
-      }
+  updated() {
+    const itemCount = Object.entries(this.$store.state.remoteStreams['camera'] ?? {}).length;
+    const top = Math.ceil(itemCount / 10);
+    const cols =  Math.ceil(itemCount / (top + 1));
+    const rows = Math.ceil(itemCount / cols);
+    const cols_percent = 100 / cols;
+    const rows_percent = 100 / rows;
+
+    let row = "" , col = "";
+
+    for (let  i = 1;i<= rows; i++){
+      row += `${rows_percent}% `;
     }
+    for (let  i = 1;i<= cols; i++){
+      col += `${cols_percent}% `;
+    }
+    const video_grid = document.getElementById('video-grid-container');
+    video_grid.style.gridTemplateColumns = col.trim();
+    video_grid.style.gridTemplateRows = row.trim();
   },
   methods:{
     async shareCamera(){
@@ -96,10 +91,9 @@ export default {
 
 <style>
 .grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  height: auto;
-  min-height: 100%;
+  display: grid;
+  height: 100%;
+  max-height: 100%;
   box-sizing: border-box;
 }
 

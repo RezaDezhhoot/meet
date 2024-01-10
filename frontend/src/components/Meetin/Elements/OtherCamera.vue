@@ -133,7 +133,9 @@ export default {
       }
     },
     endCamera(){
-      this.$store.commit('controlCamera',false);
+      this.$store.dispatch('endStream',{
+        media: ['camera']
+      })
     },
     async shareCamera(){
       if (! this.$store.state.videoStream) {
