@@ -138,11 +138,7 @@ export default {
       })
     },
     async shareCamera(){
-      if (! this.$store.state.videoStream) {
-        await this.startCamera();
-      } else {
-        this.$store.commit('controlCamera',! this.status);
-      }
+      await this.startCamera();
     },
     async startCamera() {
       if (this.user && this.user.media && this.user.media.media.remote.camera) {

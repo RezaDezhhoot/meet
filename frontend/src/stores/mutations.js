@@ -19,17 +19,10 @@ export const mutations = {
     },
     controlCamera(state , status){
         try {
-            if (! status) {
-                state.selectedVideoDevice = null;
-            }
-            state.showing = status;
-            if (state.videoStream) {
-                state.videoStream.getVideoTracks()[0].enabled = status;
-                state.socket.emit('control-local-media',{
-                    device: 'camera',
-                    action: status
-                });
-            }
+            state.socket.emit('control-local-media',{
+                device: 'camera',
+                action: status
+            });
         } catch (err) {}
     },
     controlMicrophone(state , status) {

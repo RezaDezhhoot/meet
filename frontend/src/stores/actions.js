@@ -3,7 +3,9 @@ export const actions = {
     async addIceCandidate({state} , data) {
         for (const id in state.peerConnections) {
             if (state.peerConnections[id]['pc']) {
-                await state.peerConnections[id]['pc'][data.data.media].addIceCandidate(data.data.candidate)
+                if (data.data.candidate) {
+                    await state.peerConnections[id]['pc'][data.data.media].addIceCandidate(data.data.candidate)
+                }
             }
         }
     },
@@ -34,9 +36,6 @@ export const actions = {
             // Set remote video stream
             state.peerConnections[id]['pc']['video'].ontrack = async function (stream) {
                 if (stream.track.kind === 'video') {
-                    // let video = document.getElementById('video-player');
-                    // video.srcObject = stream.streams[0];
-                    // video.load();
                     const parent = document.getElementById('video-grid-container')
                     const div  = document.createElement('div');
                     div.id = stream.streams[0].id;
@@ -53,12 +52,6 @@ export const actions = {
                     div.appendChild(video);
                 }
             };
-            state.peerConnections[id]['pc']['video'].onicecandidate = function ({candidate}) {
-                state.socket.emit('send-candidate',{
-                    candidate,
-                    media: 'video'
-                });
-            };
             // Set remote audio stream
             state.peerConnections[id]['pc']['audio'].ontrack = async function (stream) {
                 if(stream.track.kind === 'audio') {
@@ -66,27 +59,15 @@ export const actions = {
                     audio.autoplay = 1;
                     audio.classList.add('hidden');
                     audio.id = stream.streams[0].id;
-                    audio.muted = ! (localStorage.getItem('sound') == 'true');
+                    // audio.muted = ! (localStorage.getItem('sound') == 'true');
                     audio.srcObject = stream.streams[0];
                     audio.load();
                     document.getElementById('main').appendChild(audio);
                 }
             };
-            state.peerConnections[id]['pc']['audio'].onicecandidate = function ({candidate}) {
-                state.socket.emit('send-candidate',{
-                    candidate,
-                    media: 'audio'
-                });
-            };
             // Set remote screen stream
             state.peerConnections[id]['pc']['screen'].ontrack = async function (stream) {
                 document.getElementById('screen-player').srcObject = stream.streams[0];
-            };
-            state.peerConnections[id]['pc']['screen'].onicecandidate = function ({candidate}) {
-                state.socket.emit('send-candidate',{
-                    candidate,
-                    media: 'screen'
-                });
             };
         }
         if (data.from === state.socket.id) {
@@ -166,6 +147,7 @@ export const actions = {
                 video: data.video ? ( {deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined} ) : false,
                 audio: false,
             };
+
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 context.commit('controlCameraLoader');
                 const localStream = stream;
@@ -176,6 +158,20 @@ export const actions = {
                     device: 'camera',
                     action: true
                 });
+
+                const parent = document.getElementById('video-grid-container')
+                const div  = document.createElement('div');
+                div.id = stream.id;
+                div.classList.add("grid-item")
+                const video = document.createElement('video')
+                video.srcObject = stream;
+                video.muted = "muted";
+                video.autoplay = "1";
+                video.classList.add("h-full","w-full");
+                video.load();
+
+                parent.appendChild(div);
+                div.appendChild(video);
 
                 for (const id in context.state.peerConnections) {
                     if (context.state.peerConnections[id]['pc']) {
@@ -246,13 +242,13 @@ export const actions = {
             });
         }
     },
-    async startStream({state} , data) {
+    async startStream({state , dispatch} , data) {
         const media = Object.values(data.media);
         let offer = {} , streamID = {};
         if (media.length > 0) {
             for (const v of data.to) {
                 // Make RTC screen offer
-                if (media.includes('screen')) {
+                if (media.includes('screen') && state.displayStream) {
                     if (! state.remoteStreams['screen'] ) {
                         state.remoteStreams['screen'] = {}
                     }
@@ -262,7 +258,7 @@ export const actions = {
                     await state.peerConnections[v]['pc']['screen'].setLocalDescription(new RTCSessionDescription(offer['screen']));
                 }
                 // Make RTC audio offer
-                if (media.includes('audio')) {
+                if (media.includes('audio') && state.localStream) {
                     if (! state.remoteStreams['audio'] ) {
                         state.remoteStreams['audio'] = {}
                     }
@@ -272,7 +268,7 @@ export const actions = {
                     await state.peerConnections[v]['pc']['audio'].setLocalDescription(new RTCSessionDescription(offer['audio']));
                 }
                 // Make RTC video offer
-                if (media.includes('camera')) {
+                if (media.includes('camera') && state.videoStream) {
                     if (! state.remoteStreams['camera'] ) {
                         state.remoteStreams['camera'] = {}
                     }
@@ -280,6 +276,7 @@ export const actions = {
                     streamID['camera'] = state.videoStream.id;
                     state.remoteStreams['camera'][data.from] = streamID['camera'];
                     await state.peerConnections[v]['pc']['video'].setLocalDescription(new RTCSessionDescription(offer['camera']));
+                    dispatch('updateVideoGrid');
                 }
 
                 state.socket.emit("share-stream", {
@@ -293,7 +290,7 @@ export const actions = {
             }
         }
     },
-    async getOffer({state , commit} , data) {
+    async getOffer({state , commit , dispatch} , data) {
         const media = Object.values(data.data.media);
         let answer = {};
 
@@ -322,6 +319,7 @@ export const actions = {
                 await state.peerConnections[data.data.from]['pc']['video'].setRemoteDescription(
                     new RTCSessionDescription(data.data.offer.camera)
                 );
+
                 answer['camera'] = await state.peerConnections[data.data.from]['pc']['video'].createAnswer();
                 await state.peerConnections[data.data.from]['pc']['video'].setLocalDescription(new RTCSessionDescription(answer['camera']));
 
@@ -334,6 +332,7 @@ export const actions = {
                 }
 
                 commit('controlCameraLoader',false);
+                dispatch('updateVideoGrid');
             }
             // Make RTC audio answer
             if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
@@ -350,6 +349,12 @@ export const actions = {
                 if (data.data.streamID.hasOwnProperty('audio')) {
                     state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
                 }
+
+                if (state.sound) {
+                    commit("controlSound",{
+                        value: true
+                    })
+                }
             }
             // Broadcast answers
             state.socket.emit('make-answer',{
@@ -361,6 +366,7 @@ export const actions = {
     },
     async answerMade(context , data)  {
         const media = Object.values(data.data.media);
+        let callbacks = [];
 
         if (media.length > 0) {
             if (media.includes('screen')) {
@@ -368,12 +374,21 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.screen)
                 );
                 context.commit('controlMediaLoader',false);
+
+                if (! context.state.peerConnections[data.data.from]['pc']['screen_shared']) {
+                    callbacks.push('screen');
+                    context.state.peerConnections[data.data.from]['pc']['screen_shared'] = true;
+                }
             }
 
             if (media.includes('audio')) {
                 await context.state.peerConnections[data.data.from]['pc']['audio'].setRemoteDescription(
                     new RTCSessionDescription(data.data.answer.audio)
                 );
+                if (! context.state.peerConnections[data.data.from]['pc']['audio_shared']) {
+                    callbacks.push('audio');
+                    context.state.peerConnections[data.data.from]['pc']['audio_shared'] = true;
+                }
             }
 
             if (media.includes('camera')) {
@@ -381,7 +396,23 @@ export const actions = {
                     new RTCSessionDescription(data.data.answer.camera)
                 );
                 context.commit('controlCameraLoader',false);
+
+                if (! context.state.peerConnections[data.data.from]['pc']['camera_shared']) {
+                    callbacks.push('camera');
+                    context.state.peerConnections[data.data.from]['pc']['camera_shared'] = true;
+                }
             }
+
+            console.log('ok');
+
+            if (callbacks.length > 0) {
+                await context.dispatch('startStream', {
+                    media: data.data.media,
+                    from: context.state.socket.id,
+                    to:[data.data.from]
+                })
+            }
+
         }
     },
     async sendShared({state , dispatch} , data) {
@@ -466,7 +497,7 @@ export const actions = {
                 el = null;
                 delete context.state.remoteStreams['camera'][data.data.from];
             }
-
+            context.dispatch('updateVideoGrid');
         }
 
         if (data.data.from !== context.state.socket.id) {
@@ -520,7 +551,7 @@ export const actions = {
                     });
                     let foundCamera = false , foundAudio = false , media = [];
                     for( let i = 0; i < state.videoInputs.length; i++) {
-                        if (state.audioInputs[i]?.id === state.selectedVideoDevice) {
+                        if (state.videoInputs[i]?.id === state.selectedVideoDevice) {
                             foundCamera = true;
                             break;
                         }
@@ -563,6 +594,9 @@ export const actions = {
                 dispatch('endStream',{
                     media: ['camera']
                 });
+                dispatch('shareStream',{
+                    video: true , audio: false , media: 'camera'
+                });
             }
         } else if (value.type === 'microphone') {
             if (state.selectedAudioDevice !== value.value) {
@@ -598,4 +632,30 @@ export const actions = {
             })
         }
     },
+    updateVideoGrid({state}){
+        let itemCount = Object.entries(state.remoteStreams['camera'] ?? {}).length;
+        const video_grid = document.getElementById('video-grid-container');
+
+        if (itemCount === 0) {
+            state.remoteStreams['camera'] = {};
+            document.getElementById('video-empty').classList.remove('hidden');
+            document.getElementById('video-grid').classList.add('hidden')
+            return;
+        }
+
+        const top = Math.ceil(itemCount / 10);
+        const cols =  Math.ceil((itemCount / (top+1)) + 0.00001 );
+        const rows = Math.ceil(itemCount / cols);
+        const cols_percent = 100 / cols;
+        const rows_percent = 100 / rows;
+        let row = "" , col = "";
+        for (let  i = 1;i<= rows; i++){
+            row += `${rows_percent}% `;
+        }
+        for (let  i = 1;i<= cols; i++){
+            col += `${cols_percent}% `;
+        }
+        video_grid.style.gridTemplateColumns = col.trim();
+        video_grid.style.gridTemplateRows = row.trim();
+    }
 }

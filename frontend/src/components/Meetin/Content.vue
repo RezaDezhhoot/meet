@@ -1,5 +1,5 @@
 <template>
-  <section :class="{'full-screen': full}" class="left-section share-screen w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] ">
+  <section :class="{'full-screen': (full && $store.state.shareScreen)}" class="left-section share-screen w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] ">
     <div class="h-full px-[1.2rem] py-[1rem] w-full" v-if="! $store.state.shareScreen">
       <div class="h-full w-full flex flex-col justify-center items-center">
         <div class="w-[30%] no-file-img">
