@@ -70,7 +70,7 @@ export default {
     localStorage.removeItem('sound')
     this.active = this.$store.state.sound;
     this.$store.commit('controlSound', {
-      value: true
+      value: false
     });
   },
   methods:{
