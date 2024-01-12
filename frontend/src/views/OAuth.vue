@@ -26,6 +26,7 @@ export default {
       this.$cookies.set('auth',res.data.data.user);
       this.$emit('redirect-to-meet',res.data.data.room);
     }).catch(err => {
+      console.log(err);
       this.mainLoading = false;
       Swal.fire({
         position: 'center',

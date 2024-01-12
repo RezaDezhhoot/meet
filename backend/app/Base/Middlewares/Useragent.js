@@ -4,6 +4,6 @@ exports.ApiHeaders = (req, res, next) => {
         (! userAgent.isBot) || (userAgent.isBot === 'postman' && process.env.MODE === 'development') ) {
         return next();
     } else {
-        return res.status(400).json({});
+        return res.status(400).json({'ua':true});
     }
 }
