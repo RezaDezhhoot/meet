@@ -9,7 +9,7 @@ const ValidRoom = require('../../../Base/Middlewares/ValidRoom');
 
 const routerV1 = new Router().use(guest);
 
-routerV1.use(ValidRoom).use('/register/get-token',
+routerV1.use('/register/get-token',
     rateLimit({
         windowMs: 3 * 60 * 60 * 1000,
         max: 6,
@@ -22,24 +22,15 @@ routerV1.use(ValidRoom).use('/register/get-token',
 
 routerV1.post('/register/verify-token',TokenController.verify);
 
-routerV1.use(ValidRoom).post('/register',AuthController.register);
+routerV1.use('/register',ValidRoom).post('/register',AuthController.register);
 
-routerV1.use(ValidRoom).post('/login',AuthController.login);
+routerV1.use('/login',ValidRoom).post('/login',AuthController.login);
 
-routerV1.use(ValidRoom).post('/guest',AuthController.guest);
+routerV1.use('/guest',ValidRoom).post('/guest',AuthController.guest);
 
-routerV1.use(ValidRoom).use('/forget-password',
-    rateLimit({
-        windowMs: 3 * 60 * 60 * 1000,
-        max: 6,
-        message: {
-            message: 'too many requests'
-        },
-        headers: true,
-    })
-).post('/forget-password',ForgetPasswordController.store);
+routerV1.post('/forget-password',ForgetPasswordController.store);
 
-routerV1.use(ValidRoom).patch('/reset-password',ForgetPasswordController.reset);
+routerV1.patch('/reset-password',ForgetPasswordController.reset);
 
 routerV1.post('/oauth/generate',OAuthController.generate);
 
