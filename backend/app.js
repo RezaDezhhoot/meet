@@ -10,6 +10,8 @@ app.use(express.urlencoded({limit: '5000mb',extended: false}));
 app.use(express.json({limit: '5000mb'}));
 app.use(cors());
 
+app.set('trust proxy', '127.0.0.1');
+
 const server = http.createServer(app);
 
 require(path.join(appDir,'app/Providers/LibraryServiceProvider')).load(app);
