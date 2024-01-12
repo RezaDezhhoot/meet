@@ -104,12 +104,11 @@
 .full-screen {
     position: absolute;
     width: 100%;
-    z-index: 1;
     left: 0;
     top: 0;
     bottom: 0;
     height: 100% !important;
-
+    z-index: 100;
 }
 
 .full-screen video{

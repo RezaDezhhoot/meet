@@ -296,6 +296,7 @@ main{
         margin-right: 0rem !important;
         margin-bottom: 1rem;
         overflow: auto;
+        z-index: 0;
     }
 
     .left-section > div:nth-last-child(1){

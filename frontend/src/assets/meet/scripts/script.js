@@ -102,6 +102,16 @@ var UsersTab = document.querySelector('.users-tab');
 var VideoTab = document.querySelector('.video-tab');
 
 
+(function (){
+    BtnUsersTab.classList.remove('active');
+    BtnVideoTab.classList.remove('active');
+    BtnChatTab.classList.add('active');
+
+    ChatTab.classList.remove('hidden-mobile');
+    UsersTab.classList.add('hidden-mobile');
+    VideoTab.classList.add('hidden-mobile');
+})()
+
 BtnChatTab.addEventListener('click', function handleClick(event) {
     BtnUsersTab.classList.remove('active');
     BtnVideoTab.classList.remove('active');

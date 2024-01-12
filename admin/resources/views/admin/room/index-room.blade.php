@@ -13,6 +13,7 @@
                                 <th>#</th>
                                 <th>عنوان</th>
                                 <th>کلید اختصاصی</th>
+                                <th>ورود به اتاق</th>
                                 <th>لینک اتاق</th>
                                 <th>ظرفیت</th>
                                 <th>مالک</th>
@@ -28,6 +29,9 @@
                                     <td>{{ $item->key }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-warning" wire:click="loginToRoom({{ $item->id }})">ورود به اتاق</button>
+                                    </td>
+                                    <td>
+                                        <a href="{{ $item->roomLink }}">{{ $item->roomLink }}</a>
                                     </td>
                                     <td>{{ $item->capacity }} نفر </td>
                                     <td>
