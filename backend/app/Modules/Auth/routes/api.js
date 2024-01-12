@@ -20,7 +20,7 @@ routerV1.use(ValidRoom).use('/register/get-token',
     })
 ).post('/register/get-token',TokenController.store);
 
-routerV1.use(ValidRoom).post('/register/verify-token',TokenController.verify);
+routerV1.post('/register/verify-token',TokenController.verify);
 
 routerV1.use(ValidRoom).post('/register',AuthController.register);
 

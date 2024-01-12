@@ -9,5 +9,5 @@ module.exports = async (req, res, next) => {
             return next();
         }
     }
-    return res.status(400).json({});
+    return res.status(400).json({'invalid-room':true});
 }
