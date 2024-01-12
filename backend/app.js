@@ -4,10 +4,11 @@ const express = require('express');
 const app = express();
 const appDir = path.dirname(require.main.filename);
 const sequelize = require('./config/database');
-const RabbitMQ = require("./app/Libraries/Rabbitmq");
+const cors = require('cors');
 
 app.use(express.urlencoded({limit: '5000mb',extended: false}));
 app.use(express.json({limit: '5000mb'}));
+app.use(cors());
 
 const server = http.createServer(app);
 
