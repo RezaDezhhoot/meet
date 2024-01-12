@@ -88,10 +88,10 @@
                 </td>
                 <td>
                   <div class="flex" v-if="(host.id === user.user.id)">
-                    <Kick :client="item"></Kick>
                     <Microphone :client="item"></Microphone>
                     <Screen :client="item"></Screen>
                     <Camera :client="item"></Camera>
+                    <Kick :client="item"></Kick>
                   </div>
                 </td>
               </tr>
