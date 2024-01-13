@@ -14,9 +14,17 @@ export const actions = {
         const iceConfiguration = {
             iceServers: [
                 {
-                    urls: import.meta.env.VITE_ICE_SERVER_URL,
+                    urls: `turn:${import.meta.env.VITE_ICE_SERVER_URL}`,
                     username: import.meta.env.VITE_ICE_SERVER_USERNAME,
                     credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
+                },
+                {
+                    urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
+                    username: import.meta.env.VITE_ICE_SERVER_USERNAME,
+                    credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
+                },
+                {
+                    "url": "stun:stun2.1.google.com:19302"
                 }
             ]
         }
@@ -202,8 +210,6 @@ export const actions = {
                 video: false,
                 audio: data.audio ? ( {deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined} ) : false,
             };
-
-            navigator.getUserMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia );
 
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 const localStream = stream;
@@ -644,7 +650,7 @@ export const actions = {
         }
 
         const top = Math.ceil(itemCount / 10);
-        const cols =  Math.ceil((itemCount / (top+1)) + 0.00001 );
+        const cols =  itemCount === 2 ? 2 : Math.ceil( (itemCount / (top+1)) );
         const rows = Math.ceil(itemCount / cols);
         const cols_percent = 100 / cols;
         const rows_percent = 100 / rows;
