@@ -17,7 +17,7 @@ class StoreRole extends BaseComponent
         $this->set_mode($action);
         if ($this->mode == self::UPDATE_MODE)
         {
-            $this->role = Role::query()->whereNotIn('name', ['administrator', 'admin'])->findOrFail($id);
+            $this->role = Role::query()->whereNotIn('name', ['administrator', 'admin','super_admin'])->findOrFail($id);
             $this->header = $this->role->name;
             $this->name = $this->role->name;
             $this->permissionSelected = $this->role->permissions()->pluck('name')->toArray();

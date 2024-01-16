@@ -18,7 +18,9 @@ class IndexRole extends BaseComponent
 
     public function render()
     {
-        $roles = Role::query()->latest('id')->search($this->search)->paginate($this->per_page);
+        $roles = Role::query()
+            ->whereNotIn('name', ['administrator', 'admin','super_admin'])
+            ->latest('id')->search($this->search)->paginate($this->per_page);
         return view('admin.role.index-role',get_defined_vars())->extends('admin.layouts.admin');
     }
 }

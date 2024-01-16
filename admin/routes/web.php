@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => 'guest'], function () {
-    Route::get('/',\App\Http\Controllers\Auth\AuthController::class)->name('auth');
+    Route::get('/auth',\App\Http\Controllers\Auth\AuthController::class)->name('auth');
 });
 
-Route::group(['prefix' => 'admin' , 'as' => 'admin.' , 'middleware' => ['auth','role:admin']], function () {
+Route::group(['as' => 'admin.' , 'middleware' => ['auth','role:admin']], function () {
     Route::get('dashboard',\App\Http\Controllers\Dashboard\Dashboard::class)->name('dashboard');
     Route::get('profile',\App\Http\Controllers\Profile\Profile::class)->name('profile');
     Route::group(['prefix' => 'users','as' => 'user.'],function () {
