@@ -98,17 +98,11 @@ main{
 
 .box-sidbar-chats .message{
     background-color: #d6e1ff;
-    padding: 0.3rem 0.8rem;
+    padding: 0.3rem 0.4rem;
     border-radius: 8px 0px 8px 8px;
+    word-wrap: break-word;
+    max-width: 80%;
 }
-
-
-.box-sidbar-chats .message{
-    background-color: #d6e1ff;
-    padding: 0.3rem 0.8rem;
-    border-radius: 8px 0px 8px 8px;
-}
-
 
 .box-send-message{
     display: flex;

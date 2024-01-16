@@ -1,5 +1,5 @@
 <template>
-  <button v-on:click="control" class="manage-user-screen mr-[0.5rem]">
+  <button :title="title" v-on:click="control" class="manage-user-screen mr-[0.5rem]">
     <svg  width="20" height="20" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
              viewBox="0 0 81.369 81.369" xml:space="preserve">
       <g >
@@ -22,6 +22,7 @@ export default {
   name: "Camera",
   props:{
     client: Object,
+    title: String
   },
   created() {
     this.wires();

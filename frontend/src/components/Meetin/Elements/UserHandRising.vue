@@ -1,6 +1,7 @@
 <template>
   <div v-if="responsive && menu" class="flex my-6 mx-4 align-center relative">
     <button
+        :title="title"
         v-on:click="control"
         class="flex px-2 py-1 rounded-r-lg border-x-2 border-y-2 responsive-action  border-[#d1d1d1]"
         v-if="show"
@@ -21,6 +22,7 @@
   </div>
   <div class="flex mx-2 relative align-center" v-else>
     <button
+        :title="title"
         v-on:click="control"
         :class="{'border': border , 'mr-[1rem]': border , 'px-[0.5rem]' : border ,'py-[0.2rem]': border , 'mx-[1rem]': responsive,'my-[1rem]': responsive}"
         class="flex rounded-full  justify-center items-center text-[#dbdbdb]"
@@ -61,6 +63,7 @@ export default {
     border: false,
     menu: false,
     disabled: false,
+    title: String
   },
   mounted() {
     this.wires();

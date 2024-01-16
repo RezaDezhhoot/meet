@@ -1,5 +1,5 @@
 <template>
-  <button v-on:click="control" class="manage-user-mic ml-[0.3rem]">
+  <button :title="title" v-on:click="control" class="manage-user-mic ml-[0.3rem]">
     <svg width="20" height="20" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <g id="#000000ff">
         <path :fill="client.media.media.remote.microphone ? '#377E47' : '#aaaaaa'" opacity="1.00" d=" M 46.49 4.50 C 56.87 2.22 67.92 10.46 68.62 21.07 C 68.94 29.71 68.65 38.35 68.75 46.99 C 68.67 51.78 69.27 56.81 67.30 61.33 C 64.40 68.54 56.67 73.45 48.90 72.87 C 39.64 72.52 31.51 64.35 31.31 55.07 C 31.18 44.36 31.27 33.64 31.26 22.93 C 31.09 14.18 37.88 6.01 46.49 4.50 Z" />
@@ -14,6 +14,7 @@ export default {
   name: "Microphone",
   props:{
     client: Object,
+    title: String
   },
   created() {
     this.wires();

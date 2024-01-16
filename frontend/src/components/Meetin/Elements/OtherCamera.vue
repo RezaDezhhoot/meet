@@ -11,7 +11,7 @@
         </a>
       </div>
 
-      <button v-on:click="control" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic px-2 rounded-l-lg border-l-2 border-y-2" v-if="show">
+      <button :title="title" v-on:click="control" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic px-2 rounded-l-lg border-l-2 border-y-2" v-if="show">
         <svg :width="width" :height="height" viewBox="0 0 81.369 81.369" version="1.1" xmlns="http://www.w3.org/2000/svg">
           <g id="#000000ff">
             <path :fill="fill ? fill : (status ? '#62dc82' : '#dbdbdb')" opacity="1.00" d="M79.155,24.392c-1.313-0.906-3.014-1.149-4.525-0.65l-12.436,3.119v-4.977c0-5.754-4.682-10.436-10.436-10.436H10.436
@@ -31,7 +31,7 @@
       </button>
     </div>
     <div v-else-if="responsive && menu && show" class="flex my-6 mx-4 align-center relative">
-      <button v-on:click="control"  :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic px-2 py-1 rounded-r-lg border-r-2 border-y-2 responsive-action  border-[#d1d1d1]" v-if="show">
+      <button v-on:click="control" :title="title" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic px-2 py-1 rounded-r-lg border-r-2 border-y-2 responsive-action  border-[#d1d1d1]" v-if="show">
         <svg :width="width" :height="height" viewBox="0 0 81.369 81.369" version="1.1" xmlns="http://www.w3.org/2000/svg">
           <g id="#000000ff">
             <path :fill="fill ? fill : (status ? '#62dc82' : '#dbdbdb')" opacity="1.00" d="M79.155,24.392c-1.313-0.906-3.014-1.149-4.525-0.65l-12.436,3.119v-4.977c0-5.754-4.682-10.436-10.436-10.436H10.436
@@ -61,7 +61,7 @@
       </div>
     </div>
     <div v-else-if="show" class="flex mx-2 relative align-center">
-      <button v-on:click="control" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic mx-[1rem]" v-if="show">
+      <button v-on:click="control" :title="title" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic mx-[1rem]" v-if="show">
         <svg :width="width" :height="height" viewBox="0 0 81.369 81.369" version="1.1" xmlns="http://www.w3.org/2000/svg">
           <g id="#000000ff">
             <path :fill="fill ? fill : (status ? '#62dc82' : '#dbdbdb')" opacity="1.00" d="M79.155,24.392c-1.313-0.906-3.014-1.149-4.525-0.65l-12.436,3.119v-4.977c0-5.754-4.682-10.436-10.436-10.436H10.436
@@ -95,7 +95,8 @@ export default {
     responsive: false,
     label: null,
     menu: false,
-    isUser: false
+    isUser: false,
+    title: String
   },
   data(){
     return {

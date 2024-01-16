@@ -1,5 +1,5 @@
 <template>
-  <button v-on:click="control" class="manage-user-screen">
+  <button v-on:click="control" :title="title" class="manage-user-screen">
     <svg width="20" height="20" viewBox="0 0 24 24" :fill="client.media.media.remote.screen ? '#377E47' : 'none'" xmlns="http://www.w3.org/2000/svg">
       <path d="M10 16.95H6.21C2.84 16.95 2 16.11 2 12.74V6.74003C2 3.37003 2.84 2.53003 6.21 2.53003H16.74C20.11 2.53003 20.95 3.37003 20.95 6.74003" stroke="#AAAAAA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M10 21.4699V16.95" stroke="#AAAAAA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -16,6 +16,7 @@ export default {
   name: "Screen",
   props:{
     client: Object,
+    title: String
   },
   created() {
     this.wires();

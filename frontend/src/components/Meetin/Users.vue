@@ -83,10 +83,10 @@
             </div>
 
             <div class="flex" v-if="(host.id === user.user.id)">
-              <Microphone :client="item"></Microphone>
-              <Screen :client="item"></Screen>
-              <Camera :client="item"></Camera>
-              <Kick :client="item"></Kick>
+              <Microphone :client="item" title="دسترسی میکروفون"></Microphone>
+              <Screen :client="item" title="دسترسی اشتراک گذاری صفحه"></Screen>
+              <Camera :client="item" title="دسترسی دوربین"></Camera>
+              <Kick :client="item" ></Kick>
             </div>
           </li>
         </template>

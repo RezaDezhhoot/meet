@@ -25,6 +25,7 @@
                     :menu="true"
                     :responsive="true"
                     label="بلند کردن دست"
+                    title="بلند کردن دست"
                     :fill="user.media.settings.hand_rising ? '#62dc82' : '#dbdbdb'"
                     width="30"
                     height="30"
@@ -37,7 +38,8 @@
                 <UserMicrophone
                     :menu="true"
                     :responsive="true"
-                    label=" میکروفن"
+                    label="میکروفن"
+                    title="میکروفون"
                     width="30"
                     height="30"
                     :user="user"
@@ -54,6 +56,7 @@
                     height="30"
                     :user="user"
                     :show="user.media.media.remote.camera"
+                    title="دوربین"
                     :active="user.media.media.remote.camera && user.media.media.local.camera">
                 </OtherCamera>
               </li>
@@ -63,6 +66,7 @@
                     height="30"
                     :menu="true"
                     :responsive="true"
+                    title="بلندگو"
                     label=" بلند گو"
                     :user="user">
                 </UserSpeaker>
@@ -96,6 +100,7 @@
         <UserHandRising
             width="20"
             height="20"
+            title="بلند کردن دست"
             :border="true"
             :fill="user.media.settings.hand_rising ? '#62dc82' : '#dbdbdb'"
             :user="user"
@@ -108,6 +113,7 @@
             height="25"
             :menu="true"
             :user="user"
+            title="دوربین"
             :isUser="user.user.id !== host.id"
             :show="user.media.media.remote.camera"
             :active="user.media.media.remote.camera && user.media.media.local.camera">
@@ -118,6 +124,7 @@
             height="25"
             :menu="true"
             :user="user"
+            title="میکروفون"
             :show="user.media.media.remote.microphone"
             :active="user.media.media.remote.microphone && user.media.media.local.microphone">
         </UserMicrophone>
@@ -125,6 +132,7 @@
         <UserSpeaker
             width="25"
             height="25"
+            title="بلندگو"
             :user="user">
         </UserSpeaker>
       </div>
