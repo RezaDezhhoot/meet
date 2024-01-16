@@ -227,14 +227,16 @@ module.exports.shareStream = async (io,socket,data,room) => {
     }
 
 
-    socket.to(Object.values(data.to)).emit("get-offer",{
-        data: {
-            offer: data.offer,
-            from: socket.id,
-            media: data.media,
-            streamID: data.streamID
-        } , status: 200
-    })
+    if (Object.values(data.to).length > 0) {
+        socket.to(Object.values(data.to)).emit("get-offer",{
+            data: {
+                offer: data.offer,
+                from: socket.id,
+                media: data.media,
+                streamID: data.streamID
+            } , status: 200
+        })
+    }
 }
 
 module.exports.makeAnswer = async (io,socket,data,room) => {
@@ -317,15 +319,15 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
         }
 
         users[room.key][socket.id].media.media.local[data.device] = status;
-        //
-        // if (user.user.id === room.host_id) {
-        //     host[room.key][socket.id] = user;
-        //     io.emit('host-joined',{
-        //         data:{
-        //             host: host[room.key]
-        //         },status: 200
-        //     });
-        // }
+
+        if (user.user.id === room.host_id) {
+            host[room.key][socket.id] = user;
+            io.emit('host-joined',{
+                data:{
+                    host: host[room.key]
+                },status: 200
+            });
+        }
 
         io.emit('get-users',{
             data:{
