@@ -264,7 +264,6 @@ export const actions = {
         const media = Object.values(data.media);
         let offer = {} , streamID = {};
         if (media.length > 0) {
-            console.log('ok2');
             if (data.to.length > 0) {
                 for (const v of data.to) {
                     // Make RTC screen offer
