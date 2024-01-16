@@ -67,7 +67,7 @@ export const actions = {
                     audio.autoplay = 1;
                     audio.classList.add('hidden');
                     audio.id = stream.streams[0].id;
-                    // audio.muted = ! (localStorage.getItem('sound') == 'true');
+                    audio.muted = false;
                     audio.srcObject = stream.streams[0];
                     audio.load();
                     document.getElementById('main').appendChild(audio);
@@ -372,12 +372,9 @@ export const actions = {
                 if (data.data.streamID.hasOwnProperty('audio')) {
                     state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
                 }
-
-                if (state.sound) {
-                    commit("controlSound",{
-                        value: true
-                    })
-                }
+                commit("controlSound",{
+                    value: state.sound
+                })
             }
             // Broadcast answers
             state.socket.emit('make-answer',{

@@ -33,6 +33,7 @@ export default {
       hostClient: null,
       clients:[],
       socket: null,
+      mainLoading: true,
       baseUrl: inject('BaseUrl'),
       logo: inject('LogoAddr'),
     };
@@ -49,10 +50,11 @@ export default {
       document.title = this.room.title;
       this.$store.commit('setRoom',this.room);
       this.$store.commit('setHost',this.room.host);
-
+      this.mainLoading = false;
     }).catch(err => {
       this.redirectClientIfHappenedError(this.$route.params.key,404);
     });
+    this.mainLoading = false;
     this.wires();
   },
   async created() {
@@ -61,11 +63,6 @@ export default {
       connected = await this.connect()
     } while (! connected);
     this.join();
-  },
-  computed:{
-    mainLoading() {
-      return this.$store.state.mainLoading
-    }
   },
   methods:{
     async connect(){

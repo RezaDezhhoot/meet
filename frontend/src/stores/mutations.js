@@ -45,7 +45,7 @@ export const mutations = {
         Array.from(mediaPlayers).forEach(async el => {
             el.muted = ! value.value;
             await el.load();
-            await el.play();
+            // await el.play();
         })
     },
     setLogo(state , value) {
