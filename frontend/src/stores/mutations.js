@@ -19,6 +19,9 @@ export const mutations = {
     },
     controlCamera(state , status){
         try {
+            if (state.videoStream) {
+                state.videoStream.getVideoTracks()[0].enabled = status;
+            }
             state.socket.emit('control-local-media',{
                 device: 'camera',
                 action: status

@@ -587,11 +587,19 @@ export const actions = {
                 console.error(`${err.name}: ${err.message}`);
             });
         }
-
-        navigator.mediaDevices.ondevicechange = function(event) {
-            updateDevice();
-        }
-        updateDevice();
+        navigator.mediaDevices.getUserMedia({audio: true, video: true})
+            .then(s => {
+                navigator.mediaDevices.ondevicechange = function(event) {
+                    updateDevice();
+                }
+                updateDevice();
+            })
+            .catch(error => {
+                navigator.mediaDevices.ondevicechange = function(event) {
+                    updateDevice();
+                }
+                updateDevice();
+            })
     },
     setDefaultDevice({state,dispatch} , value){
         if (value.type === 'camera') {

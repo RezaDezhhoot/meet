@@ -206,7 +206,7 @@ main{
     align-items: top;
     overflow: auto;
     z-index: 110;
-    transition: 0.7s;
+    transition: 300ms;
 }
 
 
