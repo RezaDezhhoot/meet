@@ -48,7 +48,7 @@
         </template>
 
 
-        <template v-if="user && user.hasOwnProperty('user')" v-for="(item,key) in clients">
+        <template v-if="user && room.hasOwnProperty('host') && user.hasOwnProperty('user')" v-for="(item,key) in clients">
           <li v-if="item.user.id !== room.host.id">
             <div class="flex items-center">
               <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">

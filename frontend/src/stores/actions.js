@@ -64,7 +64,7 @@ export const actions = {
             state.peerConnections[id]['pc']['audio'].ontrack = async function (stream) {
                 if(stream.track.kind === 'audio') {
                     const audio = document.createElement('audio');
-                    audio.autoplay = 1;
+                    audio.autoplay = true;
                     audio.classList.add('hidden');
                     audio.id = stream.streams[0].id;
                     audio.muted = false;
@@ -220,11 +220,40 @@ export const actions = {
         } else {
             constraints = {
                 video: false,
-                audio: data.audio ? ( {deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined} ) : false,
+                audio: data.audio ? ( {
+                    aspectRatio: true,
+                    deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined ,
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    googNoiseSuppression: true,
+                    googHighpassFilter: true,
+                    googTypingNoiseDetection: true,
+                    googNoiseReduction: true,
+                    volume: 1.0,
+                    googEchoCancellation: true,
+                    googAutoGainControl: true,
+                } ) : false,
             };
 
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
-                const localStream = stream;
+                const ctx = new AudioContext();
+                const gainNode = ctx.createGain();
+                const sinWave = ctx.createOscillator();
+
+                const audioDest = ctx.createMediaStreamDestination();
+                const source = ctx.createMediaStreamSource(stream);
+
+
+                // gainNode is set to 0.5
+                sinWave.connect(gainNode);
+                gainNode.connect(audioDest);
+                gainNode.gain.value = 0.25;
+                source.connect(gainNode);
+
+                console.log(source)
+
+                const localStream = audioDest.stream;
                 context.state.localStream = localStream;
                 media = 'audio';
                 context.state.user.media.media.local.microphone = true;
@@ -300,7 +329,6 @@ export const actions = {
                         media: data.media,
                         streamID
                     });
-
                 }
             } else {
                 state.socket.emit("share-stream", {
@@ -495,7 +523,6 @@ export const actions = {
     endScreen({state , commit}  , data) {
         if (state.displayStream) {
             state.displayStream.getTracks().forEach(function(track) { track.stop(); })
-            state.displayStream.getVideoTracks()[0].enabled = false;
             state.shareScreen = false;
             state.displayStream = null;
             state.socket.emit('end-stream' , {
@@ -520,13 +547,13 @@ export const actions = {
             context.dispatch('updateVideoGrid');
         }
 
+
         if (data.data.from !== context.state.socket.id) {
             if (data.data.hasOwnProperty('screen') && data.data.screen ) {
                 context.state.shareScreen = false;
                 context.commit('controlMediaLoader',false);
             }
             if (data.data.hasOwnProperty('audio') && data.data.audio ) {
-                context.state.shareScreen = false;
                 context.commit('controlMediaLoader',false);
                 el = document.getElementById(context.state.remoteStreams['audio'][data.data.from]);
                 if (el) {
