@@ -39,10 +39,10 @@ export default {
     };
   },
   beforeCreate() {
+    this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.$store.commit('controlMainLoader' , true);
   },
   beforeMount() {
-    this.$emit('check-if-user-was-logged-in',this.$route.params.key);
     this.user = this.$cookies.get('auth');
     this.$store.commit('setLogo' , this.logo);
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
