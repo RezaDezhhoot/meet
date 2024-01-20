@@ -3,7 +3,7 @@ const {validPhone} = require("../../../../../Base/Constants/Regex");
 
 module.exports = (res) => {
   return Yup.object().shape({
-      name: Yup.string().required(res.__("validation.required",res.__('fields.name'))).max(255,res.__("validation.max",res.__('fields.name'),255)),
+      name: Yup.string().required(res.__("validation.required",res.__('fields.name'))).max(30,res.__("validation.max",res.__('fields.name'),30)),
       email: Yup.string().email(res.__("validation.email")).max(255,res.__("validation.email",res.__('fields.email'),255)),
       phone: Yup.string().required(res.__("validation.required",res.__('fields.phone'))).matches(validPhone,{
           message: res.__("validation.pattern",res.__('fields.phone'))

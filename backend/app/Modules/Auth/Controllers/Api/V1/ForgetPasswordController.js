@@ -5,6 +5,7 @@ const User = require("../../../../User/Models/User");
 const Token = require("../../../../User/Models/Token");
 const SMS = require('../../../Services/SmsService');
 const {Op} = require("sequelize");
+const validate = require("validator");
 
 exports.store = async (req , res) => {
     const errorArr = [];
@@ -93,7 +94,7 @@ exports.reset = async (req , res) => {
             return res.status(403).json({ data: errorArr, message: res.__('general.error') });
         }
 
-        user.password = utils.sha256(password);
+        user.password = utils.sha256(validate.escape(password));
         user.save();
         await Token.destroy({where:{phone}});
         return res.status(200).json({message: res.__('auth.password_updated') });

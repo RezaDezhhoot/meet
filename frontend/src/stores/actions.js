@@ -51,8 +51,9 @@ export const actions = {
 
                     const video = document.createElement('video')
                     video.srcObject = stream.streams[0];
-                    video.muted = "muted";
-                    video.autoplay = "1";
+                    video.muted = true;
+                    video.autoplay = true;
+                    video.playsinline = true;
                     video.classList.add("h-full","w-full");
                     video.load();
 
@@ -250,8 +251,6 @@ export const actions = {
                 gainNode.connect(audioDest);
                 gainNode.gain.value = 0.25;
                 source.connect(gainNode);
-
-                console.log(source)
 
                 const localStream = audioDest.stream;
                 context.state.localStream = localStream;

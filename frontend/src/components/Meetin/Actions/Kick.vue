@@ -1,6 +1,6 @@
 <template>
   <button v-on:click="kick" class="manage-user-kick mr-[0.5rem] flex text-[#aaaaaa] border border-[#aaaaaa] rounded-[2rem] py-[0.1rem] px-[0.3rem]">
-    <small class="mt-[0.1rem] mr-[0.2rem]">اخراج</small>
+    <small class="mt-[0.1rem] hidden xl:block mr-[0.2rem]">اخراج</small>
 
     <svg width="20" height="20" viewBox="0 0 24 20" fill="red" xmlns="http://www.w3.org/2000/svg">
       <path d="M21 5.97998C17.67 5.64998 14.32 5.47998 10.98 5.47998C9 5.47998 7.02 5.57998 5.04 5.77998L3 5.97998" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

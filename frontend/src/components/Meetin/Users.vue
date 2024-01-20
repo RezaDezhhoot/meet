@@ -63,14 +63,6 @@
                   (شما)
                 </small>
               </span>
-              <UserMicrophone
-                  width="20"
-                  height="20"
-                  fill="#616161"
-                  :user="item"
-                  :show="item.media.media.remote.microphone"
-                  :active="item.media.media.remote.microphone && item.media.media.local.microphone">
-              </UserMicrophone>
               <UserHandRising
                   :disabled="(host.id !== user.user.id) && item.user.id !== user.user.id"
                   fill="#616161"
@@ -80,6 +72,15 @@
                   :show="item.media.settings.hand_rising"
                   :active="item.media.settings.hand_rising">
               </UserHandRising>
+              <UserMicrophone
+                  width="20"
+                  height="20"
+                  fill="#616161"
+                  :user="item"
+                  :show="item.media.media.remote.microphone"
+                  :active="item.media.media.remote.microphone && item.media.media.local.microphone">
+              </UserMicrophone>
+
             </div>
 
             <div class="flex" v-if="(host.id === user.user.id)">

@@ -5,6 +5,7 @@ const Token = require('../../../../User/Models/Token');
 const utils = require('../../../../../../utils/helpers');
 const SMS = require('../../../Services/SmsService');
 const { Op } = require("sequelize");
+const validate = require("validator");
 
 exports.store = async (req , res) => {
     const errorArr = [];
@@ -44,12 +45,11 @@ exports.store = async (req , res) => {
         const status = await SMS.send(phone,value);
         if (status === 200 || process.env.MODE === 'test') {
             const expires_at = Date.now() + 2 * 60 * 1000;
-            const token = await Token.create({phone , value, expires_at,status:false});
+            const token = await Token.create({phone: validate.escape(phone) , value, expires_at,status:false});
 
             return res.status(201).json({ data: {
                 phone: token['phone'],
-                    country_code:req.body.country_code,
-                    expires_at:token['expires_at'],
+                    expires_at: token['expires_at'],
                     value: (process.env.MODE === 'development' || process.env.MODE === 'test') ? value : undefined
                 }, message: res.__('general.success') });
         } else throw res.__('sms.error');
@@ -86,7 +86,7 @@ exports.verify = async (req , res) => {
         if (token){
             token.status = true;
             await token.save();
-            return res.status(200).json({ data: {phone: token['phone'],country_code:token['country_code']},message: res.__('auth.success'), });
+            return res.status(200).json({ data: {phone: token['phone']},message: res.__('auth.success'), });
         }
         errorArr.push({
             filed: 'code',

@@ -137,8 +137,7 @@ module.exports.newMessage = async (io,socket,data,room) => {
             }),'logLists');
 
             message = await Chat.create({
-                text: Buffer.from(data.message,'utf-8').toString('base64'),
-                // text: Buffer.from(validator.escape(data.message),'utf-8').toString('base64'),
+                text: Buffer.from(validator.escape(data.message),'utf-8').toString('base64'),
                 room_id: room.id,
                 sender: user.name,
                 user_id: user.user.id ?? null,

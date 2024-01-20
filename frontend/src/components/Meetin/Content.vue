@@ -147,7 +147,7 @@
           </ul>
         </div>
       </div>
-      <video class="h-full rounded my-[1rem] w-full" muted autoplay ref="screenPlayer" id="screen-player"></video>
+      <video class="h-full rounded my-[1rem] w-full" muted autoplay playsinline ref="screenPlayer" id="screen-player"></video>
 
     </div>
   </section>

@@ -10,6 +10,7 @@ const passport = require('passport');
 const { Op } = require("sequelize");
 const {VERIFIED} = require("../../../../User/Enums/status");
 const {GUEST, LOGIN} = require("../../../Enums/LoginTypes");
+const validate = require("validator");
 
 exports.register = async (req , res) => {
     const errorArr = [];
@@ -37,7 +38,14 @@ exports.register = async (req , res) => {
             return res.status(422).json({ data: errorArr, message: res.__('general.error') });
         }
         await Token.destroy({where:{phone}});
-        const user = await User.create({name,phone,password: utils.sha256(password),email,status:VERIFIED,verified_at: Date.now() });
+        const user = await User.create({
+            name: validate.escape(name),
+            phone: validate.escape(phone),
+            password: utils.sha256(validate.escape(password)),
+            email: email ? validate.escape(email) : null,
+            status: VERIFIED,
+            verified_at: Date.now()
+        });
         return res.status(201).json({data:UserResource.make(user,utils.makeToken(user),['email','phone','status'],LOGIN),message: res.__('general.success')});
     } catch (e) {
         const errors = utils.getErrors(e);
