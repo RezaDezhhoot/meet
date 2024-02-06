@@ -152,13 +152,12 @@ import UserMicrophone from "./Elements/UserMicrophone.vue";
 import OtherCamera from "./Elements/OtherCamera.vue";
 import UserSpeaker from "./Elements/UserSpeaker.vue";
 import UserHandRising from "./Elements/UserHandRising.vue";
-import UserCamera from "./Elements/UserCamera.vue";
 import Recorder from "./Recorder.vue";
 
 export default {
   name: "Top",
   components: {
-    UserMicrophone , UserSpeaker , UserHandRising , UserCamera ,Recorder , OtherCamera
+    UserMicrophone , UserSpeaker , UserHandRising ,Recorder , OtherCamera
   },
   computed: {
     room(){
