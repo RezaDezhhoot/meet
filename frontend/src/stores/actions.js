@@ -402,6 +402,11 @@ export const actions = {
                 commit("controlSound",{
                     value: state.sound
                 })
+
+                const mediaPlayers = document.querySelectorAll('audio');
+                Array.from(mediaPlayers).forEach(el => {
+                    el.muted = false;
+                })
             }
             // Broadcast answers
             state.socket.emit('make-answer',{
