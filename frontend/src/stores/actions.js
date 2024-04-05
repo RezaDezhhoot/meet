@@ -249,7 +249,7 @@ export const actions = {
                 // gainNode is set to 0.5
                 sinWave.connect(gainNode);
                 gainNode.connect(audioDest);
-                gainNode.gain.value = 0.25;
+                gainNode.gain.value = 0.5;
                 source.connect(gainNode);
 
                 const localStream = audioDest.stream;
@@ -635,19 +635,7 @@ export const actions = {
                 console.error(`${err.name}: ${err.message}`);
             });
         }
-        navigator.mediaDevices.getUserMedia({audio: true, video: true})
-            .then(s => {
-                navigator.mediaDevices.ondevicechange = function(event) {
-                    updateDevice();
-                }
-                updateDevice();
-            })
-            .catch(error => {
-                navigator.mediaDevices.ondevicechange = function(event) {
-                    updateDevice();
-                }
-                updateDevice();
-            })
+        updateDevice();
     },
     setDefaultDevice({state,dispatch} , value){
         if (value.type === 'camera') {
