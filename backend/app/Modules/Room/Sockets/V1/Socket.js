@@ -44,7 +44,6 @@ module.exports.join = async (io,socket,data,room) => {
         });
         return;
     }
-
     switch (data.type) {
         case LOGIN:
             const token = data.token;
@@ -224,7 +223,6 @@ module.exports.shareStream = async (io,socket,data,room) => {
             }),'logLists');
         }
     }
-
 
     if (Object.values(data.to).length > 0) {
         socket.to(Object.values(data.to)).emit("get-offer",{

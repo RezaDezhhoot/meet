@@ -124,7 +124,19 @@ export default {
       return this.$store.state.cameraLoading;
     },
   },
+  beforeCreate() {
+    this.$store.state.socket.on('disconnect' , async data => {
+      if (this.$store.state.videoStream) {
+        // this.reConnectVideo();
+      }
+    })
+  },
   methods:{
+    reConnectVideo() {
+      this.$store.dispatch('videoShare',{
+        media: ['camera'],localStream: this.$store.state.videoStream
+      });
+    },
     async shareCamera(){
       if (this.$store.state.videoStream) {
         this.$store.commit('controlCamera',true);

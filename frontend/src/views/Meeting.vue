@@ -1,9 +1,9 @@
 <template>
-  <div v-if="mainLoading" class="loader">
+  <div v-if="! conected" class="loader">
     <loader></loader>
   </div>
 
-  <top  @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
+  <top @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main">
     <sidebar></sidebar>
     <content></content>
@@ -36,6 +36,7 @@ export default {
       mainLoading: true,
       baseUrl: inject('BaseUrl'),
       logo: inject('LogoAddr'),
+      conected: false
     };
   },
   beforeCreate() {
@@ -58,18 +59,13 @@ export default {
     this.wires();
   },
   async created() {
-    let connected = false;
-    do {
-      connected = await this.connect()
-    } while (! connected);
-    this.join();
+    await this.connect()
   },
   methods:{
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
       this.$store.commit('setSocket' , this.socket);
       this.$store.dispatch('setDevices');
-
       return this.socket;
     },
     join(){
@@ -113,6 +109,14 @@ export default {
           this.hostClient = data.data.host;
           this.$store.commit('setHostClient',this.hostClient);
         }
+      });
+      this.socket.on('connect',async data => {
+        this.conected = true;
+        this.join();
+      });
+      this.socket.on('disconnect',async data => {
+        this.user = this.$cookies.get('auth');
+        this.conected = false;
       });
 
       this.socket.on('error', async data => {

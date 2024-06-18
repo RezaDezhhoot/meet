@@ -105,6 +105,7 @@ export const actions = {
         if (client.media.settings.screen) {
             media.push('screen');
         }
+        console.log(media)
 
         if (media.length > 0) {
             state.socket.emit('get-shared' , {
@@ -113,6 +114,40 @@ export const actions = {
                 media
             })
         }
+    },
+    async screenShare(context , {media, stream}){
+        let to = [];
+        try {
+            for (const id in context.state.peerConnections) {
+                if (context.state.peerConnections[id]['pc']) {
+                    context.state.displayStream.getTracks().forEach(track => {
+                        track.shareing = true;
+                        context.state.peerConnections[id]['pc']['screen'].addTrack(track,stream)
+                    });
+                    to.push(id);
+                }
+            }
+        } catch (err) {}
+        await context.dispatch('startStream',{from: context.state.socket.id,to ,media })
+    },
+    async videoShare(context , {media, localStream}) {
+        let to = [];
+        context.state.socket.emit('control-local-media',{
+            device: 'camera',
+            action: true
+        });
+        try {
+            for (const id in context.state.peerConnections) {
+                if (context.state.peerConnections[id]['pc']) {
+                    context.state.videoStream.getTracks().forEach(track => {
+                        context.state.peerConnections[id]['pc']['video'].addTrack(track,localStream)
+                    });
+                    to.push(id);
+                }
+            }
+        } catch (err) {}
+        await context.dispatch('startStream',{from: context.state.socket.id,to ,media})
+        context.commit('controlCameraLoader' , false);
     },
     async shareStream(context , data) {
         let constraints , media , to = [];
@@ -128,19 +163,8 @@ export const actions = {
                 context.state.shareScreen = true;
                 media = 'screen';
                 context.commit('controlMediaLoader');
-                for (const id in context.state.peerConnections) {
-                    if (context.state.peerConnections[id]['pc']) {
-                        context.state.displayStream.getTracks().forEach(track => {
-                            track.shareing = true;
-                            context.state.peerConnections[id]['pc']['screen'].addTrack(track,stream)
-                        });
-                        to.push(id);
-                    }
-                }
-            }).then(async () => {
-                await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
+                await context.dispatch('screenShare',{stream ,media: [media] })
             }).catch(function (err) {
-                console.log(err);
                 context.commit('controlMediaLoader' , false);
                 Swal.fire({
                     position: 'top-start',
@@ -164,10 +188,7 @@ export const actions = {
                 context.state.videoStream = localStream;
                 context.state.showing = true;
                 media = 'camera';
-                context.state.socket.emit('control-local-media',{
-                    device: 'camera',
-                    action: true
-                });
+
 
                 if (! context.state.remoteStreams['camera'] ) {
                     context.state.remoteStreams['camera'] = {}
@@ -193,18 +214,7 @@ export const actions = {
                 }
                 context.state.remoteStreams['camera'][context.state.socket.id] = stream.id;
                 await context.dispatch('updateVideoGrid');
-
-                for (const id in context.state.peerConnections) {
-                    if (context.state.peerConnections[id]['pc']) {
-                        context.state.videoStream.getTracks().forEach(track => {
-                            context.state.peerConnections[id]['pc']['video'].addTrack(track,localStream)
-                        });
-                        to.push(id);
-                    }
-                }
-            }).then(async () => {
-                await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
-                context.commit('controlCameraLoader' , false);
+                await context.dispatch('videoShare',{media: [media],localStream: stream  })
             }).catch(function (err) {
                 console.log(err);
                 context.commit('controlCameraLoader' , false);
