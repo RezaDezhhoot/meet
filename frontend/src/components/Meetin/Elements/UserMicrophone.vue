@@ -89,6 +89,13 @@ export default {
     this.wires();
     this.socket = this.$store.state.socket;
   },
+  beforeCreate() {
+    this.$store.state.socket.on('connect' , async data => {
+      if (this.$store.state.localStream) {
+        this.reConnectAudio();
+      }
+    })
+  },
   watch:{
     async "$store.state.user.media.media.remote.microphone"(value){
       if (!value) {
@@ -105,6 +112,11 @@ export default {
     }
   },
   methods:{
+    reConnectAudio(){
+      this.$store.dispatch('audioShare',{
+        media: ['audio'],stream: this.$store.state.localStream
+      });
+    },
     async control(){
       if (! this.status) {
         await this.shareAudio();

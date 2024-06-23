@@ -1,4 +1,5 @@
 import Swal from "sweetalert2";
+
 export const actions = {
     async addIceCandidate({state} , data) {
         for (const id in state.peerConnections) {
@@ -62,16 +63,31 @@ export const actions = {
                 }
             };
             // Set remote audio stream
-            state.peerConnections[id]['pc']['audio'].ontrack = async function (stream) {
+            state.peerConnections[id]['pc']['audio'].ontrack = async function (stream ) {
                 if(stream.track.kind === 'audio') {
-                    const audio = document.createElement('audio');
-                    audio.autoplay = true;
-                    audio.classList.add('hidden');
-                    audio.id = stream.streams[0].id;
-                    audio.muted = false;
-                    audio.srcObject = stream.streams[0];
-                    audio.load();
-                    document.getElementById('main').appendChild(audio);
+                    let audio = document.getElementById(stream.track.id);
+                    let newAudio = false;
+                    if (! audio) {
+                        audio  = document.createElement('audio');
+                        newAudio = true;
+                        audio.autoplay = true;
+                        audio.classList.add('hidden');
+                        audio.id = stream.track.id;
+                        audio.muted = false;
+                        audio.srcObject = stream.streams[0];
+                        audio.load();
+                    } else {
+                        audio.autoplay = true;
+                        audio.classList.add('hidden');
+                        audio.id = stream.track.id;
+                        audio.muted = false;
+                        audio.srcObject = stream.streams[0];
+                        audio.load();
+                    }
+
+                    if (newAudio) {
+                        document.getElementById('main').appendChild(audio);
+                    }
                 }
             };
             // Set remote screen stream
@@ -128,6 +144,27 @@ export const actions = {
                 }
             }
         } catch (err) {}
+        await context.dispatch('startStream',{from: context.state.socket.id,to ,media })
+    },
+    async audioShare(context , {media, stream}) {
+        let to = [];
+        context.state.socket.emit('control-local-media',{
+            device: 'microphone',
+            action: true
+        });
+
+       try {
+           for (const id in context.state.peerConnections) {
+               if (context.state.peerConnections[id]['pc']) {
+                   context.state.localStream.getTracks().forEach(track => {
+                       context.state.peerConnections[id]['pc']['audio'].addTrack(track,stream)
+                   });
+                   to.push(id);
+               }
+           }
+       } catch (err) {}
+        context.state.user.media.media.local.microphone = true;
+        context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
         await context.dispatch('startStream',{from: context.state.socket.id,to ,media })
     },
     async videoShare(context , {media, localStream}) {
@@ -262,26 +299,9 @@ export const actions = {
                 gainNode.gain.value = 0.5;
                 source.connect(gainNode);
 
-                const localStream = audioDest.stream;
-                context.state.localStream = localStream;
+                context.state.localStream = audioDest.stream;
                 media = 'audio';
-                context.state.user.media.media.local.microphone = true;
-                context.state.socket.emit('control-local-media',{
-                    device: 'microphone',
-                    action: true
-                });
-
-                for (const id in context.state.peerConnections) {
-                    if (context.state.peerConnections[id]['pc']) {
-                        context.state.localStream.getTracks().forEach(track => {
-                            context.state.peerConnections[id]['pc']['audio'].addTrack(track,localStream)
-                        });
-                        to.push(id);
-                    }
-                }
-                context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
-            }).then(async () => {
-                await context.dispatch('startStream',{from: context.state.socket.id,to ,media: [media] })
+                await context.dispatch('audioShare',{media: [media], stream })
             }).catch(function (err){
                 console.log(err);
                 context.dispatch('setDevices');
