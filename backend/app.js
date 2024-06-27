@@ -30,5 +30,8 @@ sequelize.sync().then(async res => {
         console.log(`Admin panel running in ${process.env.APP_DOMAIN}:${process.env.PORT}/admin`);
     });
 }).catch(err => {
+    console.log(process.env.DB_DATABASE,
+        process.env.DB_USERNAME,
+        process.env.DB_PASSWORD);
     console.log(err);
 });
