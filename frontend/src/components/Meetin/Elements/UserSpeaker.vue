@@ -67,13 +67,6 @@ export default {
     responsive: false,
     title: String
   },
-  created() {
-    localStorage.removeItem('sound')
-    this.active = this.$store.state.sound;
-    this.$store.commit('controlSound', {
-      value: true
-    });
-  },
   methods:{
     control(){
       localStorage.setItem('sound',(! this.active));

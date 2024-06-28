@@ -170,13 +170,6 @@ export default {
       full: false
     }
   },
-  beforeCreate() {
-    this.$store.state.socket.on('connect' , async data => {
-      if (this.$store.state.displayStream) {
-        this.reConnectScreen();
-      }
-    })
-  },
   watch:{
     "$store.state.displayStream"(value) {
       if (value && value.active) {
@@ -185,21 +178,8 @@ export default {
         this.$store.state.shareScreen = false;
       }
     },
-    "$store.state.user.media.media.remote.screen"(value){
-      if (! value) {
-        this.$store.dispatch('endScreen',{
-          media: "screen"
-        });
-        this.$store.state.shareScreen = false;
-      }
-    }
   },
   methods:{
-    reConnectScreen() {
-      this.$store.dispatch('screenShare',{
-        media: ['screen'],stream: this.$store.state.displayStream
-      });
-    },
     shareScreen() {
       this.$store.dispatch('shareStream',{
         screen: true  , media: 'screen'

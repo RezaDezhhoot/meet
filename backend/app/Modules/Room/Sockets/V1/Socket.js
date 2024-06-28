@@ -53,6 +53,7 @@ module.exports.join = async (io,socket,data,room) => {
                 if (user) {
                     status = 200;
                     users[room.key][socket.id] = {
+                        id: user.id,
                         socketId: socket.id,
                         name: user.name,
                         room: room.title,
@@ -167,6 +168,14 @@ module.exports.typing = async (io,socket,data,room) => {
     });
 }
 
+module.exports.clearVideoEl = async (io,socket,data,room) => {
+    socket.broadcast.emit('clear-video-el',{
+        data: {
+            data: typistUsers[room.key]
+        }, status:200
+    });
+}
+
 module.exports.noTyping = async (io,socket,data,room) => {
     delete typistUsers[room.key][socket.id];
     socket.broadcast.emit('get-typists',{
@@ -180,48 +189,39 @@ module.exports.shareStream = async (io,socket,data,room) => {
     const media = Object.values(data.media);
 
     if (media.includes('camera')) {
-        if (! users[room.key][socket.id].media.media.remote.camera) {
-            delete data.offer['camera'];
-        } else {
-            users[room.key][socket.id].media.settings.camera = true;
-            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-                room_id: room.id,
-                action: 'share-camera',
-                user_id: users[room.key][socket.id].user.id ?? null,
-                user_ip: socket.handshake.address,
-                user_name: users[room.key][socket.id].name,
-            }),'logLists');
-        }
+        users[room.key][socket.id].media.settings.camera = true;
+        users[room.key][socket.id].media.media.remote.camera = true;
+        await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+            room_id: room.id,
+            action: 'share-camera',
+            user_id: users[room.key][socket.id].user.id ?? null,
+            user_ip: socket.handshake.address,
+            user_name: users[room.key][socket.id].name,
+        }),'logLists');
     }
 
     if (media.includes('audio')) {
-        if (! users[room.key][socket.id].media.media.remote.microphone) {
-            delete data.offer['audio'];
-        } else {
-            users[room.key][socket.id].media.settings.audio = true;
-            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-                room_id: room.id,
-                action: 'share-audio',
-                user_id: users[room.key][socket.id].user.id ?? null,
-                user_ip: socket.handshake.address,
-                user_name: users[room.key][socket.id].name,
-            }),'logLists');
-        }
+        users[room.key][socket.id].media.settings.audio = true;
+        users[room.key][socket.id].media.media.remote.microphone = true;
+        await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+            room_id: room.id,
+            action: 'share-audio',
+            user_id: users[room.key][socket.id].user.id ?? null,
+            user_ip: socket.handshake.address,
+            user_name: users[room.key][socket.id].name,
+        }),'logLists');
     }
 
     if (media.includes('screen')) {
-        if (! users[room.key][socket.id].media.media.remote.screen) {
-            delete data.offer['screen'];
-        } else {
-            users[room.key][socket.id].media.settings.screen = true;
-            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-                room_id: room.id,
-                action: 'share-screen',
-                user_id: users[room.key][socket.id].user.id ?? null,
-                user_ip: socket.handshake.address,
-                user_name: users[room.key][socket.id].name,
-            }),'logLists');
-        }
+        users[room.key][socket.id].media.settings.screen = true;
+        users[room.key][socket.id].media.media.remote.screen = true;
+        await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+            room_id: room.id,
+            action: 'share-screen',
+            user_id: users[room.key][socket.id].user.id ?? null,
+            user_ip: socket.handshake.address,
+            user_name: users[room.key][socket.id].name,
+        }),'logLists');
     }
 
     if (Object.values(data.to).length > 0) {
@@ -294,6 +294,13 @@ module.exports.controlRemoteMedia = async (io,socket,data,room) => {
         if (! users[room.key][data.to].media.media.remote[data.device]) {
             users[room.key][data.to].media.media.local[data.device] = users[room.key][data.to].media.media.remote[data.device];
         }
+
+        io.to(data.to).emit('remote-media-controlled' , {
+            data: {
+                'device': data.device,
+                'action':  users[room.key][data.to].media.media.remote[data.device]
+            }
+        });
 
         io.emit('get-users',{
             data:{

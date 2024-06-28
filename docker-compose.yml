@@ -105,7 +105,7 @@ services:
       - main
   phpmyadmin:
     image: phpmyadmin
-    container_name: phpmyadmin
+    container_name: meet_phpmyadmin
     restart: always
     depends_on:
       - mysql

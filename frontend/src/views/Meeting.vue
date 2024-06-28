@@ -128,6 +128,28 @@ export default {
       this.socket.on('get-offer' , async data => {
         this.$store.dispatch('getOffer',data);
       });
+      this.socket.on('remote-media-controlled' , async data => {
+        console.log(data.data);
+        if (! data.data.action) {
+          if (data.data.device === 'screen') {
+            this.$store.dispatch('endScreen',{
+              media: "screen"
+            });
+            this.$store.state.shareScreen = false;
+          } else if (data.data.device === 'microphone') {
+            this.$store.dispatch('endStream',{
+              media: ['audio']
+            })
+            this.status = false;
+          }
+          else if (data.data.device === 'camera') {
+            this.$store.dispatch('endStream',{
+              media: ['camera']
+            })
+            this.status = false;
+          }
+        }
+      });
       this.socket.on('answer-made' , async data => {
         this.$store.dispatch('answerMade',data);
       });

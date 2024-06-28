@@ -47,13 +47,16 @@ export default {
       GuestSchema.validate(this.user,{abortEarly: false})
           .then(() => {
             this.loading = true;
+          })
+          .then(() => {
             this.resetErrors();
             axios.post(`/v1/auth/guest?room=${this.$route.query.room}&lang=fa`,{
               name: this.user.name
             }).then((res) => {
-              this.loading = false;
               this.$cookies.set('auth',res.data.data);
               this.$emit('redirect-to-meet',this.$route.query.room);
+            }).then(() => {
+              this.loading = false;
             }).catch(err =>{
               this.loading = false;
               err.response.data.data.forEach(error => {
