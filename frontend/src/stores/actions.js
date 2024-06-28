@@ -43,25 +43,43 @@ export const actions = {
                 }
             }
             // Set remote video stream
-            state.peerConnections[id]['pc']['video'].ontrack = async function (stream) {
-                if (stream.track.kind === 'video') {
+            state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
+                track.onunmute = () => {
                     const parent = document.getElementById('video-grid-container')
-                    const div  = document.createElement('div');
-                    div.id = stream.streams[0].id;
-                    div.classList.add("grid-item")
-
+                    let div  = document.getElementById(track.id);
                     const video = document.createElement('video')
-                    video.srcObject = stream.streams[0];
+                    video.srcObject = stream;
                     video.muted = true;
                     video.autoplay = true;
                     video.playsinline = true;
                     video.classList.add("h-full","w-full");
-                    video.load();
 
-                    parent.appendChild(div);
-                    div.appendChild(video);
+                    if (! div) {
+                        div  = document.createElement('div');
+                        div.id = track.id;
+                        div.classList.add("grid-item")
+                        video.load();
+                        parent.appendChild(div);
+                        div.appendChild(video);
+                    } else {
+                        div.id = track.id;
+                        video.load();
+                        div.innerHTML = "";
+                        div.appendChild(video);
+                    }
                 }
+
+                track.onmuted = (data) => {
+                    console.log(data)
+                }
+
+                stream.onremovetrack = ({track}) => {
+                    console.log(`${track.kind} track was removed.`);
+                };
             };
+            state.peerConnections[id]['pc']['video'].onremovetrack = function ({track} ) {
+                console.log(track)
+            }
             // Set remote audio stream
             state.peerConnections[id]['pc']['audio'].ontrack = async function (stream ) {
                 if(stream.track.kind === 'audio') {
@@ -108,6 +126,7 @@ export const actions = {
         } else {
             makeNewPc(data.from,clients[data.from].user.id)
         }
+
         for (const id in state.peerConnections) {
             if(! Object.keys(clients).includes(id)) {
                 delete state.peerConnections[id];
@@ -144,7 +163,6 @@ export const actions = {
         if (client.media.settings.screen) {
             media.push('screen');
         }
-        console.log(media)
 
         if (media.length > 0) {
             state.socket.emit('get-shared' , {
@@ -226,6 +244,7 @@ export const actions = {
                 context.commit('controlMediaLoader');
                 await context.dispatch('screenShare',{stream ,media: [media] })
             }).catch(function (err) {
+                console.log(err);
                 context.commit('controlMediaLoader' , false);
                 Swal.fire({
                     position: 'top-start',
@@ -255,7 +274,6 @@ export const actions = {
                     context.state.remoteStreams['camera'] = {}
                 }
                 context.state.remoteStreams['camera'][context.state.socket.id] = stream.id;
-                await context.dispatch('updateVideoGrid');
 
                 const parent = document.getElementById('video-grid-container')
                 const div  = document.createElement('div');
@@ -274,7 +292,6 @@ export const actions = {
                     context.state.remoteStreams['camera'] = {}
                 }
                 context.state.remoteStreams['camera'][context.state.socket.id] = stream.id;
-                await context.dispatch('updateVideoGrid');
                 await context.dispatch('videoShare',{media: [media],localStream: stream  })
             }).catch(function (err) {
                 console.log(err);
@@ -436,7 +453,6 @@ export const actions = {
                 }
 
                 commit('controlCameraLoader',false);
-                dispatch('updateVideoGrid');
             }
             // Make RTC audio answer
             if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
@@ -557,6 +573,7 @@ export const actions = {
 
             if (media.includes('audio')) {
                 if (state.localStream) {
+                    state.localStream.getTracks().forEach(function(track) { track.stop(); })
                     state.localStream = null;
                 }
                 commit('controlMicrophone',false);
@@ -564,6 +581,18 @@ export const actions = {
 
             if (media.includes('camera')) {
                 if (state.videoStream) {
+                    for (const id in state.peerConnections) {
+                        if (state.peerConnections[id]['pc']) {
+                            const senders = state.peerConnections[id]['pc']['video'].getSenders();
+                            console.log(senders)
+                            senders.forEach((sender) => state.peerConnections[id]['pc']['video'].removeTrack(sender));
+                            // state.videoStream.getTracks().forEach(function(track) {
+                            // //     state.peerConnections[id]['pc']['video'].removeTrack(track)
+                            //     track.enabled = false;
+                            //     track.stop();
+                            // });
+                        }
+                    }
                     state.videoStream = null;
                 }
                 commit('controlCamera',false);
@@ -603,7 +632,6 @@ export const actions = {
                 el = null;
                 delete context.state.remoteStreams['camera'][data.data.from];
             }
-            context.dispatch('updateVideoGrid');
         }
 
 
@@ -750,19 +778,19 @@ export const actions = {
             document.getElementById('video-grid').classList.remove('hidden');
         }
 
-        const top = Math.ceil(itemCount / 10);
-        const cols =  itemCount === 2 ? 2 : Math.ceil( (itemCount / (top+1)) );
-        const rows = Math.ceil(itemCount / cols);
-        const cols_percent = 100 / cols;
-        const rows_percent = 100 / rows;
-        let row = "" , col = "";
-        for (let  i = 1;i<= rows; i++){
-            row += `${rows_percent}% `;
-        }
-        for (let  i = 1;i<= cols; i++){
-            col += `${cols_percent}% `;
-        }
-        video_grid.style.gridTemplateColumns = col.trim();
-        video_grid.style.gridTemplateRows = row.trim();
+        // const top = Math.ceil(itemCount / 10);
+        // const cols =  itemCount === 2 ? 2 : Math.ceil( (itemCount / (top+1)) );
+        // const rows = Math.ceil(itemCount / cols);
+        // const cols_percent = 100 / cols;
+        // const rows_percent = 100 / rows;
+        // let row = "" , col = "";
+        // for (let  i = 1;i<= rows; i++){
+        //     row += `${rows_percent}% `;
+        // }
+        // for (let  i = 1;i<= cols; i++){
+        //     col += `${cols_percent}% `;
+        // }
+        // video_grid.style.gridTemplateColumns = col.trim();
+        // video_grid.style.gridTemplateRows = row.trim();
     }
 }
