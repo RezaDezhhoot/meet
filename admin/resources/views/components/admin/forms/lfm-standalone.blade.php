@@ -1,6 +1,6 @@
 @props(['id', 'label', 'required' => false, 'help', 'file' , 'type' => 'file', 'disable'=>false])
-<div>
-    <div class="form-group col-12">
+<div  class="form-group col-12">
+    <div>
         <label for="{{$id}}">{{$label}}</label>
         @if(!$disable)
         <div class="input-group">

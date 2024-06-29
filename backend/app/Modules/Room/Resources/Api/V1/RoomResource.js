@@ -12,6 +12,7 @@ exports.make =  async (room  , ignore = [] ) => {
         title: room.title,
         capacity: room.capacity,
         key: room?.key,
-        host: UserResource.make(host,null,['email','phone','status'])
+        host: UserResource.make(host,null,['email','phone','status']),
+        logo: room?.logo,
     }
 }

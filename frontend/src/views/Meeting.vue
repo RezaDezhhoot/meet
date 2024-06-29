@@ -35,8 +35,9 @@ export default {
       socket: null,
       mainLoading: true,
       baseUrl: inject('BaseUrl'),
-      logo: inject('LogoAddr'),
-      conected: false
+      logo: null,
+      conected: false,
+      reload: false,
     };
   },
   beforeCreate() {
@@ -45,9 +46,9 @@ export default {
   },
   beforeMount() {
     this.user = this.$cookies.get('auth');
-    this.$store.commit('setLogo' , this.logo);
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
       this.room = res.data.room;
+      this.$store.commit('setLogo' , this.room.logo);
       document.title = this.room.title;
       this.$store.commit('setRoom',this.room);
       this.$store.commit('setHost',this.room.host);
@@ -98,6 +99,17 @@ export default {
             },2000);
           }
         }
+        this.reload = true;
+
+        const mediaPlayers = document.querySelectorAll('audio');
+        Array.from(mediaPlayers).forEach(el => {
+          el.muted = false;
+          el.defaultMuted = false;
+          // el.defaultMuted = ! value.value;
+          el.load();
+          // await el.play();
+        })
+
       });
 
       this.socket.on('add-candidate',async data => {
@@ -113,9 +125,10 @@ export default {
       this.socket.on('connect',async data => {
         this.conected = true;
         this.join();
+        if (this.reload)
+          window.location.reload(true);
       });
       this.socket.on('disconnect',async data => {
-        this.user = this.$cookies.get('auth');
         this.conected = false;
       });
 

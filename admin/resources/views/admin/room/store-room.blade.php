@@ -11,7 +11,9 @@
                 <x-admin.forms.input with="4" type="text" id="title" label="عنوان*" wire:model.defer="title"/>
                 <x-admin.forms.input with="4" type="number" id="capacity" label="ظرفیت*" wire:model.defer="capacity"/>
                 <x-admin.forms.dropdown with="4" id="status" :data="$data['status']" label="وضعیت*" wire:model="status"/>
-{{--                <x-admin.forms.searchable-dropdown help="{{$room->host->name ?? ''}}" wire:keydown="searchHost" with="6" id="host_id" :data="$data['users']" label="میزبان*" wire:model="host_id"/>--}}
+                <x-admin.forms.lfm-standalone with="12" id="logo" label="لوگو سامانه*" :file="$logo" type="image" required="true" wire:model="logo"/>
+
+                {{--                <x-admin.forms.searchable-dropdown help="{{$room->host->name ?? ''}}" wire:keydown="searchHost" with="6" id="host_id" :data="$data['users']" label="میزبان*" wire:model="host_id"/>--}}
                 <x-admin.forms.select2 id="host_id" :data="$host"  width="6" label="میزبان*" ajaxUrl="/feed/users" wire:model.defer="host_id"/>
                 <x-admin.forms.select2 id="owner_id" :data="$owner"  width="6" label="مالک*" ajaxUrl="/feed/users" wire:model.defer="owner_id"/>
             </div>

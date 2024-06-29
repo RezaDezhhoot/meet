@@ -89,16 +89,18 @@ export const actions = {
                         audio  = document.createElement('audio');
                         newAudio = true;
                         audio.autoplay = true;
+                        audio.defaultMuted  = false;
                         audio.classList.add('hidden');
                         audio.id = stream.track.id;
-                        audio.muted = false;
+                        audio.muted = "muted";
                         audio.srcObject = stream.streams[0];
                         audio.load();
                     } else {
                         audio.autoplay = true;
+                        audio.defaultMuted  = false;
                         audio.classList.add('hidden');
                         audio.id = stream.track.id;
-                        audio.muted = false;
+                        audio.muted = "muted";
                         audio.srcObject = stream.streams[0];
                         audio.load();
                     }
@@ -145,11 +147,11 @@ export const actions = {
             });
         }
 
-        if (state.videoStream) {
-            dispatch('videoShare',{
-                media: ['camera'], localStream: state.videoStream
-            });
-        }
+        // if (state.videoStream) {
+        //     dispatch('videoShare',{
+        //         media: ['camera'], localStream: state.videoStream
+        //     });
+        // }
     },
     joinStream({state , dispatch} , client){
         let media = [];
@@ -292,7 +294,8 @@ export const actions = {
                     context.state.remoteStreams['camera'] = {}
                 }
                 context.state.remoteStreams['camera'][context.state.socket.id] = stream.id;
-                await context.dispatch('videoShare',{media: [media],localStream: stream  })
+                await context.dispatch('updateVideoGrid');
+                await context.dispatch('videoShare',{media: [media],localStream: stream  });
             }).catch(function (err) {
                 console.log(err);
                 context.commit('controlCameraLoader' , false);
@@ -453,6 +456,7 @@ export const actions = {
                 }
 
                 commit('controlCameraLoader',false);
+                dispatch('updateVideoGrid');
             }
             // Make RTC audio answer
             if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
@@ -469,14 +473,10 @@ export const actions = {
                 if (data.data.streamID.hasOwnProperty('audio')) {
                     state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
                 }
-                commit("controlSound",{
-                    value: state.sound
-                })
 
-                if (state.sound) {
-                    const mediaPlayers = document.querySelectorAll('audio');
-                    Array.from(mediaPlayers).forEach(el => {
-                        el.muted = false;
+                if ( localStorage.getItem('sound')) {
+                    commit("controlSound",{
+                        value: true
                     })
                 }
 
@@ -632,6 +632,7 @@ export const actions = {
                 el = null;
                 delete context.state.remoteStreams['camera'][data.data.from];
             }
+            context.dispatch('updateVideoGrid');
         }
 
 
@@ -778,19 +779,19 @@ export const actions = {
             document.getElementById('video-grid').classList.remove('hidden');
         }
 
-        // const top = Math.ceil(itemCount / 10);
-        // const cols =  itemCount === 2 ? 2 : Math.ceil( (itemCount / (top+1)) );
-        // const rows = Math.ceil(itemCount / cols);
-        // const cols_percent = 100 / cols;
-        // const rows_percent = 100 / rows;
-        // let row = "" , col = "";
-        // for (let  i = 1;i<= rows; i++){
-        //     row += `${rows_percent}% `;
-        // }
-        // for (let  i = 1;i<= cols; i++){
-        //     col += `${cols_percent}% `;
-        // }
-        // video_grid.style.gridTemplateColumns = col.trim();
-        // video_grid.style.gridTemplateRows = row.trim();
+        const top = Math.ceil(itemCount / 10);
+        const cols =  itemCount === 2 ? 2 : Math.ceil( (itemCount / (top+1)) );
+        const rows = Math.ceil(itemCount / cols);
+        const cols_percent = 100 / cols;
+        const rows_percent = 100 / rows;
+        let row = "" , col = "";
+        for (let  i = 1;i<= rows; i++){
+            row += `${rows_percent}% `;
+        }
+        for (let  i = 1;i<= cols; i++){
+            col += `${cols_percent}% `;
+        }
+        video_grid.style.gridTemplateColumns = col.trim();
+        video_grid.style.gridTemplateRows = row.trim();
     }
 }

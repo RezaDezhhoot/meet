@@ -11,7 +11,7 @@ use function Laravel\Prompts\select;
 
 class StoreRoom extends BaseComponent
 {
-    public $room , $title , $capacity , $status , $host_id , $owner_id;
+    public $room , $title , $capacity , $status , $host_id , $owner_id , $logo;
 
     public $user;
 
@@ -32,6 +32,7 @@ class StoreRoom extends BaseComponent
             $this->status = $this->room->status;
             $this->host_id = $this->room->host_id;
             $this->owner_id = $this->room->owner_id;
+            $this->logo = $this->room->logo;
             $this->header = $this->title;
 
             $this->host = $this->room->host->toArray() ?? [];
@@ -50,7 +51,7 @@ class StoreRoom extends BaseComponent
             $this->saveInDataBase($this->room);
         } elseif ($this->mode == self::CREATE_MODE) {
             $this->saveInDataBase(new Room());
-            $this->reset(['title','capacity','status','host_id','owner_id']);
+            $this->reset(['title','capacity','status','host_id','owner_id','logo']);
         }
     }
 
@@ -62,12 +63,14 @@ class StoreRoom extends BaseComponent
             'status' => ['required'],
             'host_id' => ['required','exists:users,id'],
             'owner_id' => ['required','exists:users,id'],
+            'logo' => ['nullable','string','max:20000']
         ],[],[
             'title' => 'عنوان',
             'capacity' => 'ظرفیت',
             'host_id' => 'میزبان',
             'status' => 'وضعیت',
-            'owner_id' => 'مالک'
+            'owner_id' => 'مالک',
+            'logo' => 'لوگو'
         ]);
 
         $room->title = $this->title;
@@ -75,6 +78,7 @@ class StoreRoom extends BaseComponent
         $room->status = $this->status;
         $room->host_id = $this->host_id;
         $room->owner_id = $this->owner_id;
+        $room->logo = $this->logo;
         $room->save();
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }

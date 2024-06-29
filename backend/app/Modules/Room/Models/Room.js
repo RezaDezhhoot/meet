@@ -28,6 +28,10 @@ const Room = sequelize.define('Room',{
         type: DataTypes.BIGINT,
         allowNull: true,
     },
+    logo:{
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
 },{
     tableName: 'rooms',
     createdAt: 'created_at',

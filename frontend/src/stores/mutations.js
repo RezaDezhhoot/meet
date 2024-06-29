@@ -44,8 +44,9 @@ export const mutations = {
         const mediaPlayers = document.querySelectorAll('audio');
         Array.from(mediaPlayers).forEach(async el => {
             el.muted = ! value.value;
-            await el.load();
-            // await el.play();
+            // el.defaultMuted = ! value.value;
+             el.load();
+             el.play();
         })
     },
     setLogo(state , value) {
