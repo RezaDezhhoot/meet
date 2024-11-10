@@ -3,8 +3,12 @@
     <loader></loader>
   </div>
 
+
   <top @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main">
+    <div v-if="lowSignal">
+      <low-signal></low-signal>
+    </div>
     <sidebar></sidebar>
     <content></content>
   </main>
@@ -12,6 +16,7 @@
 <script>
 import Top from "../components/Meetin/Top.vue";
 import Loader from "../components/Meetin/Elements/Loader.vue";
+import LowSignal from "../components/Meetin/Elements/LowSignal.vue";
 import Sidebar from "../components/Meetin/Sidebar.vue";
 import Content from "../components/Meetin/Content.vue";
 import io from 'socket.io-client';
@@ -23,7 +28,8 @@ export default {
     top: Top,
     sidebar: Sidebar,
     content: Content,
-    loader: Loader
+    loader: Loader,
+    lowSignal: LowSignal
   },
   data(){
     return {
@@ -37,6 +43,7 @@ export default {
       baseUrl: inject('BaseUrl'),
       logo: null,
       conected: false,
+      lowSignal: false,
       reload: false,
     };
   },
@@ -124,12 +131,13 @@ export default {
       });
       this.socket.on('connect',async data => {
         this.conected = true;
+        this.lowSignal = false;
         this.join();
         if (this.reload)
           window.location.reload(true);
       });
       this.socket.on('disconnect',async data => {
-        this.conected = false;
+        this.lowSignal = true;
       });
 
       this.socket.on('error', async data => {
