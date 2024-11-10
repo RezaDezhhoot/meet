@@ -67,16 +67,14 @@ export default {
     this.wires();
   },
   async created() {
+    window.addEventListener("online", this.updateConnectionStatus);
+    window.addEventListener("offline", this.updateConnectionStatus);
     await this.connect()
   },
   methods:{
     updateConnectionStatus() {
+      console.log(navigator.onLine)
       this.lowSignal = navigator.onLine; // Update status
-    },
-    created() {
-      // Add event listeners for online/offline events
-      window.addEventListener("online", this.updateConnectionStatus);
-      window.addEventListener("offline", this.updateConnectionStatus);
     },
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
