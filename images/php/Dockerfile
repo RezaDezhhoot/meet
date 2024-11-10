@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM docker.arvancloud.ir/php:8.2-fpm
 
 # Install dependencies for the operating system software
 RUN apt-get update && apt-get install -y \

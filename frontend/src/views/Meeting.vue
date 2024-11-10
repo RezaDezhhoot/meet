@@ -70,6 +70,14 @@ export default {
     await this.connect()
   },
   methods:{
+    updateConnectionStatus() {
+      this.lowSignal = navigator.onLine; // Update status
+    },
+    created() {
+      // Add event listeners for online/offline events
+      window.addEventListener("online", this.updateConnectionStatus);
+      window.addEventListener("offline", this.updateConnectionStatus);
+    },
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
       this.$store.commit('setSocket' , this.socket);
