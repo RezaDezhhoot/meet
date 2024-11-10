@@ -71,9 +71,20 @@ export default {
     this.wires();
   },
   async created() {
+    if (Notification.permission !== "granted") {
+      this.requestPermission();
+    }
+
     await this.connect()
   },
   methods:{
+    requestPermission() {
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+          console.log("Notification permission:", permission);
+        });
+      }
+    },
     updateConnectionStatus() {
       console.log(navigator.onLine)
       this.lowSignal = navigator.onLine; // Update status
@@ -98,14 +109,23 @@ export default {
     },
     wires() {
       let meeting = this;
-      setInterval(async function (meeting) {
+      setInterval(async function (meeting ) {
         try {
           const data = await meeting.socket.timeout(1000).emitWithAck("ping" , {});
           meeting.lowSignal = false
         } catch (err) {
           meeting.lowSignal = true
+          if ("Notification" in window && Notification.permission === "granted") {
+            const notification = new Notification("مشکل در اتصال", {
+              body: "اتصال اینترنت شما ضعیف است، لطفاً بررسی کنید یا منتظر بمانید تا اتصال بهبود یابد",
+              icon: "/meet/internet.webp" // Optional icon URL
+            });
+            notification.onclick = function () {
+              console.log("Notification clicked");
+            };
+          }
         }
-      }, 2000,this);
+      }, 3500, meeting );
 
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
@@ -141,8 +161,6 @@ export default {
         this.$store.dispatch('addIceCandidate',data);
       });
 
-
-
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
           this.hostClient = data.data.host;
@@ -170,7 +188,6 @@ export default {
         this.$store.dispatch('getOffer',data);
       });
       this.socket.on('remote-media-controlled' , async data => {
-        console.log(data.data);
         if (! data.data.action) {
           if (data.data.device === 'screen') {
             this.$store.dispatch('endScreen',{
