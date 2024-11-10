@@ -17,6 +17,9 @@ module.exports.ChannelV1 = async (io) => {
             const nsp = socket.nsp;
 
             SocketV1.createRoom(nsp,socket,room)
+
+            socket.on('ping', async (data , callback) => await SocketV1.ping(nsp,socket,data,room , callback))
+
             // Client join.
             socket.on('join', async data => await SocketV1.join(nsp,socket,data,room))
 

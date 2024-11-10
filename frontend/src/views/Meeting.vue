@@ -45,6 +45,7 @@ export default {
       conected: false,
       lowSignal: false,
       reload: false,
+      onLine: navigator.onLine,
     };
   },
   beforeCreate() {
@@ -52,6 +53,9 @@ export default {
     this.$store.commit('controlMainLoader' , true);
   },
   beforeMount() {
+    window.addEventListener("online", this.updateConnectionStatus);
+    window.addEventListener("offline", this.updateConnectionStatus);
+
     this.user = this.$cookies.get('auth');
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
       this.room = res.data.room;
@@ -67,8 +71,6 @@ export default {
     this.wires();
   },
   async created() {
-    window.addEventListener("online", this.updateConnectionStatus);
-    window.addEventListener("offline", this.updateConnectionStatus);
     await this.connect()
   },
   methods:{
@@ -95,6 +97,16 @@ export default {
       });
     },
     wires() {
+      let meeting = this;
+      setInterval(async function (meeting) {
+        try {
+          const data = await meeting.socket.timeout(1000).emitWithAck("ping" , {});
+          meeting.lowSignal = false
+        } catch (err) {
+          meeting.lowSignal = true
+        }
+      }, 2000,this);
+
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
           this.clients = data.data.users;
@@ -128,6 +140,8 @@ export default {
       this.socket.on('add-candidate',async data => {
         this.$store.dispatch('addIceCandidate',data);
       });
+
+
 
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {

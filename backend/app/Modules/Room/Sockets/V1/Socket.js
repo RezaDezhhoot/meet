@@ -168,6 +168,12 @@ module.exports.typing = async (io,socket,data,room) => {
     });
 }
 
+module.exports.ping = async (io,socket,data,room , callback) => {
+    if (typeof callback !== "function") return;
+
+    return callback("ok")
+}
+
 module.exports.clearVideoEl = async (io,socket,data,room) => {
     socket.broadcast.emit('clear-video-el',{
         data: {
