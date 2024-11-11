@@ -36,7 +36,7 @@
   </div>
 </template>
 <script>
-import "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js";
+import "../../lib/jquery.min.js";
 import axios from "axios";
 import { inject } from 'vue';
 
