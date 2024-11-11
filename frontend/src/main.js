@@ -37,6 +37,7 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to, from) => {
     if (to.name === 'meeting') {
         import('../src/assets/meet/scripts/script.js');
+        import('../src/assets/meet/scripts/tailwindcss.js');
     }
 })
 
