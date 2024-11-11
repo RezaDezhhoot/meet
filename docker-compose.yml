@@ -30,7 +30,7 @@ services:
     networks:
       - main
   npm:
-    image: node:14
+    image: docker.arvancloud.ir/node:14
     volumes:
       - ./admin:/app
     working_dir: /app
@@ -87,7 +87,7 @@ services:
     networks:
       - main
   mysql:
-    image: mysql
+    image: docker.arvancloud.ir/mysql
     container_name: ${DATABASE_CONTAINER}
     restart: on-failure
     tty: true
@@ -104,7 +104,7 @@ services:
     networks:
       - main
   phpmyadmin:
-    image: phpmyadmin
+    image: docker.arvancloud.ir/phpmyadmin
     container_name: meet_phpmyadmin
     restart: always
     depends_on:
@@ -116,7 +116,7 @@ services:
     networks:
       - main
   rabbitmq:
-    image: rabbitmq:3.8-management-alpine
+    image: docker.arvancloud.ir/rabbitmq:3.8-management-alpine
     tty: true
     hostname: ${RABBITMQ_HOST}
     container_name: ${RABBITMQ_HOST}
