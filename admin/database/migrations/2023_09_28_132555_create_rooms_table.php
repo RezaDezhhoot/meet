@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->string('key')->nullable()->unique();
                 $table->bigInteger('capacity');
                 $table->string('status');
-                $table->foreignId('host_id')->nullable()->constrained('users')->nullOnDelete();
+                $table->unsignedBigInteger('host_id')->nullable();
                 $table->timestamps();
             });
         }
