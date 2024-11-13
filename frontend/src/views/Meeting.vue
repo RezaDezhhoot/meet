@@ -90,7 +90,9 @@ export default {
       this.lowSignal = navigator.onLine; // Update status
     },
     async connect(){
-      this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`);
+      this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`,{
+        path: import.meta.env.VITE_SOCKET_PATH ?? null
+      });
       this.$store.commit('setSocket' , this.socket);
       this.$store.dispatch('setDevices');
       return this.socket;
