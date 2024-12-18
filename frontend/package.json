@@ -10,6 +10,8 @@
   "dependencies": {
     "@vueuse/core": "^10.5.0",
     "axios": "^1.5.1",
+    "jszip": "^3.10.1",
+    "pdfjs-dist": "^4.9.155",
     "pinia": "^2.1.6",
     "primevue": "^3.43.0",
     "socket.io-client": "^4.7.2",

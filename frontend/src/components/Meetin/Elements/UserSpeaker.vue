@@ -68,11 +68,7 @@ export default {
     title: String
   },
   mounted() {
-    this.active = true;
-    localStorage.setItem('sound',true);
-    this.$store.commit('controlSound', {
-      value: true,
-    });
+    localStorage.setItem('sound',false);
   },
   methods:{
     control(){

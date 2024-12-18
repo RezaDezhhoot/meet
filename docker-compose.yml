@@ -52,6 +52,7 @@ services:
       - '3000:3000'
     volumes:
       - ./backend:/app
+      - ./storage:/app/uploads
       - /app/node_modules
     command: npm run dev
     environment:

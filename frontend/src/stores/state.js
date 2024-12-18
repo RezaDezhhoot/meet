@@ -4,6 +4,7 @@ export const state = {
     cameraLoading: false,
 
     localStream: null,
+    recorderLocalStream: null,
     videoStream: null,
     displayStream: null,
     remoteStreams: Array,
@@ -39,7 +40,10 @@ export const state = {
 
     hiddenVideo: true,
     showing: false,
+
+    content: false,
     shareScreen: false,
+    shareFile: false,
 
     logo: null,
 
@@ -50,4 +54,9 @@ export const state = {
     selectedVideoDevice: null,
     selectedSpeakerDevice: null,
     selectedAudioDevice: null,
+
+    top: {
+        users: true,
+        chat: true
+    }
 }

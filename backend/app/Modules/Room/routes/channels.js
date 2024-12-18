@@ -22,6 +22,9 @@ module.exports.ChannelV1 = async (io) => {
 
             // Client join.
             socket.on('join', async data => await SocketV1.join(nsp,socket,data,room))
+            socket.on('share-file', async data => await SocketV1.shareFile(nsp,socket,data,room))
+            socket.on('get-shared-file', async data => await SocketV1.getShareFile(nsp,socket,data,room))
+            socket.on('check-speakers', async data => await SocketV1.checkSpeakers(nsp,socket,data,room))
 
             // Submit new message
             socket.on('new-message', async data => await SocketV1.newMessage(nsp,socket,data,room))

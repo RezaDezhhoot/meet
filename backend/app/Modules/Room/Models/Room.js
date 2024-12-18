@@ -32,6 +32,10 @@ const Room = sequelize.define('Room',{
         type: DataTypes.TEXT,
         allowNull: true
     },
+    ui:{
+        type: DataTypes.INTEGER,
+        defaultValue: 1
+    },
 },{
     tableName: 'rooms',
     createdAt: 'created_at',

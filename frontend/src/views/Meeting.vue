@@ -2,10 +2,9 @@
   <div v-if="! conected" class="loader">
     <loader></loader>
   </div>
-
-
-  <top @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
-  <main id="main">
+  <top2 v-if="room.ui === 2" @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top2>
+  <top v-else @logout="logout" :ping="pingValue" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
+  <main id="main"  :class="room.ui === 2 ? 'bg-black' : ''">
     <div v-if="lowSignal">
       <low-signal></low-signal>
     </div>
@@ -15,6 +14,7 @@
 </template>
 <script>
 import Top from "../components/Meetin/Top.vue";
+import Top2 from "../components/Meetin/Top2.vue";
 import Loader from "../components/Meetin/Elements/Loader.vue";
 import LowSignal from "../components/Meetin/Elements/LowSignal.vue";
 import Sidebar from "../components/Meetin/Sidebar.vue";
@@ -26,10 +26,11 @@ import axios from 'axios'
 export default {
   components: {
     top: Top,
+    top2: Top2,
     sidebar: Sidebar,
     content: Content,
     loader: Loader,
-    lowSignal: LowSignal
+    lowSignal: LowSignal,
   },
   data(){
     return {
@@ -46,6 +47,7 @@ export default {
       lowSignal: false,
       reload: false,
       onLine: navigator.onLine,
+      pingValue: 0,
     };
   },
   beforeCreate() {
@@ -74,8 +76,11 @@ export default {
     if (Notification.permission !== "granted") {
       this.requestPermission();
     }
-
+    setInterval(async () => {
+      await this.ping()
+    }, 3000);
     await this.connect()
+    await this.ping()
   },
   methods:{
     requestPermission() {
@@ -86,12 +91,12 @@ export default {
       }
     },
     updateConnectionStatus() {
-      console.log(navigator.onLine)
       this.lowSignal = navigator.onLine; // Update status
     },
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`,{
-        path: import.meta.env.VITE_SOCKET_PATH ?? null
+        path: import.meta.env.VITE_SOCKET_PATH ?? null,
+        secure: true
       });
       this.$store.commit('setSocket' , this.socket);
       this.$store.dispatch('setDevices');
@@ -127,7 +132,7 @@ export default {
             };
           }
         }
-      }, 3500, meeting );
+      }, 10500, meeting );
 
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
@@ -213,6 +218,20 @@ export default {
       this.socket.on('answer-made' , async data => {
         this.$store.dispatch('answerMade',data);
       });
+      this.socket.on('check-speakers' , async data => {
+        if ( localStorage.getItem('sound') === "true") {
+          this.$store.commit("controlSound",{
+            value: false
+          })
+          this.$store.commit("controlSound",{
+            value: true
+          })
+        }
+      });
+
+      this.socket.on('share-file' , async data => {
+        this.$store.dispatch('getSharedFile',data);
+      });
       this.socket.on('send-shared' , async data => {
         this.$store.dispatch('sendShared', data)
       });
@@ -232,6 +251,24 @@ export default {
       }).then(() => {
         location.reload();
       });
+    },
+    async ping() {
+      const url = import.meta.env.VITE_BASE_URL
+      const start = performance.now()
+      try {
+        await fetch(url  , {method: "HEAD" , mode: "no-cors"})
+      } catch (err) {
+        this.pingValue = 1
+        return
+      }
+      const end = performance.now()
+
+      let diff =end - start;
+      if (diff > 1000) {
+        diff = 1000
+      }
+      const mappedValue = 1 + (5 - 1) * ((diff - 1) / (1000 - 1))
+      this.pingValue = 5 - (Math.round(mappedValue) - 1)
     },
     logout(){
       this.clearCookie();

@@ -1,6 +1,6 @@
 <template>
-  <section :class="{'full-screen': (full && $store.state.shareScreen)}" class="left-section share-screen w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] ">
-    <div class="h-full px-[1.2rem] py-[1rem] w-full" v-if="! $store.state.shareScreen">
+  <section :class="{'full-screen': (full && content)}" class="left-section share-screen w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] ">
+    <div class="h-full px-[1.2rem] py-[1rem] w-full " v-if="! content">
       <div class="h-full w-full flex flex-col justify-center items-center">
         <div class="w-[30%] no-file-img">
           <img class="w-full" src="/meet/icons/4480052@0.png" alt="فایل">
@@ -12,7 +12,7 @@
 
           </div>
 
-          <div class="flex no-file-btns" v-if="$store.state.user && $store.state.user.media.media.remote.screen">
+          <div class="flex no-file-btns " v-if="$store.state.user && $store.state.user.media.media.remote.screen">
             <!--          <button class="flex text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">-->
             <!--            <div class="flex justify-center items-center w-[2.5rem] border-l border-[#d1d1d1] h-full">-->
             <!--              <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
@@ -31,28 +31,22 @@
             <!--            </div>-->
             <!--          </button>-->
 
-            <!--          <button class="flex text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">-->
-            <!--            <div class="flex justify-center items-center w-[2.5rem] border-l border-[#d1d1d1] h-full">-->
-            <!--              <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
-            <!--                <path d="M19.9201 8.94995L13.4001 15.47C12.6301 16.24 11.3701 16.24 10.6001 15.47L4.08008 8.94995" stroke="#909090" stroke-width="3" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>-->
-            <!--              </svg>-->
-            <!--            </div>-->
+            <label for="mediaInput" class="flex cursor-pointer text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">
+              <div class="flex px-[0.5rem] py-[0.4rem]">
+                <span  class="font-bold text-[#616161] px-[0.8rem]">فایل</span>
 
-            <!--            <div class="flex px-[0.5rem] py-[0.4rem]">-->
-            <!--              <span class="font-bold text-[#616161] px-[0.8rem]">فایل</span>-->
-
-            <!--              <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">-->
-            <!--                <g id="#000000ff">-->
-            <!--                  <path fill="#5481ff" opacity="1.00" d=" M 24.38 8.55 C 32.24 7.99 40.14 8.54 48.01 8.30 C 50.71 8.46 54.04 7.64 56.05 9.97 C 64.56 18.45 73.07 26.95 81.55 35.46 C 83.55 37.05 83.38 39.73 83.38 42.03 C 83.24 55.35 83.43 68.68 83.29 82.00 C 83.54 87.08 79.11 91.71 74.03 91.61 C 58.68 91.77 43.32 91.59 27.97 91.69 C 24.84 91.79 21.42 91.17 19.26 88.69 C 16.90 86.45 16.61 83.05 16.63 79.99 C 16.74 59.31 16.59 38.63 16.70 17.96 C 16.52 13.49 19.94 9.21 24.38 8.55 M 22.91 18.97 C 22.91 37.65 22.93 56.34 22.91 75.03 C 22.96 77.94 22.59 80.93 23.31 83.78 C 24.38 85.84 27.06 85.27 28.96 85.44 C 43.97 85.28 58.98 85.55 73.98 85.31 C 76.37 85.49 77.26 83.00 77.09 81.04 C 77.10 67.92 77.07 54.79 77.08 41.67 C 71.03 41.58 64.98 41.84 58.93 41.58 C 54.46 41.50 50.33 37.66 50.13 33.15 C 49.77 26.97 50.11 20.78 50.00 14.60 C 42.00 14.69 34.00 14.44 26.01 14.68 C 23.60 14.49 22.74 17.01 22.91 18.97 M 56.25 19.00 C 56.40 23.63 55.94 28.28 56.43 32.90 C 56.48 34.15 57.68 35.33 58.96 35.25 C 63.51 35.68 68.08 35.26 72.63 35.40 C 67.19 29.91 61.72 24.46 56.25 19.00 Z" />-->
-            <!--                </g>-->
-            <!--              </svg>-->
-            <!--            </div>-->
-            <!--          </button>-->
-
+                <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                  <g id="#000000ff">
+                    <path fill="#5481ff" opacity="1.00" d=" M 24.38 8.55 C 32.24 7.99 40.14 8.54 48.01 8.30 C 50.71 8.46 54.04 7.64 56.05 9.97 C 64.56 18.45 73.07 26.95 81.55 35.46 C 83.55 37.05 83.38 39.73 83.38 42.03 C 83.24 55.35 83.43 68.68 83.29 82.00 C 83.54 87.08 79.11 91.71 74.03 91.61 C 58.68 91.77 43.32 91.59 27.97 91.69 C 24.84 91.79 21.42 91.17 19.26 88.69 C 16.90 86.45 16.61 83.05 16.63 79.99 C 16.74 59.31 16.59 38.63 16.70 17.96 C 16.52 13.49 19.94 9.21 24.38 8.55 M 22.91 18.97 C 22.91 37.65 22.93 56.34 22.91 75.03 C 22.96 77.94 22.59 80.93 23.31 83.78 C 24.38 85.84 27.06 85.27 28.96 85.44 C 43.97 85.28 58.98 85.55 73.98 85.31 C 76.37 85.49 77.26 83.00 77.09 81.04 C 77.10 67.92 77.07 54.79 77.08 41.67 C 71.03 41.58 64.98 41.84 58.93 41.58 C 54.46 41.50 50.33 37.66 50.13 33.15 C 49.77 26.97 50.11 20.78 50.00 14.60 C 42.00 14.69 34.00 14.44 26.01 14.68 C 23.60 14.49 22.74 17.01 22.91 18.97 M 56.25 19.00 C 56.40 23.63 55.94 28.28 56.43 32.90 C 56.48 34.15 57.68 35.33 58.96 35.25 C 63.51 35.68 68.08 35.26 72.63 35.40 C 67.19 29.91 61.72 24.46 56.25 19.00 Z" />
+                  </g>
+                </svg>
+              </div>
+            </label>
+            <input type="file" @change="handleFileUpload" hidden id="mediaInput" />
+            <div class="upload-progress"  :style="{ width: progress + '%' }"></div>
             <button class="flex mx-auto text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">
-              <div v-on:click="shareScreen" class="flex px-[0.5rem] py-[0.4rem]">
+              <div v-on:click="startShareScreen" class="flex px-[0.5rem] py-[0.4rem]">
                 <span class="font-bold text-[#616161] px-[0.8rem]">صفحه نمایش</span>
-
                 <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
                   <g id="#000000ff">
                     <path fill="#5481ff" opacity="1.00" d=" M 8.37 19.94 C 8.16 14.79 12.80 10.25 17.92 10.44 C 39.30 10.37 60.68 10.38 82.05 10.43 C 87.18 10.23 91.81 14.76 91.62 19.91 C 91.72 34.27 91.67 48.63 91.65 62.99 C 91.94 67.85 88.02 72.58 83.08 72.81 C 76.92 73.14 70.75 72.83 64.58 72.94 C 64.58 76.40 64.58 79.87 64.58 83.34 C 67.48 83.37 70.43 83.03 73.29 83.66 C 76.24 84.87 75.11 89.80 71.89 89.52 C 58.28 89.75 44.66 89.49 31.04 89.64 C 29.23 89.46 26.91 90.00 25.61 88.38 C 24.38 86.90 24.96 84.42 26.73 83.65 C 29.58 83.05 32.52 83.36 35.42 83.34 C 35.42 79.87 35.42 76.40 35.42 72.94 C 29.27 72.83 23.11 73.14 16.97 72.82 C 12.05 72.62 8.08 67.95 8.35 63.09 C 8.33 48.71 8.29 34.32 8.37 19.94 M 16.14 17.10 C 14.33 18.02 14.69 20.33 14.55 22.01 C 14.65 35.65 14.48 49.30 14.63 62.94 C 14.19 65.52 16.67 67.02 18.95 66.66 C 39.32 66.69 59.68 66.63 80.05 66.69 C 81.39 66.57 82.91 66.80 84.11 66.07 C 85.77 64.94 85.25 62.68 85.45 60.97 C 85.32 47.30 85.55 33.62 85.35 19.96 C 85.58 17.49 83.09 16.42 81.01 16.67 C 61.01 16.64 41.01 16.72 21.00 16.63 C 19.38 16.68 17.69 16.55 16.14 17.10 M 41.67 72.94 C 41.67 76.40 41.67 79.87 41.67 83.33 C 47.22 83.33 52.78 83.33 58.33 83.33 C 58.33 79.87 58.33 76.40 58.33 72.93 C 52.78 72.93 47.22 72.93 41.67 72.94 Z" />
@@ -69,20 +63,23 @@
 
     </div>
 
-    <div :class="{ hidden:  !$store.state.shareScreen}" class="h-full  content-view">
-      <div class="controller rounded">
-
-        <button class="mx-[1rem] pt-[1rem] box-content" v-on:click="full = ! full" >
-          <svg v-if="! full" width="45" height="45" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-            <g id="#000000ff">
-              <path fill="#fff" opacity="1.00" d=" M 19.36 13.49 C 24.69 11.75 30.48 12.69 35.99 12.63 C 39.97 12.72 40.94 18.81 37.37 20.36 C 32.34 21.87 26.55 19.45 21.76 21.72 C 19.44 26.51 21.95 32.35 20.34 37.40 C 18.89 40.55 13.77 40.22 12.76 36.90 C 12.22 32.65 12.52 28.33 12.54 24.06 C 12.44 19.57 15.27 15.28 19.36 13.49 Z" />
-              <path fill="#fff" opacity="1.00" d=" M 62.28 13.16 C 64.34 12.13 66.77 12.66 68.99 12.50 C 73.93 12.65 79.72 11.65 83.63 15.45 C 89.24 20.33 87.16 28.49 87.46 35.02 C 88.16 39.46 81.45 41.42 79.63 37.37 C 78.30 32.48 80.03 27.20 78.69 22.31 C 78.44 22.06 77.93 21.54 77.68 21.28 C 73.00 20.07 68.07 21.36 63.32 20.60 C 59.98 19.85 59.34 14.83 62.28 13.16 Z" />
-              <path fill="#fff" opacity="1.00" d=" M 15.44 60.54 C 17.53 59.85 20.08 61.13 20.61 63.30 C 21.41 68.04 20.11 72.99 21.29 77.67 C 21.54 77.93 22.05 78.44 22.30 78.70 C 26.99 79.94 31.95 78.63 36.72 79.40 C 39.38 80.05 40.51 83.65 38.83 85.78 C 37.28 88.00 34.29 87.41 31.96 87.57 C 26.55 87.40 20.06 88.53 15.93 84.13 C 11.43 80.00 12.65 73.43 12.46 67.98 C 12.43 65.30 12.15 61.43 15.44 60.54 Z" />
-              <path fill="#fff" opacity="1.00" d=" M 82.40 60.47 C 85.10 59.76 87.84 62.24 87.47 65.00 C 87.14 71.34 89.16 79.06 84.13 84.06 C 79.99 88.54 73.42 87.40 67.95 87.57 C 65.64 87.42 62.64 87.98 61.14 85.74 C 59.48 83.60 60.65 80.02 63.31 79.40 C 68.06 78.63 73.02 79.95 77.70 78.69 C 80.20 76.64 78.85 72.86 79.17 70.05 C 79.29 66.77 78.09 61.52 82.40 60.47 Z" />
-            </g>
-          </svg>
-          <svg v-else fill="#fff" width="45" height="45" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-               viewBox="0 0 385.331 385.331" xml:space="preserve">
+    <div :class="{ hidden: !content}" class="h-full content-view">
+      <video :class="{'force-hidden ':! shareScreen}" class="h-full rounded my-[1rem] w-full" muted autoplay playsinline ref="screenPlayer" id="screen-player"></video>
+      <div  :class="{'force-hidden ': ! shareFile}" class="h-full" ><div id="iframeContainer" class="h-full flex p-2 mx-auto text-center justify-center"></div></div>
+      <div class="controller ">
+        <div  class="video-controller">
+          <ul>
+            <li v-on:click="full = ! full">
+              <svg v-if="! full" width="25px" height="25px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <g id="#000000ff">
+                  <path fill="#fff" opacity="1.00" d=" M 19.36 13.49 C 24.69 11.75 30.48 12.69 35.99 12.63 C 39.97 12.72 40.94 18.81 37.37 20.36 C 32.34 21.87 26.55 19.45 21.76 21.72 C 19.44 26.51 21.95 32.35 20.34 37.40 C 18.89 40.55 13.77 40.22 12.76 36.90 C 12.22 32.65 12.52 28.33 12.54 24.06 C 12.44 19.57 15.27 15.28 19.36 13.49 Z" />
+                  <path fill="#fff" opacity="1.00" d=" M 62.28 13.16 C 64.34 12.13 66.77 12.66 68.99 12.50 C 73.93 12.65 79.72 11.65 83.63 15.45 C 89.24 20.33 87.16 28.49 87.46 35.02 C 88.16 39.46 81.45 41.42 79.63 37.37 C 78.30 32.48 80.03 27.20 78.69 22.31 C 78.44 22.06 77.93 21.54 77.68 21.28 C 73.00 20.07 68.07 21.36 63.32 20.60 C 59.98 19.85 59.34 14.83 62.28 13.16 Z" />
+                  <path fill="#fff" opacity="1.00" d=" M 15.44 60.54 C 17.53 59.85 20.08 61.13 20.61 63.30 C 21.41 68.04 20.11 72.99 21.29 77.67 C 21.54 77.93 22.05 78.44 22.30 78.70 C 26.99 79.94 31.95 78.63 36.72 79.40 C 39.38 80.05 40.51 83.65 38.83 85.78 C 37.28 88.00 34.29 87.41 31.96 87.57 C 26.55 87.40 20.06 88.53 15.93 84.13 C 11.43 80.00 12.65 73.43 12.46 67.98 C 12.43 65.30 12.15 61.43 15.44 60.54 Z" />
+                  <path fill="#fff" opacity="1.00" d=" M 82.40 60.47 C 85.10 59.76 87.84 62.24 87.47 65.00 C 87.14 71.34 89.16 79.06 84.13 84.06 C 79.99 88.54 73.42 87.40 67.95 87.57 C 65.64 87.42 62.64 87.98 61.14 85.74 C 59.48 83.60 60.65 80.02 63.31 79.40 C 68.06 78.63 73.02 79.95 77.70 78.69 C 80.20 76.64 78.85 72.86 79.17 70.05 C 79.29 66.77 78.09 61.52 82.40 60.47 Z" />
+                </g>
+              </svg>
+              <svg v-else fill="#dbdbdb" width="25px" height="25px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                   viewBox="0 0 385.331 385.331" xml:space="preserve">
             <g>
               <g id="Fullscreen_Exit">
                 <path d="M264.943,156.665h108.273c6.833,0,11.934-5.39,11.934-12.211c0-6.833-5.101-11.85-11.934-11.838h-96.242V36.181
@@ -106,12 +103,9 @@
               <g></g>
             </g>
           </svg>
-        </button>
-
-        <div v-if="$store.state.displayStream" class="video-controller">
-          <ul>
-            <li v-on:click="end">
-              <svg fill="#fff" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            </li>
+            <li v-if="$store.state.displayStream || file" v-on:click="end">
+              <svg fill="red" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                    viewBox="0 0 512.456 512.456" xml:space="preserve">
               <g transform="translate(-1)">
               <g>
@@ -144,17 +138,22 @@
             </g>
             </svg>
             </li>
+            <li @click="downloadSharedFile" v-if="content && shareFile">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <path d="M12 16V4M12 16l-4-4M12 16l4-4M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </li>
           </ul>
         </div>
       </div>
-      <video class="h-full rounded my-[1rem] w-full" muted autoplay playsinline ref="screenPlayer" id="screen-player"></video>
-
     </div>
   </section>
 </template>
 
 <script>
 import loader from "@/components/Meetin/Elements/Loader.vue";
+import axios from 'axios'
+import Swal from "sweetalert2";
 
 export default {
   name: "Content",
@@ -162,12 +161,25 @@ export default {
   computed:{
     loading() {
       return this.$store.state.mediaLoading
+    },
+    content(){
+      return this.$store.state.content
+    },
+    shareScreen(){
+      return  this.$store.state.shareScreen
+    },
+    shareFile(){
+      return this.$store.state.shareFile
     }
   },
   data(){
     return {
       showing: false,
-      full: false
+      full: false,
+      file: null,
+      filePreview: null,
+      uploading: false,
+      progress: 0
     }
   },
   watch:{
@@ -180,7 +192,102 @@ export default {
     },
   },
   methods:{
-    shareScreen() {
+    downloadSharedFile(){
+      const url = this.shareFile.url
+      fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.blob();
+          })
+          .then((blob) => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = url.split('/').pop();
+            link.click(); // Trigger the download
+            URL.revokeObjectURL(link.href);
+          })
+          .catch((error) => {
+            console.error('Download failed:', error);
+          });
+    },
+   async handleFileUpload(event) {
+      const uploadedFile = event.target.files[0];
+      const validMime = ['application/pdf','image/jpeg','image/png','image/gif','image/jpg','application/vnd.openxmlformats-officedocument.presentationml.presentation']
+      if (uploadedFile) {
+        if (uploadedFile.size > 1024 * 1024 * 100) {
+          Swal.fire({
+            position: 'top-start',
+            text: "حداکثر حجم فایل برای بارگزاری 100 مگابایت می باشد!",
+            icon: 'warning',
+            showConfirmButton: false,
+            backdrop: false,
+            timer: 3500,
+          })
+          return
+        }
+        console.log(uploadedFile.type)
+
+        if (! validMime.includes(uploadedFile.type))  {
+          Swal.fire({
+            position: 'top-start',
+            text: "فرمت فایل نامعتبر می باشد!",
+            icon: 'warning',
+            showConfirmButton: false,
+            backdrop: false,
+            timer: 3500,
+          })
+          return
+        }
+
+        this.filePreview = URL.createObjectURL(uploadedFile);
+        this.uploading = true;
+        this.progress = 0;
+        const formData = new FormData();
+        formData.append("file", uploadedFile);
+        try {
+          const {data} = await axios.post("/v1/files", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "Authorization": "Bearer " + this.$cookies.get("auth").token
+            },
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                this.progress = Math.round(
+                    (progressEvent.loaded / progressEvent.total) * 100
+                );
+              }
+            },
+          });
+          this.file = uploadedFile;
+          this.filePreview = data.data.addr
+          this.$store.dispatch('shareFile' , {mime: this.file.type , url: data.data.addr})
+        } catch (error) {
+          this.file = null;
+          this.filePreview = null
+          this.$store.commit('setContent' , false)
+          this.$store.commit('setShareFile' , false)
+          Swal.fire({
+            position: 'top-start',
+            text: "خظا در هنگام بارگزاری فایل!",
+            icon: 'warning',
+            showConfirmButton: false,
+            backdrop: false,
+            timer: 3500,
+          })
+        }
+        this.progress = 0
+        this.uploading = false;
+
+        switch (uploadedFile.type) {
+          case "application/pdf":
+
+            break
+        }
+      }
+    },
+    startShareScreen() {
       this.$store.dispatch('shareStream',{
         screen: true  , media: 'screen'
       });
@@ -189,6 +296,8 @@ export default {
       this.$store.dispatch('endScreen',{
         media: 'screen'
       });
+      this.$store.commit('setContent' , false)
+      this.$store.commit('setShareFile' , false)
     }
   }
 }

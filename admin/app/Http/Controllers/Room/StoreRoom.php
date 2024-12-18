@@ -11,7 +11,7 @@ use function Laravel\Prompts\select;
 
 class StoreRoom extends BaseComponent
 {
-    public $room , $title , $capacity , $status , $host_id , $owner_id , $logo;
+    public $room , $title , $capacity , $status , $host_id , $owner_id , $logo , $ui = 1;
 
     public $user;
 
@@ -34,6 +34,7 @@ class StoreRoom extends BaseComponent
             $this->owner_id = $this->room->owner_id;
             $this->logo = $this->room->logo;
             $this->header = $this->title;
+            $this->ui = $this->room->ui;
 
             $this->host = $this->room->host->toArray() ?? [];
             $this->owner = $this->room->owner ? $this->room->owner->toArray() : [];
@@ -43,6 +44,11 @@ class StoreRoom extends BaseComponent
         } else abort(404);
         $this->data['status'] = RoomStatus::toArray();
         $this->data['users'] = [];
+
+        $this->data['ui'] = [
+            1 => 'پیشفرض',
+            2 => 'سفارشی 1 (اداره زندان ها)',
+        ];
     }
 
     public function store()
@@ -63,14 +69,16 @@ class StoreRoom extends BaseComponent
             'status' => ['required'],
             'host_id' => ['required','exists:users,id'],
             'owner_id' => ['required','exists:users,id'],
-            'logo' => ['nullable','string','max:20000']
+            'logo' => ['nullable','string','max:20000'],
+            'ui' => ['required','integer']
         ],[],[
             'title' => 'عنوان',
             'capacity' => 'ظرفیت',
             'host_id' => 'میزبان',
             'status' => 'وضعیت',
             'owner_id' => 'مالک',
-            'logo' => 'لوگو'
+            'logo' => 'لوگو',
+            'ui' => 'ui'
         ]);
 
         $room->title = $this->title;
@@ -79,6 +87,7 @@ class StoreRoom extends BaseComponent
         $room->host_id = $this->host_id;
         $room->owner_id = $this->owner_id;
         $room->logo = $this->logo;
+        $room->ui = $this->ui;
         $room->save();
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }

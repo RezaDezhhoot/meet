@@ -2,8 +2,26 @@ export const mutations = {
     setLocalStream(state , stream){
         state.localStream = stream;
     },
+    setRecorderLocalStream(state , stream){
+        state.recorderLocalStream = stream;
+    },
     setRoom(state , room) {
         state.room = room;
+    },
+    controlUserBox(state , status) {
+        state.top.users = status;
+    },
+    controlChatBox(state , status) {
+        state.top.chat = status;
+    },
+    setContent(state , status) {
+        state.content = status;
+    },
+    setShareScreen(state , status) {
+        state.shareScreen = status;
+    },
+    setShareFile(state , status) {
+        state.shareFile = status;
     },
     setClients(state , clients) {
         state.clients = clients;
@@ -42,12 +60,18 @@ export const mutations = {
     controlSound(state , value){
         state.sound = value.value;
         const mediaPlayers = document.querySelectorAll('audio');
+        console.log(mediaPlayers)
         Array.from(mediaPlayers).forEach(async el => {
-            el.muted = ! value.value;
-            // el.defaultMuted = ! value.value;
-             el.load();
-             el.play();
+            el.volume = value.value ? 1.0 : 0;
+            if (value.value) {
+                el.removeAttribute("muted")
+            } else {
+                el.setAttribute("muted","true")
+            }
+            el.load();
+            // await el.play();
         })
+        localStorage.setItem('sound' , value.value)
     },
     setLogo(state , value) {
         state.logo = value;

@@ -32,4 +32,7 @@ exports.loadApiRoutes = (app) => {
     // Setting API routes V1:
     const {settingRouterV1} = require(path.join(appDir,'app','Modules/Settings/routes/api.js'));
     app.use('/api/v1/settings',settingRouterV1);
+
+    const {uploadRouterV1} = require(path.join(appDir,'app','Modules/Upload/routes/api.js'));
+    app.use('/api/v1/files',uploadRouterV1);
 }

@@ -1,8 +1,8 @@
 <template>
-  <section class="right-section w-[30%] h-full ml-[0.5rem] flex flex-col justify-between items-center">
+  <section class="right-section w-[30%] h-full ml-[0.5rem] flex flex-col  items-center">
     <Camera></Camera>
-    <Users></Users>
-    <Chat></Chat>
+    <Users v-if="showUserBox"></Users>
+    <Chat v-if="showChatBox"></Chat>
   </section>
 
   <section class="navbar hide-pc">
@@ -30,6 +30,14 @@ export default {
   name: "Sidebar",
   components:{
     Audio , Chat , Camera , Users
+  },
+  computed: {
+    showUserBox() {
+      return this.$store.state.top.users;
+    },
+    showChatBox() {
+      return this.$store.state.top.chat;
+    }
   }
 }
 </script>

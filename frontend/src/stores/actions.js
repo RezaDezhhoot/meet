@@ -1,5 +1,4 @@
 import Swal from "sweetalert2";
-
 export const actions = {
     async addIceCandidate({state} , data) {
         for (const id in state.peerConnections) {
@@ -15,7 +14,7 @@ export const actions = {
         const iceConfiguration = {
             iceServers: [
                 {
-                    urls: `turn:${import.meta.env.VITE_ICE_SERVER_URL}`,
+                    urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
                     username: import.meta.env.VITE_ICE_SERVER_USERNAME,
                     credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
                 },
@@ -92,7 +91,7 @@ export const actions = {
                         audio.defaultMuted  = false;
                         audio.classList.add('hidden');
                         audio.id = stream.track.id;
-                        audio.muted = "muted";
+                        audio.setAttribute("muted","true")
                         audio.srcObject = stream.streams[0];
                         audio.load();
                     } else {
@@ -187,7 +186,6 @@ export const actions = {
                 }
             }
         } catch (err) {}
-
         context.state.shareScreen = true;
         await context.dispatch('startStream',{from: context.state.socket.id,to ,media })
     },
@@ -228,8 +226,9 @@ export const actions = {
                 }
             }
         } catch (err) {}
-        await context.dispatch('startStream',{from: context.state.socket.id,to ,media})
+        context.state.user.media.media.local.camera = true;
         context.commit('controlCameraLoader' , false);
+        await context.dispatch('startStream',{from: context.state.socket.id,to ,media})
     },
     async shareStream(context , data) {
         let constraints , media , to = [];
@@ -244,9 +243,12 @@ export const actions = {
                 context.state.displayStream = stream;
                 media = 'screen';
                 context.commit('controlMediaLoader');
+                context.commit('setContent' , true)
+                context.commit('setShareScreen' , true)
                 await context.dispatch('screenShare',{stream ,media: [media] })
             }).catch(function (err) {
-                console.log(err);
+                context.commit('setContent' , false)
+                context.commit('setShareScreen' , false)
                 context.commit('controlMediaLoader' , false);
                 Swal.fire({
                     position: 'top-start',
@@ -297,7 +299,6 @@ export const actions = {
                 await context.dispatch('updateVideoGrid');
                 await context.dispatch('videoShare',{media: [media],localStream: stream  });
             }).catch(function (err) {
-                console.log(err);
                 context.commit('controlCameraLoader' , false);
                 context.dispatch('setDevices');
                 Swal.fire({
@@ -328,7 +329,9 @@ export const actions = {
                 } ) : false,
             };
 
-            navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
+            //
+            try {
+                const stream = context.state.recorderLocalStream ? context.state.recorderLocalStream : await navigator.mediaDevices.getUserMedia(constraints)
                 const ctx = new AudioContext();
                 const gainNode = ctx.createGain();
                 const sinWave = ctx.createOscillator();
@@ -346,12 +349,10 @@ export const actions = {
                 context.state.localStream = audioDest.stream;
                 media = 'audio';
                 await context.dispatch('audioShare',{media: [media], stream })
-            }).catch(function (err){
-                console.log(err);
-                context.dispatch('setDevices');
+            } catch (err) {
+                await context.dispatch('setDevices');
                 let text = 'عدم دسترسی به میکروفون!';
-
-                Swal.fire({
+                await Swal.fire({
                     position: 'top-start',
                     text,
                     icon: 'warning',
@@ -359,7 +360,7 @@ export const actions = {
                     backdrop: false,
                     timer: 3500,
                 })
-            });
+            }
         }
     },
     async startStream({state , dispatch} , data) {
@@ -427,7 +428,8 @@ export const actions = {
                 );
                 answer['screen'] = await state.peerConnections[data.data.from]['pc']['screen'].createAnswer();
                 await state.peerConnections[data.data.from]['pc']['screen'].setLocalDescription(new RTCSessionDescription(answer['screen']));
-                state.shareScreen = true;
+                commit('setContent' , true);
+                commit('setShareScreen' , true);
 
                 if (! state.remoteStreams['screen'] ) {
                     state.remoteStreams['screen'] = {}
@@ -472,12 +474,6 @@ export const actions = {
 
                 if (data.data.streamID.hasOwnProperty('audio')) {
                     state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
-                }
-
-                if ( localStorage.getItem('sound')) {
-                    commit("controlSound",{
-                        value: true
-                    })
                 }
 
             }
@@ -534,6 +530,9 @@ export const actions = {
                     from: context.state.socket.id,
                     to:[data.data.from]
                 })
+                if (media.includes("audio")) {
+                    context.state.socket.emit("check-speakers")
+                }
             }
 
         }
@@ -556,6 +555,11 @@ export const actions = {
             if (state.displayStream && media.includes('screen') && state.peerConnections[data.data.from]['pc']['screen'].getSenders().length === 0 ) {
                 state.displayStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['screen'].addTrack(track, state.displayStream));
                 calls.push('screen');
+            } else if (state.shareFile) {
+                state.socket.emit('get-shared-file' , {
+                    file: state.shareFile,
+                    to: data.data.from
+                })
             }
 
             if (calls.length > 0) {
@@ -584,7 +588,6 @@ export const actions = {
                     for (const id in state.peerConnections) {
                         if (state.peerConnections[id]['pc']) {
                             const senders = state.peerConnections[id]['pc']['video'].getSenders();
-                            console.log(senders)
                             senders.forEach((sender) => state.peerConnections[id]['pc']['video'].removeTrack(sender));
                             // state.videoStream.getTracks().forEach(function(track) {
                             // //     state.peerConnections[id]['pc']['video'].removeTrack(track)
@@ -613,11 +616,14 @@ export const actions = {
             state.displayStream.getTracks().forEach(function(track) { track.stop(); })
             state.shareScreen = false;
             state.displayStream = null;
-            state.socket.emit('end-stream' , {
-                media: ['screen'],
-            })
-            commit('controlMediaLoader',false);
         }
+        state.socket.emit('end-stream' , {
+            media: ['screen'],
+        })
+        commit('setContent' , false)
+        commit('setShareScreen' , false)
+        commit('setShareFile' , false)
+        commit('controlMediaLoader',false);
     },
     clearRemoteStream(context , data){
         let el;
@@ -640,15 +646,20 @@ export const actions = {
             if (data.data.hasOwnProperty('screen') && data.data.screen ) {
                 context.state.shareScreen = false;
                 context.commit('controlMediaLoader',false);
+                context.commit('setContent' , false)
+                context.commit('setShareScreen' , false)
+                context.commit('setShareFile' , false)
             }
             if (data.data.hasOwnProperty('audio') && data.data.audio ) {
                 context.commit('controlMediaLoader',false);
-                el = document.getElementById(context.state.remoteStreams['audio'][data.data.from]);
-                if (el) {
-                    el.remove();
+                if (context.state.remoteStreams['audio'].hasOwnProperty(data.data.from)) {
+                    el = document.getElementById(context.state.remoteStreams['audio'][data.data.from]);
+                    if (el) {
+                        el.remove();
+                    }
+                    el = null;
+                    delete context.state.remoteStreams['audio'][data.data.from];
                 }
-                el = null;
-                delete context.state.remoteStreams['audio'][data.data.from];
             }
         }
     },
@@ -793,5 +804,36 @@ export const actions = {
         }
         video_grid.style.gridTemplateColumns = col.trim();
         video_grid.style.gridTemplateRows = row.trim();
+    },
+    shareFile({state} , data) {
+        state.socket.emit("share-file", data);
+    },
+    getSharedFile({state , commit} , data) {
+        const iframeContainer = document.getElementById("iframeContainer");
+        iframeContainer.innerHTML = "";
+        if (data.mime === "application/pdf") {
+            const embed = document.createElement("object");
+            embed.data  = data.url;
+            embed.style.width = "100%";
+            embed.style.height = "100%";
+            embed.style.border = "none";
+            iframeContainer.appendChild(embed);
+        } else if (data.mime === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || data.mime === "application/vnd.ms-powerpoint") {
+            const embed = document.createElement("object");
+            embed.data  = `https://docs.google.com/gview?url=${data.url}&embedded=true`;
+            embed.style.width = "100%";
+            embed.style.height = "100%";
+            embed.style.border = "none";
+            iframeContainer.appendChild(embed);
+        } else {
+            const img = document.createElement("img");
+            img.src = data.url;
+            img.style.maxWidth = "100%";
+            img.style.maxHeight = "100%";
+            img.style.border = "none";
+            iframeContainer.appendChild(img);
+        }
+        commit("setContent" , true)
+        commit("setShareFile" , data)
     }
 }

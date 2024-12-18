@@ -33,6 +33,21 @@ module.exports.createRoom = (io , socket , room) => {
     }
 }
 
+module.exports.shareFile = async (io,socket,data,room) => {
+    users[room.key][socket.id].media.settings.screen = true;
+    users[room.key][socket.id].media.media.remote.screen = true;
+    io.emit('share-file',data);
+}
+
+module.exports.getShareFile = async (io,socket,data,room) => {
+    console.log(data)
+    socket.to(data.to).emit('share-file',data.file);
+}
+
+module.exports.checkSpeakers = async (io,socket,data,room) => {
+    socket.broadcast.emit('check-speakers');
+}
+
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-tab w-full h-[32%] mr-[0.5rem] bg-white rounded-b-[0.5rem] lg:rounded-[0.5rem] px-[1.2rem] py-[1rem]">
+  <div class="chat-tab w-full mt-2 h-[33%] mr-[0.5rem] bg-white rounded-b-[0.5rem] lg:rounded-[0.5rem] px-[1.2rem] py-[1rem]">
     <div class="flex w-full justify-between border-b-[1px] border-[#aaaaaa] h-[2rem] mb-[0.5rem]">
       <div class="text-[#616161] font-bold flex justify-center items-center pb-[0.5rem]">
         <div class="flex justify-center items-center box-mini-menu">
