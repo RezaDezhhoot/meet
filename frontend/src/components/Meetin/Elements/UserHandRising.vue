@@ -1,5 +1,5 @@
 <template>
-  <div v-if="responsive && menu" class="flex my-6 mx-4 align-center relative">
+  <div v-if="responsive && menu" class="flex my-6 mx-4 align-center relative ">
     <button
         :title="title"
         v-on:click="control"

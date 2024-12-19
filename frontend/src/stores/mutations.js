@@ -90,5 +90,8 @@ export const mutations = {
     },
     controlCameraLoader(state , value = true) {
         state.cameraLoading = value;
+    },
+    setMainContent(state , value) {
+        state.main_content = value;
     }
 }

@@ -40,7 +40,6 @@ module.exports.shareFile = async (io,socket,data,room) => {
 }
 
 module.exports.getShareFile = async (io,socket,data,room) => {
-    console.log(data)
     socket.to(data.to).emit('share-file',data.file);
 }
 
@@ -50,7 +49,6 @@ module.exports.checkSpeakers = async (io,socket,data,room) => {
 
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
-
     if (room.capacity === Object.entries(users[room.key]).length) {
         socket.emit('error',{
             data:{
@@ -127,6 +125,7 @@ module.exports.join = async (io,socket,data,room) => {
         users: users[room.key],
         room_id: room.id
     }),'lists');
+
     io.emit('get-users',{
         data:{
             users: users[room.key] ,
@@ -210,7 +209,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
     const media = Object.values(data.media);
 
     if (media.includes('camera')) {
-        users[room.key][socket.id].media.settings.camera = true;
+        users[room.key][socket.id].media.settings.camera = data.streamID.camera;
         users[room.key][socket.id].media.media.remote.camera = true;
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
@@ -222,7 +221,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
     }
 
     if (media.includes('audio')) {
-        users[room.key][socket.id].media.settings.audio = true;
+        users[room.key][socket.id].media.settings.audio = data.streamID;
         users[room.key][socket.id].media.media.remote.microphone = true;
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
@@ -234,7 +233,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
     }
 
     if (media.includes('screen')) {
-        users[room.key][socket.id].media.settings.screen = true;
+        users[room.key][socket.id].media.settings.screen = data.streamID;
         users[room.key][socket.id].media.media.remote.screen = true;
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
@@ -272,7 +271,7 @@ module.exports.endStream = async (io,socket,data,room) => {
         let camera = false , screen = false , audio = false;
         if (data.media.includes('camera')) {
             users[room.key][socket.id].media.settings.camera = false;
-            camera = true;
+            camera = data.camera;
         }
 
         if (data.media.includes('screen')) {
@@ -293,7 +292,6 @@ module.exports.endStream = async (io,socket,data,room) => {
             }
         });
     }
-
 }
 
 module.exports.getShared = async (io,socket,data,room) => {
@@ -417,9 +415,7 @@ module.exports.kickClient = async (io,socket,data,room) => {
 }
 
 module.exports.sendCandidate = async (io,socket,data,room) => {
-    socket.broadcast.emit('add-candidate',{
-        data
-    });
+    socket.broadcast.emit('add-candidate',data);
 }
 
 module.exports.disconnect = async (io,socket,data,room) => {
@@ -433,7 +429,6 @@ module.exports.disconnect = async (io,socket,data,room) => {
                 },status: 200
             });
         }
-
         io.emit('end-stream',{
             data: {
                 camera: users[room.key][socket.id].media.settings.camera,

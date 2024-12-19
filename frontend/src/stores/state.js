@@ -3,11 +3,17 @@ export const state = {
     mediaLoading: false,
     cameraLoading: false,
 
+    main_content: true,
+
     localStream: null,
     recorderLocalStream: null,
     videoStream: null,
     displayStream: null,
-    remoteStreams: Array,
+    remoteStreams: {
+        camera: {},
+        audio: null,
+        screen: null
+    },
 
     room: Object,
     host: Object,

@@ -1,6 +1,6 @@
 <template>
-  <section class="right-section w-[30%] h-full ml-[0.5rem] flex flex-col  items-center">
-    <Camera></Camera>
+  <section :style="'width:'+ width +'%'" class="right-section h-full ml-[0.5rem] flex flex-col  items-center">
+    <Camera v-if="content" height="32"></Camera>
     <Users v-if="showUserBox"></Users>
     <Chat v-if="showChatBox"></Chat>
   </section>
@@ -31,13 +31,19 @@ export default {
   components:{
     Audio , Chat , Camera , Users
   },
+  props:{
+    width: 30
+  },
   computed: {
     showUserBox() {
       return this.$store.state.top.users;
     },
     showChatBox() {
       return this.$store.state.top.chat;
-    }
+    },
+    content(){
+      return this.$store.state.main_content
+    },
   }
 }
 </script>

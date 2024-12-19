@@ -1,33 +1,33 @@
 import Swal from "sweetalert2";
+const iceConfiguration = {
+    iceServers: [
+        {
+            urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
+            username: import.meta.env.VITE_ICE_SERVER_USERNAME,
+            credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
+        },
+        {
+            urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
+            username: import.meta.env.VITE_ICE_SERVER_USERNAME,
+            credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
+        },
+        {
+            "url": "stun:stun2.1.google.com:19302"
+        }
+    ]
+}
 export const actions = {
     async addIceCandidate({state} , data) {
         for (const id in state.peerConnections) {
             if (state.peerConnections[id]['pc']) {
-                if (data.data.candidate) {
-                    await state.peerConnections[id]['pc'][data.data.media].addIceCandidate(data.data.candidate)
+                if (data.candidate) {
+                    await state.peerConnections[id]['pc'][data.media].addIceCandidate(data.candidate)
                 }
             }
         }
     },
     fillRTCs({state , dispatch} , data){
         const clients = data.clients
-        const iceConfiguration = {
-            iceServers: [
-                {
-                    urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
-                    username: import.meta.env.VITE_ICE_SERVER_USERNAME,
-                    credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
-                },
-                {
-                    urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
-                    username: import.meta.env.VITE_ICE_SERVER_USERNAME,
-                    credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
-                },
-                {
-                    "url": "stun:stun2.1.google.com:19302"
-                }
-            ]
-        }
         // Creating RTC connection for each user to local
         function makeNewPc(id , user_id) {
             state.peerConnections[id] = {
@@ -41,43 +41,19 @@ export const actions = {
                     screen: new RTCPeerConnection(iceConfiguration)
                 }
             }
-            // Set remote video stream
             state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
                 track.onunmute = () => {
-                    const parent = document.getElementById('video-grid-container')
-                    let div  = document.getElementById(track.id);
-                    const video = document.createElement('video')
-                    video.srcObject = stream;
-                    video.muted = true;
-                    video.autoplay = true;
-                    video.playsinline = true;
-                    video.classList.add("h-full","w-full");
-
-                    if (! div) {
-                        div  = document.createElement('div');
-                        div.id = track.id;
-                        div.classList.add("grid-item")
-                        video.load();
-                        parent.appendChild(div);
-                        div.appendChild(video);
-                    } else {
-                        div.id = track.id;
-                        video.load();
-                        div.innerHTML = "";
-                        div.appendChild(video);
-                    }
+                    state.remoteStreams['camera'][stream.id] = stream
+                    dispatch('setDynamicGrid')
                 }
-
-                track.onmuted = (data) => {
-                    console.log(data)
-                }
-
-                stream.onremovetrack = ({track}) => {
-                    console.log(`${track.kind} track was removed.`);
-                };
             };
-            state.peerConnections[id]['pc']['video'].onremovetrack = function ({track} ) {
-                console.log(track)
+            state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
+                if (event.candidate) {
+                    state.socket.emit("send-candidate" , {
+                        candidate: event.candidate,
+                        media: "video"
+                    })
+                }
             }
             // Set remote audio stream
             state.peerConnections[id]['pc']['audio'].ontrack = async function (stream ) {
@@ -109,10 +85,26 @@ export const actions = {
                     }
                 }
             };
+            state.peerConnections[id]['pc']['audio'].onicecandidate = function (event) {
+                if (event.candidate) {
+                    state.socket.emit("send-candidate" , {
+                        candidate: event.candidate,
+                        media: "audio"
+                    })
+                }
+            }
             // Set remote screen stream
             state.peerConnections[id]['pc']['screen'].ontrack = async function (stream) {
                 document.getElementById('screen-player').srcObject = stream.streams[0];
             };
+            state.peerConnections[id]['pc']['screen'].onicecandidate = function (event) {
+                if (event.candidate) {
+                    state.socket.emit("send-candidate" , {
+                        candidate: event.candidate,
+                        media: "screen"
+                    })
+                }
+            }
         }
         if (data.from === state.socket.id) {
             for (const index in clients) {
@@ -272,33 +264,11 @@ export const actions = {
                 context.state.videoStream = localStream;
                 context.state.showing = true;
                 media = 'camera';
-
-
-                if (! context.state.remoteStreams['camera'] ) {
-                    context.state.remoteStreams['camera'] = {}
-                }
-                context.state.remoteStreams['camera'][context.state.socket.id] = stream.id;
-
-                const parent = document.getElementById('video-grid-container')
-                const div  = document.createElement('div');
-                div.id = stream.id;
-                div.classList.add("grid-item")
-                const video = document.createElement('video')
-                video.srcObject = stream;
-                video.muted = "muted";
-                video.autoplay = "1";
-                video.classList.add("h-full","w-full");
-                video.load();
-
-                parent.appendChild(div);
-                div.appendChild(video);
-                if (! context.state.remoteStreams['camera'] ) {
-                    context.state.remoteStreams['camera'] = {}
-                }
-                context.state.remoteStreams['camera'][context.state.socket.id] = stream.id;
-                await context.dispatch('updateVideoGrid');
+                context.state.remoteStreams['camera'][localStream.id] = localStream
+                context.dispatch('setDynamicGrid')
                 await context.dispatch('videoShare',{media: [media],localStream: stream  });
             }).catch(function (err) {
+                console.log(err)
                 context.commit('controlCameraLoader' , false);
                 context.dispatch('setDevices');
                 Swal.fire({
@@ -391,6 +361,9 @@ export const actions = {
                     }
                     // Make RTC video offer
                     if (media.includes('camera') && state.videoStream) {
+                        if (! state.remoteStreams['camera'] ) {
+                            state.remoteStreams['camera'] = {}
+                        }
                         offer['camera'] = await state.peerConnections[v]['pc']['video'].createOffer();
                         streamID['camera'] = state.videoStream.id;
                         await state.peerConnections[v]['pc']['video'].setLocalDescription(new RTCSessionDescription(offer['camera']));
@@ -453,12 +426,12 @@ export const actions = {
                     state.remoteStreams['camera'] = {}
                 }
 
-                if (data.data.streamID.hasOwnProperty('camera')) {
-                    state.remoteStreams['camera'][data.data.from] = data.data.streamID['camera'];
-                }
+                // if (data.data.streamID.hasOwnProperty('camera')) {
+                //     state.remoteStreams['camera'][data.data.from] = data.data.streamID['camera'];
+                // }
 
                 commit('controlCameraLoader',false);
-                dispatch('updateVideoGrid');
+                // dispatch('updateVideoGrid');
             }
             // Make RTC audio answer
             if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
@@ -525,11 +498,11 @@ export const actions = {
             }
 
             if (callbacks.length > 0) {
-                await context.dispatch('startStream', {
-                    media: data.data.media,
-                    from: context.state.socket.id,
-                    to:[data.data.from]
-                })
+                // await context.dispatch('startStream', {
+                //     media: data.data.media,
+                //     from: context.state.socket.id,
+                //     to:[data.data.from]
+                // })
                 if (media.includes("audio")) {
                     context.state.socket.emit("check-speakers")
                 }
@@ -582,20 +555,11 @@ export const actions = {
                 }
                 commit('controlMicrophone',false);
             }
-
+            let camera
             if (media.includes('camera')) {
                 if (state.videoStream) {
-                    for (const id in state.peerConnections) {
-                        if (state.peerConnections[id]['pc']) {
-                            const senders = state.peerConnections[id]['pc']['video'].getSenders();
-                            senders.forEach((sender) => state.peerConnections[id]['pc']['video'].removeTrack(sender));
-                            // state.videoStream.getTracks().forEach(function(track) {
-                            // //     state.peerConnections[id]['pc']['video'].removeTrack(track)
-                            //     track.enabled = false;
-                            //     track.stop();
-                            // });
-                        }
-                    }
+                    camera = state.videoStream.id
+                    state.videoStream.getTracks().forEach(function(track) { track.stop(); })
                     state.videoStream = null;
                 }
                 commit('controlCamera',false);
@@ -605,6 +569,7 @@ export const actions = {
             if (media.length > 0) {
                 state.socket.emit('end-stream' , {
                     media,
+                    camera
                 })
             }
         } catch (err) {
@@ -630,18 +595,9 @@ export const actions = {
         if (data.data.hasOwnProperty('camera') && data.data.camera) {
             context.state.showing = false;
             context.commit('controlCameraLoader',false);
-            if (context.state.remoteStreams['camera'] && context.state.remoteStreams['camera'].hasOwnProperty(data.data.from)) {
-                el = document.getElementById(context.state.remoteStreams['camera'][data.data.from]);
-                if (el) {
-                    el.remove();
-                }
-                el = null;
-                delete context.state.remoteStreams['camera'][data.data.from];
-            }
-            context.dispatch('updateVideoGrid');
+            delete context.state.remoteStreams['camera'][data.data.camera];
+            context.dispatch('setDynamicGrid');
         }
-
-
         if (data.data.from !== context.state.socket.id) {
             if (data.data.hasOwnProperty('screen') && data.data.screen ) {
                 context.state.shareScreen = false;
@@ -835,5 +791,34 @@ export const actions = {
         }
         commit("setContent" , true)
         commit("setShareFile" , data)
-    }
+    },
+    setDynamicGrid({state , commit}) {
+        const streams = Object.entries(state.remoteStreams['camera'] ?? {})
+        const boxCount = streams.length
+        const outerBox = document.querySelector('.outer-box');
+        if (boxCount > 0) {
+            outerBox.innerHTML = '';
+            let columns = Math.ceil(Math.sqrt(boxCount));
+            let rows = Math.ceil(boxCount / columns);
+            let columnWidth = 100 / columns;
+            let rowHeight = 100 / rows;
+            outerBox.style.gridTemplateColumns = `repeat(${columns}, ${columnWidth}%)`;
+            outerBox.style.gridTemplateRows = `repeat(${rows}, ${rowHeight}%)`;
+            for (const [key , value] of streams) {
+                const box = document.createElement('div')
+                box.id = key;
+                box.className = 'inner-box';
+                const video = document.createElement('video')
+                video.srcObject = value;
+                video.muted = true;
+                video.autoplay = true;
+                video.playsinline = true;
+                box.appendChild(video)
+                outerBox.appendChild(box);
+            }
+        } else {
+            outerBox.innerHTML = '';
+            state.remoteStreams['camera'] = {}
+        }
+    },
 }

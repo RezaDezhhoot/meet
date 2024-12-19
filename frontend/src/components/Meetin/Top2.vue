@@ -87,16 +87,40 @@
         <span class="title-site">{{ room.title }}</span>
 
       </button>
+      <Recorder  />
       <div class="flex text-[1rem] justify-center items-center mr-10">
         <span id="clock" class="text-[1.3rem] text-white font-black">
         </span>
       </div>
-<!--      <Recorder :user="user" :host="host" :room="room" />-->
     </div>
-
     <div class="flex items-center mx-auto">
+      <div class="wifi-icon2">
+        <template v-if="ping >= 4">
+          <div v-for="i in 5 - ping" :class="'wifi-bar bar-'+(ping + i)"></div>
+          <div v-for="i in ping" :class="'wifi-bar-ok bar-'+(ping + 1 - i)"></div>
+        </template>
+        <template v-else-if="ping >= 3">
+          <div v-for="i in 5 - ping" :class="'wifi-bar bar-'+(5 - i + 1)"></div>
+          <div v-for="i in ping" :class="'wifi-bar-week bar-'+(ping + 1 - i)"></div>
+        </template>
+        <template v-else-if="ping >= 1">
+          <div v-for="i in 5 - ping" :class="'wifi-bar bar-'+(5 - i + 1)"></div>
+          <div v-for="i in ping" :class="'wifi-bar-bad bar-'+(ping + 1 - i)"></div>
+        </template>
+        <template v-else>
+          <div v-for="i in 5 " :class="'wifi-bar bar-'+i"></div>
+        </template>
+      </div>
       <div class="flex ml-[10rem] hidden-mobile" v-if="user && user.hasOwnProperty('user') && user.media && host">
-        <button @click="controlUserBox" class="mx-2">
+        <button title="اشتراک گزاری" @click="updateContent" class="mx-2">
+          <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <g id="#000000ff">
+              <path :fill="content ? '#62dc82' : '#aaaaaa'" opacity="1.00" d=" M 8.37 19.94 C 8.16 14.79 12.80 10.25 17.92 10.44 C 39.30 10.37 60.68 10.38 82.05 10.43 C 87.18 10.23 91.81 14.76 91.62 19.91 C 91.72 34.27 91.67 48.63 91.65 62.99 C 91.94 67.85 88.02 72.58 83.08 72.81 C 76.92 73.14 70.75 72.83 64.58 72.94 C 64.58 76.40 64.58 79.87 64.58 83.34 C 67.48 83.37 70.43 83.03 73.29 83.66 C 76.24 84.87 75.11 89.80 71.89 89.52 C 58.28 89.75 44.66 89.49 31.04 89.64 C 29.23 89.46 26.91 90.00 25.61 88.38 C 24.38 86.90 24.96 84.42 26.73 83.65 C 29.58 83.05 32.52 83.36 35.42 83.34 C 35.42 79.87 35.42 76.40 35.42 72.94 C 29.27 72.83 23.11 73.14 16.97 72.82 C 12.05 72.62 8.08 67.95 8.35 63.09 C 8.33 48.71 8.29 34.32 8.37 19.94 M 16.14 17.10 C 14.33 18.02 14.69 20.33 14.55 22.01 C 14.65 35.65 14.48 49.30 14.63 62.94 C 14.19 65.52 16.67 67.02 18.95 66.66 C 39.32 66.69 59.68 66.63 80.05 66.69 C 81.39 66.57 82.91 66.80 84.11 66.07 C 85.77 64.94 85.25 62.68 85.45 60.97 C 85.32 47.30 85.55 33.62 85.35 19.96 C 85.58 17.49 83.09 16.42 81.01 16.67 C 61.01 16.64 41.01 16.72 21.00 16.63 C 19.38 16.68 17.69 16.55 16.14 17.10 M 41.67 72.94 C 41.67 76.40 41.67 79.87 41.67 83.33 C 47.22 83.33 52.78 83.33 58.33 83.33 C 58.33 79.87 58.33 76.40 58.33 72.93 C 52.78 72.93 47.22 72.93 41.67 72.94 Z" />
+            </g>
+          </svg>
+        </button>
+
+        <button title="کاربران" @click="controlUserBox" class="mx-2">
           <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <g id="#000000ff">
               <path :fill="showUserBox ? '#62dc82' : '#aaaaaa'" opacity="1.00" d=" M 46.44 8.64 C 56.42 6.70 67.10 13.24 69.88 23.01 C 72.43 30.88 69.66 40.09 63.21 45.26 C 56.96 50.52 47.53 51.49 40.34 47.61 C 33.23 43.97 28.65 35.98 29.21 28.00 C 29.55 18.57 37.14 10.10 46.44 8.64 Z" />
@@ -104,7 +128,7 @@
             </g>
           </svg>
         </button>
-        <button @click="controlChatBox" class="mx-2">
+        <button title="گفتوگو" @click="controlChatBox" class="mx-2">
           <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <g id="#000000ff">
               <path :fill="showChatBox ? '#62dc82' : '#aaaaaa'" opacity="1.00" d=" M 16.46 13.66 C 19.13 12.44 22.13 12.52 25.00 12.51 C 37.33 12.61 49.67 12.44 62.00 12.59 C 68.99 12.62 75.06 18.95 74.95 25.91 C 75.04 33.63 75.04 41.35 74.95 49.06 C 75.02 55.49 69.90 61.45 63.52 62.29 C 54.13 63.00 44.66 62.09 35.28 62.73 C 28.81 67.00 22.80 71.95 16.35 76.25 C 13.19 78.65 8.19 75.93 8.39 72.01 C 8.25 57.00 8.37 41.97 8.34 26.95 C 8.03 21.39 11.30 15.85 16.46 13.66 Z" />
@@ -162,6 +186,7 @@
 
       </div>
     </div>
+
   </header>
 </template>
 
@@ -181,6 +206,9 @@ export default {
   mounted() {
     this.startTime()
   },
+  props: {
+    ping: 1
+  },
   computed: {
     room(){
       return this.$store.state.room;
@@ -199,7 +227,10 @@ export default {
     },
     showChatBox() {
       return this.$store.state.top.chat;
-    }
+    },
+    content(){
+      return this.$store.state.main_content
+    },
   },
   methods:{
     logout(){
@@ -210,6 +241,9 @@ export default {
     },
     controlChatBox(){
       this.$store.commit('controlChatBox',! this.showChatBox);
+    },
+    updateContent() {
+      this.$store.commit('setMainContent',! this.content);
     },
     startTime() {
       const today = new Date();

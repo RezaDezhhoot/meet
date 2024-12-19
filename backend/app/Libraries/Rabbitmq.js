@@ -26,7 +26,6 @@ module.exports.directPublish = async (exchangeName, routingKey  , msg , queue  ,
                 },
                 "delivery_mode": "1"
             });
-            console.log(" [x] Sent %s", msg);
         });
     });
 }

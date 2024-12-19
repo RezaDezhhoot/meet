@@ -97,8 +97,6 @@
     <div class="flex items-center">
 
       <div class="wifi-icon2">
-
-
         <template v-if="ping >= 4">
           <div v-for="i in 5 - ping" :class="'wifi-bar bar-'+(ping + i)"></div>
           <div v-for="i in ping" :class="'wifi-bar-ok bar-'+(ping + 1 - i)"></div>

@@ -5,14 +5,16 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = path.join(uploadDir, req.body.dir || 'default');
+        const now = new Date()
+        const dir = path.join(uploadDir, req.headers.dir || 'default', `${now.getFullYear()}-${now.getMonth()}-${now.getDay()}`);
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
         cb(null, dir);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        const now = new Date()
+        cb(null,`${now.getFullYear()}-${now.getMonth()}-${now.getDay()}-${Date.now()}-${path.extname(file.originalname)}`);
     }
 });
 const upload = multer({

@@ -2,14 +2,17 @@
   <div v-if="! conected" class="loader">
     <loader></loader>
   </div>
-  <top2 v-if="room.ui === 2" @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top2>
+  <top2 v-if="room.ui === 2" :ping="pingValue" @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top2>
   <top v-else @logout="logout" :ping="pingValue" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top>
   <main id="main"  :class="room.ui === 2 ? 'bg-black' : ''">
     <div v-if="lowSignal">
       <low-signal></low-signal>
     </div>
-    <sidebar></sidebar>
-    <content></content>
+    <sidebar :width="(showUserBox || showChatBox || content) ? 30 : 0"></sidebar>
+    <template v-if="! content ">
+      <Camera height="100"></Camera>
+    </template>
+    <content v-if="content"></content>
   </main>
 </template>
 <script>
@@ -22,6 +25,7 @@ import Content from "../components/Meetin/Content.vue";
 import io from 'socket.io-client';
 import {inject} from 'vue';
 import axios from 'axios'
+import Camera from "../components/Meetin/Camera.vue";
 
 export default {
   components: {
@@ -31,6 +35,7 @@ export default {
     content: Content,
     loader: Loader,
     lowSignal: LowSignal,
+    Camera,
   },
   data(){
     return {
@@ -49,6 +54,17 @@ export default {
       onLine: navigator.onLine,
       pingValue: 0,
     };
+  },
+  computed:{
+    showUserBox() {
+      return this.$store.state.top.users;
+    },
+    showChatBox() {
+      return this.$store.state.top.chat;
+    },
+    content(){
+      return this.$store.state.main_content
+    },
   },
   beforeCreate() {
     this.$emit('check-if-user-was-logged-in',this.$route.params.key);
@@ -81,6 +97,10 @@ export default {
     }, 3000);
     await this.connect()
     await this.ping()
+
+    if (this.room.ui === 2) {
+      this.$store.commit('setMainContent' , false)
+    }
   },
   methods:{
     requestPermission() {

@@ -227,8 +227,6 @@ export default {
           })
           return
         }
-        console.log(uploadedFile.type)
-
         if (! validMime.includes(uploadedFile.type))  {
           Swal.fire({
             position: 'top-start',

@@ -412,3 +412,27 @@
 .bar-5 {
     height: 50px;
 }
+
+.outer-box {
+    display: grid;
+    height: 100vh; /* Full height of the viewport */
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+/* Inner boxes */
+.inner-box {
+    /*background-color: lightblue;*/
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.inner-box > video {
+    width: 100%;
+    /*height: 100%;*/
+}

@@ -57,7 +57,6 @@ export default {
           if (this.microphone && track.kind === "audio") {
             continue
           }
-          console.log(track)
           track.stop();
           this.stopAndSave()
         }
@@ -106,7 +105,6 @@ export default {
         const file = new File([blob], fileName, { type: blob.type, lastModified: new Date().getTime() });
         const formData = new FormData();
         formData.append("file", file);
-        formData.append('dir','records')
         this.stream = null
         this.$store.commit('setRecorderLocalStream' , null)
         this.recordedChunks = []
@@ -114,7 +112,8 @@ export default {
           const {data} = await axios.post("/v1/files", formData, {
             headers: {
               "Content-Type": "multipart/form-data",
-              "Authorization": "Bearer " + this.$cookies.get("auth").token
+              "Authorization": "Bearer " + this.$cookies.get("auth").token,
+              "dir": "records",
             },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
@@ -125,6 +124,7 @@ export default {
             },
           });
         } catch (error) {
+          console.log(error)
           Swal.fire({
             position: 'top-start',
             text: "خطا در هنگام ارسال فایل ضبط شده!",
