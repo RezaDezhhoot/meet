@@ -88,7 +88,7 @@ services:
     networks:
       - main
   mysql:
-    image: docker.arvancloud.ir/mysql
+    image: mysql
     container_name: ${DATABASE_CONTAINER}
     restart: on-failure
     tty: true
