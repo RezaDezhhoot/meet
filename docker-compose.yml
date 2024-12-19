@@ -95,7 +95,6 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./shared/config/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./shared/mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
