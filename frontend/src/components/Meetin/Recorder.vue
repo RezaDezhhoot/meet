@@ -33,7 +33,7 @@ export default {
       mediaRecorder: null,
       recordedChunks: [],
       timer: null,
-      stream: null
+      stream: null,
     }
   },
   computed: {
@@ -49,6 +49,9 @@ export default {
     microphone(){
       return this.$store.state.localStream;
     },
+    progress(){
+      return this.$store.state.progress;
+    }
   },
   methods:{
     end() {
@@ -117,9 +120,9 @@ export default {
             },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
-                this.progress = Math.round(
+                this.$store.commit('updateProgress' , Math.round(
                     (progressEvent.loaded / progressEvent.total) * 100
-                );
+                ));
               }
             },
           });
@@ -135,6 +138,7 @@ export default {
           })
         }
       }
+      this.$store.commit('updateProgress' , 0);
 
       if (this.mediaRecorder) {
         this.mediaRecorder.stop();

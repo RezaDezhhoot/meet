@@ -4,7 +4,7 @@ export const state = {
     cameraLoading: false,
 
     main_content: true,
-
+    progress: 0,
     localStream: null,
     recorderLocalStream: null,
     videoStream: null,

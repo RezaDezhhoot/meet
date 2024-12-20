@@ -1,4 +1,6 @@
 <template>
+  {{progress}}
+
   <section :class="{'full-screen': (full && content)}" class="left-section share-screen w-[70%] h-full mr-[0.5rem] bg-white rounded-[0.5rem] ">
     <div class="h-full px-[1.2rem] py-[1rem] w-full " v-if="! content">
       <div class="h-full w-full flex flex-col justify-center items-center">
@@ -170,6 +172,9 @@ export default {
     },
     shareFile(){
       return this.$store.state.shareFile
+    },
+    progress(){
+      return this.$store.state.progress;
     }
   },
   data(){
@@ -179,7 +184,6 @@ export default {
       file: null,
       filePreview: null,
       uploading: false,
-      progress: 0
     }
   },
   watch:{
@@ -252,9 +256,9 @@ export default {
             },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
-                this.progress = Math.round(
+                this.$store.commit('updateProgress' , Math.round(
                     (progressEvent.loaded / progressEvent.total) * 100
-                );
+                ));
               }
             },
           });
@@ -277,12 +281,7 @@ export default {
         }
         this.progress = 0
         this.uploading = false;
-
-        switch (uploadedFile.type) {
-          case "application/pdf":
-
-            break
-        }
+        this.$store.commit('updateProgress' , 0);
       }
     },
     startShareScreen() {

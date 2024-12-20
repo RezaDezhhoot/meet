@@ -93,5 +93,8 @@ export const mutations = {
     },
     setMainContent(state , value) {
         state.main_content = value;
+    },
+    updateProgress(state , value) {
+        state.progress = value
     }
 }
