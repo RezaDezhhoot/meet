@@ -6,6 +6,7 @@ const User = require('../../../User/Models/User');
 const Penalty = require('../../../User/Models/Penalty');
 const Chat = require('../../Models/Chat');
 let users = {};
+let permissions = {};
 let typistUsers = {};
 let host = {};
 let host_socket_id = {};
@@ -49,7 +50,7 @@ module.exports.checkSpeakers = async (io,socket,data,room) => {
 
 module.exports.join = async (io,socket,data,room) => {
     let status = 404;
-    if (room.capacity === Object.entries(users[room.key]).length) {
+    if (room.capacity === Object.entries(users[room.key] ?? {}).length) {
         socket.emit('error',{
             data:{
                 code: 422
@@ -65,6 +66,12 @@ module.exports.join = async (io,socket,data,room) => {
                 const user = await User.findByPk(decoded_token.user._id);
                 if (user) {
                     status = 200;
+                    let media
+                    if (permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
+                        media = permissions[room.key][user.id]
+                    } else {
+                        media = MediaResource.make(user,room,data.type)
+                    }
                     users[room.key][socket.id] = {
                         id: user.id,
                         socketId: socket.id,
@@ -72,7 +79,7 @@ module.exports.join = async (io,socket,data,room) => {
                         room: room.title,
                         ip: socket.handshake.address,
                         user: UserResource.make(user,null,['email','phone','status'],LOGIN),
-                        media: MediaResource.make(user,room,data.type),
+                        media,
                     };
 
                     if (user.id === room.host_id) {
@@ -102,13 +109,19 @@ module.exports.join = async (io,socket,data,room) => {
                 name: data.name,
                 id: ip
             }
+            let media
+            if (permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
+                media = permissions[room.key][user.id]
+            } else {
+                media = MediaResource.make(user,room,data.type)
+            }
             users[room.key][socket.id] = {
                 socketId: socket.id,
                 name: user.name,
                 room: room.title,
                 ip,
-                user: UserResource.make(user,null,['id','email','phone','status'],GUEST),
-                media: MediaResource.make(user,room,data.type),
+                user: UserResource.make(user,null,['email','phone','status'],GUEST),
+                media: media,
             };
             if (host[room.key]) {
                 socket.emit('host-joined',{
@@ -134,6 +147,13 @@ module.exports.join = async (io,socket,data,room) => {
         },
         status
     });
+}
+
+module.exports.leave = async (io,socket,data,room) => {
+    const user = users[room.key][socket.id]
+    if (user && user.hasOwnProperty('user') && permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
+        delete permissions[room.key][user.id]
+    }
 }
 
 module.exports.newMessage = async (io,socket,data,room) => {
@@ -437,6 +457,11 @@ module.exports.disconnect = async (io,socket,data,room) => {
                 from: socket.id
             }
         });
+        // check if user was login , check action (refresh or logout) , save media data for next time
+        if (users[room.key][socket.id].user.hasOwnProperty("id")) {
+            permissions[room.key] = {}
+            permissions[room.key][users[room.key][socket.id].user.id] = users[room.key][socket.id].media
+        }
         delete users[room.key][socket.id];
         if (typistUsers[room.key][socket.id]) {
             delete typistUsers[room.key][socket.id];
@@ -446,7 +471,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
             room_id: room.id
         }),'lists');
 
-        if (Object.entries(users[room.key]).length === 0) {
+        if (Object.entries(users[room.key] ?? {}).length === 0) {
             delete users[room.key];
         }
 

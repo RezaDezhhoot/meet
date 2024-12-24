@@ -134,6 +134,26 @@ services:
       - '15672:15672'
     networks:
       - main
+  freeswitch:
+    container_name: freeswitch
+    image: safarov/freeswitch
+    ports:
+      - "5060:5060/udp"
+      - "5080:5080/udp"
+      - "64000-64100:64000-64100/udp"
+      - "5066:5066/tcp"
+      - "9443:7443"
+    networks:
+      - freeswitch
+
+    environment:
+      SOUND_RATES: "32000:48000"
+      SOUND_TYPES: "en-us-allison"
+      EPMD: "false"
+      DUMPCAP: "false"
+    volumes:
+      - './freeswitch/configs/freeswitch:/etc/freeswitch'
+      - './freeswitch/configs/freeswitch-sounds:/usr/share/freeswitch/sounds'
 networks:
   main:
     driver: bridge

@@ -28,6 +28,7 @@ module.exports.ChannelV1 = async (io) => {
 
             // Submit new message
             socket.on('new-message', async data => await SocketV1.newMessage(nsp,socket,data,room))
+            socket.on('leave', async data => await SocketV1.leave(nsp,socket,data,room))
 
             // Typing
             socket.on('typing', async data => await SocketV1.typing(nsp,socket,data,room))

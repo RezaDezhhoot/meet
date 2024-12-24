@@ -270,7 +270,6 @@ export const actions = {
             }).catch(function (err) {
                 console.log(err)
                 context.commit('controlCameraLoader' , false);
-                context.dispatch('setDevices');
                 Swal.fire({
                     position: 'top-start',
                     text: "عدم دسترسی به دوربین!",
@@ -320,7 +319,6 @@ export const actions = {
                 media = 'audio';
                 await context.dispatch('audioShare',{media: [media], stream })
             } catch (err) {
-                await context.dispatch('setDevices');
                 let text = 'عدم دسترسی به میکروفون!';
                 await Swal.fire({
                     position: 'top-start',
@@ -619,7 +617,19 @@ export const actions = {
             }
         }
     },
-    setDevices({state,dispatch}) {
+    async setDevices({state,dispatch}) {
+        try {
+            let stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+            });
+            stream.getTracks().forEach(function (track) {
+                track.stop()
+            })
+            stream = null
+        } catch (error) {
+            console.error('Permission denied or error occurred:', error);
+        }
         function updateDevice() {
             navigator.mediaDevices
                 .enumerateDevices()
