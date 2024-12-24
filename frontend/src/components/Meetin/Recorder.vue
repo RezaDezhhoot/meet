@@ -66,39 +66,68 @@ export default {
       }
     },
     async start() {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { mediaSource: 'screen' },
-        audio: false,
-      });
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { mediaSource: 'screen' },
+          audio: false,
+        });
 
-      const audioStream = this.microphone ? this.microphone : await navigator.mediaDevices.getUserMedia({
-        audio: {
-          noiseSuppression: true,
-          echoCancellation: true
-        }
-      });
-      this.$store.commit('setRecorderLocalStream' , audioStream)
+        const audioStream = this.microphone ? this.microphone : await navigator.mediaDevices.getUserMedia({
+          audio: {
+            noiseSuppression: true,
+            echoCancellation: true
+          }
+        });
+        this.$store.commit('setRecorderLocalStream' , audioStream)
 
-      this.stream = new MediaStream([
-        ...stream.getTracks(),
-        ...audioStream.getTracks()
-      ]);
-      const videoTrack = this.stream.getVideoTracks()[0];
-      videoTrack.onended = async () => {
-        this.end()
-      };
-      this.mediaRecorder = new MediaRecorder(this.stream, { mimeType: 'video/webm' });
-      this.mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          this.recordedChunks.push(e.data);
+        this.stream = new MediaStream([
+          ...stream.getTracks(),
+          ...audioStream.getTracks()
+        ]);
+        const videoTrack = this.stream.getVideoTracks()[0];
+        videoTrack.onended = async () => {
+          this.end()
+        };
+        this.mediaRecorder = new MediaRecorder(this.stream, { mimeType: 'video/webm' });
+        this.mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            this.recordedChunks.push(e.data);
+          }
+        };
+        this.mediaRecorder.onstop = async () => {
+          await this.stopAndSave()
+        };
+        this.mediaRecorder.start();
+        this.recording = true;
+        this.startTime();
+      } catch (err) {
+        Swal.fire({
+          position: 'top-start',
+          text: "عدم دسترسی به میکروفون یا صفحه نمایش",
+          icon: 'warning',
+          showConfirmButton: false,
+          backdrop: false,
+          timer: 3500,
+        })
+        if (this.mediaRecorder) {
+          this.mediaRecorder.stop();
+          this.mediaRecorder = null;
         }
-      };
-      this.mediaRecorder.onstop = async () => {
-        await this.stopAndSave()
-      };
-      this.mediaRecorder.start();
-      this.recording = true;
-      this.startTime();
+        if (this.stream) {
+          for (const track of this.stream.getTracks()) {
+            if (this.microphone && track.kind === "audio") {
+              continue
+            }
+            track.stop();
+          }
+          this.stream = null
+        }
+        this.$store.commit('setRecorderLocalStream' , null)
+        this.recording = false;
+        if (this.timer) {
+          clearInterval(this.timer)
+        }
+      }
     },
     async stopAndSave() {
       if (this.recordedChunks.length > 0) {

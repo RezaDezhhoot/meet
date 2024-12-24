@@ -69,6 +69,11 @@ module.exports.join = async (io,socket,data,room) => {
                     let media
                     if (permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
                         media = permissions[room.key][user.id]
+                        console.log(media)
+                        media.media.local.camera = false;
+                        media.media.local.screen = false;
+                        media.media.local.microphone = false;
+                        media.media.local.audio = false;
                     } else {
                         media = MediaResource.make(user,room,data.type)
                     }
@@ -231,6 +236,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
     if (media.includes('camera')) {
         users[room.key][socket.id].media.settings.camera = data.streamID.camera;
         users[room.key][socket.id].media.media.remote.camera = true;
+        console.log(users[room.key][socket.id].media.settings.camera)
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
             action: 'share-camera',
@@ -461,6 +467,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
         if (users[room.key][socket.id].user.hasOwnProperty("id")) {
             permissions[room.key] = {}
             permissions[room.key][users[room.key][socket.id].user.id] = users[room.key][socket.id].media
+            console.log(users[room.key][socket.id].media)
         }
         delete users[room.key][socket.id];
         if (typistUsers[room.key][socket.id]) {
