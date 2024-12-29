@@ -415,19 +415,23 @@ module.exports.kickClient = async (io,socket,data,room) => {
         const user = users[room.key][socket.id];
         const targetUser = users[room.key][data.to];
         if (user.user.id === room.host_id && targetUser.user.id !== room.host_id) {
-            await Penalty.create({
-                kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
-                room_id: room.id,
-                user_id: targetUser?.user?.id,
-                user_ip: targetUser.ip,
-            });
-            await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-                room_id: room.id,
-                action: 'kicked-out',
-                user_id: targetUser.user.id ?? null,
-                user_ip: targetUser.ip,
-                user_name: targetUser.name,
-            }),'logLists');
+            try {
+                await Penalty.create({
+                    kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
+                    room_id: room.id,
+                    user_id: targetUser?.user?.id,
+                    user_ip: targetUser.ip,
+                });
+                await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
+                    room_id: room.id,
+                    action: 'kicked-out',
+                    user_id: targetUser.user.id ?? null,
+                    user_ip: targetUser.ip,
+                    user_name: targetUser.name,
+                }),'logLists');
+            } catch (err) {
+                console.log(err)
+            }
 
             socket.to(data.to).emit('error',{
                 data:{
