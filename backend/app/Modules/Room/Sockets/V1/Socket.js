@@ -169,7 +169,7 @@ module.exports.newMessage = async (io,socket,data,room) => {
             await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
                 room_id: room.id,
                 action: 'new-message',
-                user_id: user.user.id ?? null,
+                user_id: Number(user.user.id) ?? null,
                 user_ip: socket.handshake.address,
                 user_name: user.name,
             }),'logLists');
@@ -238,7 +238,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
             action: 'share-camera',
-            user_id: users[room.key][socket.id].user.id ?? null,
+            user_id: Number(users[room.key][socket.id].user.id) ?? null,
             user_ip: socket.handshake.address,
             user_name: users[room.key][socket.id].name,
         }),'logLists');
@@ -250,7 +250,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
             action: 'share-audio',
-            user_id: users[room.key][socket.id].user.id ?? null,
+            user_id: Number(users[room.key][socket.id].user.id) ?? null,
             user_ip: socket.handshake.address,
             user_name: users[room.key][socket.id].name,
         }),'logLists');
@@ -262,7 +262,7 @@ module.exports.shareStream = async (io,socket,data,room) => {
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
             action: 'share-screen',
-            user_id: users[room.key][socket.id].user.id ?? null,
+            user_id: Number(users[room.key][socket.id].user.id) ?? null,
             user_ip: socket.handshake.address,
             user_name: users[room.key][socket.id].name,
         }),'logLists');
@@ -425,7 +425,7 @@ module.exports.kickClient = async (io,socket,data,room) => {
                 await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
                     room_id: room.id,
                     action: 'kicked-out',
-                    user_id: targetUser.user.id ?? null,
+                    user_id: Number(targetUser.user.id )?? null,
                     user_ip: targetUser.ip,
                     user_name: targetUser.name,
                 }),'logLists');
