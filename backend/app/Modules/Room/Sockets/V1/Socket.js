@@ -415,11 +415,12 @@ module.exports.kickClient = async (io,socket,data,room) => {
         const user = users[room.key][socket.id];
         const targetUser = users[room.key][data.to];
         if (user.user.id === room.host_id && targetUser.user.id !== room.host_id) {
+            console.log(Number(targetUser?.user?.id))
             try {
                 await Penalty.create({
                     kicked_at: Date.now() + 2 * 60 * 60 * 1000 ,
                     room_id: room.id,
-                    user_id: targetUser?.user?.id,
+                    user_id: Number(targetUser?.user?.id),
                     user_ip: targetUser.ip,
                 });
                 await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
