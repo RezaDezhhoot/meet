@@ -475,7 +475,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
             room_id: room.id
         }),'lists');
 
-        if (Object.entries(users[room.key] ?? {}).length === 0) {
+        if (user.hasOwnProperty(room.key) && Object.entries(users[room.key] ?? {}).length === 0) {
             delete users[room.key];
         }
 
