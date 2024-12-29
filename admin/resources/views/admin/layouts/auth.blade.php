@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="canonical" href="https://keenthemes.com/metronic" />
     <!--begin::Fonts-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+    <link href="{{asset('admin/css/fonts.css')}}" rel="stylesheet" type="text/css" />
+
     <!--end::Fonts-->
     <!--begin::Page Custom Styles(used by this page)-->
     <link href="{{asset('admin/css/pages/login/classic/login-4.rtl.css')}}" rel="stylesheet" type="text/css" />
