@@ -178,7 +178,7 @@ module.exports.newMessage = async (io,socket,data,room) => {
                 text: Buffer.from(validator.escape(data.message),'utf-8').toString('base64'),
                 room_id: room.id,
                 sender: user.name,
-                user_id: user.user.id ?? null,
+                user_id: Number(user.user.id) ?? null,
                 user_ip: socket.handshake.address,
             });
         } else {

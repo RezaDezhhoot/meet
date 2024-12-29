@@ -1,7 +1,7 @@
 module.exports.make = (chat) => {
     return {
         'id': chat?.id,
-        'text': Buffer.from(chat?.text, 'base64').toString('utf-8'),
+        'text': chat?.text ? Buffer.from(chat?.text, 'base64').toString('utf-8') : null,
         'sender': chat.sender,
     }
 }
