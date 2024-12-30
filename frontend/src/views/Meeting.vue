@@ -94,7 +94,7 @@ export default {
     }
     setInterval(async () => {
       await this.ping()
-    }, 3000);
+    }, 5000);
     await this.connect()
     await this.ping()
 
@@ -152,7 +152,7 @@ export default {
             };
           }
         }
-      }, 10500, meeting );
+      }, 105000, meeting );
 
       this.socket.on('get-users',async data => {
         if (data.status === 200) {

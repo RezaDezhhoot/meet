@@ -472,6 +472,9 @@ export const actions = {
                   if (data.data.streamID.hasOwnProperty('audio')) {
                       state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
                   }
+                  commit('controlSound' , {
+                      value: state.sound
+                  })
               } catch (err) {
                   console.log(err)
               }

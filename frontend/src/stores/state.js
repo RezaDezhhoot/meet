@@ -11,8 +11,8 @@ export const state = {
     displayStream: null,
     remoteStreams: {
         camera: {},
-        audio: null,
-        screen: null
+        audio: {},
+        screen: {}
     },
 
     room: Object,
@@ -21,7 +21,7 @@ export const state = {
 
     clients: Array,
 
-    sound: false,
+    sound: true,
     user: {
         media:{
             settings: {

@@ -51,13 +51,12 @@ export default {
   name: "UserSpeaker",
   data(){
     return {
-      active: false,
       showDropdown: false,
     };
   },
-  watch:{
-    "$store.state.sound"(value){
-      this.active = value;
+  computed: {
+    active() {
+      return this.$store.state.sound
     }
   },
   props:{
@@ -68,7 +67,7 @@ export default {
     title: String
   },
   mounted() {
-    localStorage.setItem('sound',false);
+    localStorage.setItem('sound',"false");
   },
   methods:{
     control(){

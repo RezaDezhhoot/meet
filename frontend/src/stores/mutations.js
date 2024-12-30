@@ -60,7 +60,6 @@ export const mutations = {
     controlSound(state , value){
         state.sound = value.value;
         const mediaPlayers = document.querySelectorAll('audio');
-        console.log(mediaPlayers)
         Array.from(mediaPlayers).forEach(async el => {
             el.volume = value.value ? 1.0 : 0;
             if (value.value) {

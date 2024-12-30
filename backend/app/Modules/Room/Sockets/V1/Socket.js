@@ -68,40 +68,62 @@ module.exports.join = async (io,socket,data,room) => {
                     status = 200;
                     let media
                     if (permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
-                        media = permissions[room.key][user.id]
-                        media.media.local.camera = false;
-                        media.media.local.screen = false;
-                        media.media.local.microphone = false;
-                        media.media.local.audio = false;
+                        const p = permissions[room.key][user.id]
+                        media = {
+                            host: p.host,
+                            type: p.type,
+                            media: {
+                                local:{
+                                    audio: false,
+                                    screen: false,
+                                    microphone: false,
+                                    camera: false,
+                                },
+                                remote:{
+                                    audio: p.media.remote.audio ?? false,
+                                    screen: p.media.remote.screen ?? false,
+                                    microphone: p.media.remote.microphone ?? false,
+                                    camera: p.media.remote.camera ?? false,
+                                }
+                            },
+                            settings: {
+                                hand_rising: p.settings.hand_rising ?? false,
+                                camera: p.settings.camera ?? false,
+                                audio: p.settings.audio ?? false,
+                                screen: p.settings.screen ?? false,
+                            }
+                        }
                     } else {
                         media = MediaResource.make(user,room,data.type)
                     }
-                    users[room.key][socket.id] = {
-                        id: user.id,
-                        socketId: socket.id,
-                        name: user.name,
-                        room: room.title,
-                        ip: socket.handshake.address,
-                        user: UserResource.make(user,null,['email','phone','status'],LOGIN),
-                        media,
-                    };
+                    if (users && users.hasOwnProperty(room.key)) {
+                        users[room.key][socket.id] = {
+                            id: user.id,
+                            socketId: socket.id,
+                            name: user.name,
+                            room: room.title,
+                            ip: socket.handshake.address,
+                            user: UserResource.make(user,null,['email','phone','status'],LOGIN),
+                            media,
+                        };
 
-                    if (user.id === room.host_id) {
-                        host[room.key][socket.id] = users[room.key][socket.id];
-                        host_socket_id[room.key][socket.id] = socket.id;
+                        if (user.id === room.host_id) {
+                            host[room.key][socket.id] = users[room.key][socket.id];
+                            host_socket_id[room.key][socket.id] = socket.id;
 
-                        io.emit('host-joined',{
-                            data:{
-                                host: host[room.key]
-                            }, status
-                        });
+                            io.emit('host-joined',{
+                                data:{
+                                    host: host[room.key]
+                                }, status
+                            });
 
-                    } else if (host[room.key]) {
-                        socket.emit('host-joined',{
-                            data:{
-                                host: host[room.key]
-                            }, status
-                        });
+                        } else if (host[room.key]) {
+                            socket.emit('host-joined',{
+                                data:{
+                                    host: host[room.key]
+                                }, status
+                            });
+                        }
                     }
                 }
             }
@@ -115,24 +137,50 @@ module.exports.join = async (io,socket,data,room) => {
             }
             let media
             if (permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
-                media = permissions[room.key][user.id]
+                const p = permissions[room.key][user.id]
+                media = {
+                    host: p.host,
+                    type: p.type,
+                    media: {
+                        local:{
+                            audio: false,
+                            screen: false,
+                            microphone: false,
+                            camera: false,
+                        },
+                        remote:{
+                            audio: p.media.remote.audio ?? false,
+                            screen: p.media.remote.screen ?? false,
+                            microphone: p.media.remote.microphone ?? false,
+                            camera: p.media.remote.camera ?? false,
+                        }
+                    },
+                    settings: {
+                        hand_rising: p.settings.hand_rising ?? false,
+                        camera: p.settings.camera ?? false,
+                        audio: p.settings.audio ?? false,
+                        screen: p.settings.screen ?? false,
+                    }
+                }
             } else {
                 media = MediaResource.make(user,room,data.type)
             }
-            users[room.key][socket.id] = {
-                socketId: socket.id,
-                name: user.name,
-                room: room.title,
-                ip,
-                user: UserResource.make(user,null,['email','phone','status'],GUEST),
-                media: media,
-            };
-            if (host[room.key]) {
-                socket.emit('host-joined',{
-                    data:{
-                        host: host[room.key]
-                    },status
-                });
+            if (users && users.hasOwnProperty(room.key)) {
+                users[room.key][socket.id] = {
+                    socketId: socket.id,
+                    name: user.name,
+                    room: room.title,
+                    ip,
+                    user: UserResource.make(user,null,['email','phone','status'],GUEST),
+                    media: media,
+                };
+                if (host[room.key]) {
+                    socket.emit('host-joined',{
+                        data:{
+                            host: host[room.key]
+                        },status
+                    });
+                }
             }
             break;
         default:
@@ -389,7 +437,6 @@ module.exports.handRising = async (io,socket,data,room) => {
     if (users[room.key][socket.id].user.id === room.host_id || data.to === socket.id) {
         const user = users[room.key][data.to];
         users[room.key][data.to].media.settings.hand_rising = ! user.media.settings.hand_rising;
-
         if (users[room.key][socket.id].user.id !== room.host_id && Object.entries(host[room.key]).length > 0) {
             socket.to(
                 Object.values(host_socket_id[room.key])
@@ -466,7 +513,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
                     from: socket.id
                 }
             });
-            // check if user was login , check action (refresh or logout) , save media data for next time
+            // // check if user was login , check action (refresh or logout) , save media data for next time
             if (users[room.key][socket.id].user.hasOwnProperty("id")) {
                 permissions[room.key] = {}
                 permissions[room.key][users[room.key][socket.id].user.id] = users[room.key][socket.id].media
