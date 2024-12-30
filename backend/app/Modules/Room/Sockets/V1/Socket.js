@@ -447,42 +447,52 @@ module.exports.sendCandidate = async (io,socket,data,room) => {
 }
 
 module.exports.disconnect = async (io,socket,data,room) => {
-    if (users[room.key][socket.id]) {
-        if (users[room.key][socket.id].user.id === room.host_id) {
-            delete host[room.key][socket.id];
-            delete host_socket_id[room.key][socket.id];
-            io.emit('host-joined',{
+    try {
+        if (users && users.hasOwnProperty(room.key) && users[room.key].hasOwnProperty(socket.id) && users[room.key][socket.id]) {
+            if (users[room.key][socket.id].user.id === room.host_id) {
+                delete host[room.key][socket.id];
+                delete host_socket_id[room.key][socket.id];
+                io.emit('host-joined',{
+                    data:{
+                        host: host[room.key]
+                    },status: 200
+                });
+            }
+            io.emit('end-stream',{
+                data: {
+                    camera: users[room.key][socket.id].media.settings.camera,
+                    screen: users[room.key][socket.id].media.settings.screen,
+                    audio: users[room.key][socket.id].media.settings.audio,
+                    from: socket.id
+                }
+            });
+            // check if user was login , check action (refresh or logout) , save media data for next time
+            if (users[room.key][socket.id].user.hasOwnProperty("id")) {
+                permissions[room.key] = {}
+                permissions[room.key][users[room.key][socket.id].user.id] = users[room.key][socket.id].media
+            }
+            delete users[room.key][socket.id];
+            if (typistUsers[room.key][socket.id]) {
+                delete typistUsers[room.key][socket.id];
+            }
+            await RabbitMQ.directPublish('rooms',`users`,JSON.stringify({
+                users: users[room.key],
+                room_id: room.id
+            }),'lists');
+
+            if (users.hasOwnProperty(room.key) && Object.entries(users[room.key] ?? {}).length === 0) {
+                delete users[room.key];
+            }
+
+            io.emit('get-users',{
                 data:{
-                    host: host[room.key]
-                },status: 200
+                    users: users[room.key] , from: socket.id
+                },
+                status: 200
             });
         }
-        io.emit('end-stream',{
-            data: {
-                camera: users[room.key][socket.id].media.settings.camera,
-                screen: users[room.key][socket.id].media.settings.screen,
-                audio: users[room.key][socket.id].media.settings.audio,
-                from: socket.id
-            }
-        });
-        // check if user was login , check action (refresh or logout) , save media data for next time
-        if (users[room.key][socket.id].user.hasOwnProperty("id")) {
-            permissions[room.key] = {}
-            permissions[room.key][users[room.key][socket.id].user.id] = users[room.key][socket.id].media
-        }
-        delete users[room.key][socket.id];
-        if (typistUsers[room.key][socket.id]) {
-            delete typistUsers[room.key][socket.id];
-        }
-        await RabbitMQ.directPublish('rooms',`users`,JSON.stringify({
-            users: users[room.key],
-            room_id: room.id
-        }),'lists');
-
-        if (users.hasOwnProperty(room.key) && Object.entries(users[room.key] ?? {}).length === 0) {
-            delete users[room.key];
-        }
-
+    } catch (err) {
+        console.log(err)
         io.emit('get-users',{
             data:{
                 users: users[room.key] , from: socket.id
