@@ -50,11 +50,11 @@ export const mutations = {
         try {
             if (state.localStream) {
                 state.localStream.getAudioTracks()[0].enabled = status;
-                state.socket.emit('control-local-media',{
-                    device: 'microphone',
-                    action: status
-                });
             }
+            state.socket.emit('control-local-media',{
+                device: 'microphone',
+                action: status
+            });
         } catch (err) {}
     },
     controlSound(state , value){
