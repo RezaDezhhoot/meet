@@ -113,7 +113,7 @@ export const actions = {
                         makeNewPc(index,clients[index].user.id);
                     }
                     // If the user has started a stream, it joins the old stream
-                    dispatch('joinStream',clients[index]);
+                    // dispatch('joinStream',clients[index]);
                 }
             }
         } else {
@@ -442,7 +442,7 @@ export const actions = {
                        state.remoteStreams['camera'] = {}
                    }
 
-                   console.log(1)
+                   console.log('offer')
                    // if (data.data.streamID.hasOwnProperty('camera')) {
                    //     state.remoteStreams['camera'][data.data.from] = data.data.streamID['camera'];
                    // }
