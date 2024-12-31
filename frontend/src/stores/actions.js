@@ -156,6 +156,7 @@ export const actions = {
             media.push('screen');
         }
         if (media.length > 0) {
+            console.log('join' , client.media.settings)
             state.socket.emit('get-shared' , {
                 from: state.socket.id,
                 to: client.socketId,
