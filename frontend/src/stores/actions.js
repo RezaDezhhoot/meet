@@ -47,14 +47,14 @@ export const actions = {
                     dispatch('setDynamicGrid')
                 }
             };
-            state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
-                if (event.candidate) {
-                    state.socket.emit("send-candidate" , {
-                        candidate: event.candidate,
-                        media: "video"
-                    })
-                }
-            }
+            // state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
+            //     if (event.candidate) {
+            //         state.socket.emit("send-candidate" , {
+            //             candidate: event.candidate,
+            //             media: "video"
+            //         })
+            //     }
+            // }
             // Set remote audio stream
             state.peerConnections[id]['pc']['audio'].ontrack = async function (stream ) {
                 if(stream.track.kind === 'audio') {
@@ -85,26 +85,26 @@ export const actions = {
                     }
                 }
             };
-            state.peerConnections[id]['pc']['audio'].onicecandidate = function (event) {
-                if (event.candidate) {
-                    state.socket.emit("send-candidate" , {
-                        candidate: event.candidate,
-                        media: "audio"
-                    })
-                }
-            }
+            // state.peerConnections[id]['pc']['audio'].onicecandidate = function (event) {
+            //     if (event.candidate) {
+            //         state.socket.emit("send-candidate" , {
+            //             candidate: event.candidate,
+            //             media: "audio"
+            //         })
+            //     }
+            // }
             // Set remote screen stream
             state.peerConnections[id]['pc']['screen'].ontrack = async function (stream) {
                 document.getElementById('screen-player').srcObject = stream.streams[0];
             };
-            state.peerConnections[id]['pc']['screen'].onicecandidate = function (event) {
-                if (event.candidate) {
-                    state.socket.emit("send-candidate" , {
-                        candidate: event.candidate,
-                        media: "screen"
-                    })
-                }
-            }
+            // state.peerConnections[id]['pc']['screen'].onicecandidate = function (event) {
+            //     if (event.candidate) {
+            //         state.socket.emit("send-candidate" , {
+            //             candidate: event.candidate,
+            //             media: "screen"
+            //         })
+            //     }
+            // }
         }
         if (data.from === state.socket.id) {
             for (const index in clients) {
@@ -113,7 +113,7 @@ export const actions = {
                         makeNewPc(index,clients[index].user.id);
                     }
                     // If the user has started a stream, it joins the old stream
-                    // dispatch('joinStream',clients[index]);
+                    dispatch('joinStream',clients[index]);
                 }
             }
         } else {
@@ -356,6 +356,7 @@ export const actions = {
         if (media.length > 0) {
             if (data.to.length > 0) {
                 for (const v of data.to) {
+                    console.log(v)
                     // Make RTC screen offer
                     if (media.includes('screen') && state.displayStream ) {
                         offer['screen'] = await state.peerConnections[v]['pc']['screen'].createOffer();
@@ -537,11 +538,11 @@ export const actions = {
             }
 
             if (callbacks.length > 0) {
-                // await context.dispatch('startStream', {
-                //     media: data.data.media,
-                //     from: context.state.socket.id,
-                //     to:[data.data.from]
-                // })
+                await context.dispatch('startStream', {
+                    media: data.data.media,
+                    from: context.state.socket.id,
+                    to:[data.data.from]
+                })
                 if (media.includes("audio")) {
                     context.state.socket.emit("check-speakers")
                 }
@@ -553,6 +554,7 @@ export const actions = {
         const media = Object.values(data.data.media);
         let calls = [];
 
+        console.log(data);
         if (media.length > 0) {
             if (state.videoStream && media.includes('camera') && state.peerConnections[data.data.from]['pc']['video'].getSenders().length === 0 ) {
                 state.videoStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['video'].addTrack(track, state.videoStream));
@@ -573,7 +575,6 @@ export const actions = {
                     to: data.data.from
                 })
             }
-
             if (calls.length > 0) {
                 dispatch('startStream',{
                     from: state.socket.id,
