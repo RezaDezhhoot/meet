@@ -42,6 +42,7 @@ export const actions = {
             }
             state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
                 track.onunmute = () => {
+                    console.log(1)
                     state.remoteStreams['camera'][stream.id] = stream
                     dispatch('setDynamicGrid')
                 }
