@@ -6,9 +6,9 @@ const iceConfiguration = {
             username: import.meta.env.VITE_ICE_SERVER_USERNAME,
             credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
         },
-        // {
-        //     "url": "stun:stun2.1.google.com:19302"
-        // }
+        {
+            "url": "stun:stun2.1.google.com:19302"
+        }
     ]
 }
 export const actions = {
