@@ -270,6 +270,7 @@ export const actions = {
                 context.dispatch('setDynamicGrid')
                 await context.dispatch('videoShare',{media: [media],localStream: stream  });
             }).catch(function (err) {
+                console.log(err)
                 context.commit('controlCameraLoader' , false);
                 Swal.fire({
                     position: 'top-start',
@@ -540,11 +541,11 @@ export const actions = {
             }
 
             if (callbacks.length > 0) {
-                // await context.dispatch('startStream', {
-                //     media: data.data.media,
-                //     from: context.state.socket.id,
-                //     to:[data.data.from]
-                // })
+                await context.dispatch('startStream', {
+                    media: data.data.media,
+                    from: context.state.socket.id,
+                    to:[data.data.from]
+                })
                 if (media.includes("audio")) {
                     context.state.socket.emit("check-speakers")
                 }
