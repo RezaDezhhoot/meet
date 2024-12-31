@@ -2,12 +2,12 @@ import Swal from "sweetalert2";
 const iceConfiguration = {
     iceServers: [
         {
-            urls: `stun:${import.meta.env.VITE_ICE_SERVER_URL}`,
+            urls: `turn:${import.meta.env.VITE_ICE_SERVER_URL}`,
             username: import.meta.env.VITE_ICE_SERVER_USERNAME,
             credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
         },
         {
-            "url": "stun:stun2.1.google.com:19302"
+            "urls": "stun:stun2.1.google.com:19302"
         }
     ]
 }
