@@ -536,11 +536,11 @@ export const actions = {
             }
 
             if (callbacks.length > 0) {
-                await context.dispatch('startStream', {
-                    media: data.data.media,
-                    from: context.state.socket.id,
-                    to:[data.data.from]
-                })
+                // await context.dispatch('startStream', {
+                //     media: data.data.media,
+                //     from: context.state.socket.id,
+                //     to:[data.data.from]
+                // })
                 if (media.includes("audio")) {
                     context.state.socket.emit("check-speakers")
                 }
