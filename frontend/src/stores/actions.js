@@ -156,7 +156,6 @@ export const actions = {
             media.push('screen');
         }
         if (media.length > 0) {
-            console.log('join' , client.media.settings)
             state.socket.emit('get-shared' , {
                 from: state.socket.id,
                 to: client.socketId,
@@ -577,6 +576,7 @@ export const actions = {
                 })
             }
             if (calls.length > 0) {
+                console.log(calls)
                 dispatch('startStream',{
                     from: state.socket.id,
                     to: [data.data.from],
