@@ -46,8 +46,8 @@ export const actions = {
                     if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
                         console.log('old')
                         state.remoteStreams['camera'][stream.id] = stream
-                        // const player = document.getElementById(`${stream.id}_player`)
-                        // player.srcObject = stream
+                        const player = document.getElementById(`${stream.id}_player`)
+                        player.srcObject = stream
                     } else {
                         console.log('new')
                         state.remoteStreams['camera'][stream.id] = stream
