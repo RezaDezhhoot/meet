@@ -41,18 +41,16 @@ export const actions = {
                 }
             }
             state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
-                track.onunmute = () => {
-                    console.log(stream.id)
-                    if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
-                        console.log('old')
-                        // state.remoteStreams['camera'][stream.id] = stream
-                        // const player = document.getElementById(`${stream.id}_player`)
-                        // player.srcObject = stream
-                    } else {
-                        console.log('new')
-                        state.remoteStreams['camera'][stream.id] = stream
-                        dispatch('setDynamicGrid')
-                    }
+                console.log(stream.id)
+                if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
+                    console.log('old')
+                    // state.remoteStreams['camera'][stream.id] = stream
+                    // const player = document.getElementById(`${stream.id}_player`)
+                    // player.srcObject = stream
+                } else {
+                    console.log('new')
+                    state.remoteStreams['camera'][stream.id] = stream
+                    dispatch('setDynamicGrid')
                 }
             };
             // state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
