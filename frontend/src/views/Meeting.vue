@@ -123,6 +123,8 @@ export default {
       return this.socket;
     },
     join(){
+      console.log(this.socket.id)
+
       this.socket.emit('join',{
         token: this.user.token,
         type: this.user.type,
