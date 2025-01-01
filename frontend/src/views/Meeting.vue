@@ -140,7 +140,7 @@ export default {
       let meeting = this;
       setInterval(async function (meeting ) {
         try {
-          const data = await meeting.socket.timeout(1000).emitWithAck("ping" , {});
+          const data = await meeting.socket.timeout(3000).emitWithAck("ping" , {});
           meeting.lowSignal = false
         } catch (err) {
           meeting.lowSignal = true
