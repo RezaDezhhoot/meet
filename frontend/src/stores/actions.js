@@ -648,12 +648,12 @@ export const actions = {
             if (data.data.hasOwnProperty('audio') && data.data.audio ) {
                 context.commit('controlMediaLoader',false);
                 if (context.state.remoteStreams['audio'].hasOwnProperty(data.data.from)) {
-                    el = document.getElementById(context.state.remoteStreams['audio'][data.data.from]);
+                    el = document.getElementById(data.data.audio);
                     if (el) {
                         el.remove();
                     }
                     el = null;
-                    delete context.state.remoteStreams['audio'][data.data.from];
+                    delete context.state.remoteStreams['audio'][data.data.audio];
                 }
             }
         }
