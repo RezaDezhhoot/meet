@@ -41,18 +41,16 @@ export const actions = {
                 }
             }
             state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
-                track.onunmute = () => {
-                    console.log(stream.id)
-                    if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
-                        console.log('old')
-                        // state.remoteStreams['camera'][stream.id] = stream
-                        // const player = document.getElementById(`${stream.id}_player`)
-                        // player.srcObject = stream
-                    } else {
-                        console.log('new')
-                        state.remoteStreams['camera'][stream.id] = stream
-                        dispatch('setDynamicGrid')
-                    }
+                console.log(stream.id)
+                if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
+                    console.log('old')
+                    // state.remoteStreams['camera'][stream.id] = stream
+                    // const player = document.getElementById(`${stream.id}_player`)
+                    // player.srcObject = stream
+                } else {
+                    console.log('new')
+                    state.remoteStreams['camera'][stream.id] = stream
+                    dispatch('setDynamicGrid')
                 }
             };
             // state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
@@ -64,33 +62,20 @@ export const actions = {
             //     }
             // }
             // Set remote audio stream
-            state.peerConnections[id]['pc']['audio'].ontrack = async function (stream ) {
-                if(stream.track.kind === 'audio') {
-                    let audio = document.getElementById(stream.track.id);
-                    let newAudio = false;
-                    if (! audio) {
-                        audio  = document.createElement('audio');
-                        newAudio = true;
-                        audio.autoplay = true;
-                        audio.defaultMuted  = false;
-                        audio.classList.add('hidden');
-                        audio.id = stream.track.id;
-                        audio.setAttribute("muted","true")
-                        audio.srcObject = stream.streams[0];
-                        audio.load();
-                    } else {
-                        audio.autoplay = true;
-                        audio.defaultMuted  = false;
-                        audio.classList.add('hidden');
-                        audio.id = stream.track.id;
-                        audio.muted = "muted";
-                        audio.srcObject = stream.streams[0];
-                        audio.load();
-                    }
+            state.peerConnections[id]['pc']['audio'].ontrack = async function ({track , streams: [stream]}) {
+                if (state.remoteStreams['audio'].hasOwnProperty(stream.id)) {
 
-                    if (newAudio) {
-                        document.getElementById('main').appendChild(audio);
-                    }
+                } else {
+                    state.remoteStreams['audio'][stream.id] = stream
+                    let audio  = document.createElement('audio');
+                    audio.autoplay = true;
+                    audio.defaultMuted  = false;
+                    audio.classList.add('hidden');
+                    audio.id = stream.id;
+                    audio.setAttribute("muted","true")
+                    audio.srcObject = stream;
+                    audio.load();
+                    document.getElementById('main').appendChild(audio);
                 }
             };
             // state.peerConnections[id]['pc']['audio'].onicecandidate = function (event) {
