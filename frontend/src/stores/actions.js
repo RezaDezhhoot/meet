@@ -309,7 +309,7 @@ export const actions = {
                 // gainNode is set to 0.5
                 sinWave.connect(gainNode);
                 gainNode.connect(audioDest);
-                gainNode.gain.value = 0.5;
+                gainNode.gain.value = 0.75;
                 source.connect(gainNode);
 
                 context.state.localStream = audioDest.stream;
