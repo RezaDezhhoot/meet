@@ -140,19 +140,10 @@ export default {
       let meeting = this;
       setInterval(async function (meeting ) {
         try {
-          const data = await meeting.socket.timeout(3000).emitWithAck("ping" , {});
+          await meeting.socket.timeout(5000).emitWithAck("ping" , {});
           meeting.lowSignal = false
         } catch (err) {
           meeting.lowSignal = true
-          if ("Notification" in window && Notification.permission === "granted") {
-            const notification = new Notification("مشکل در اتصال", {
-              body: "اتصال اینترنت شما ضعیف است، لطفاً بررسی کنید یا منتظر بمانید تا اتصال بهبود یابد",
-              icon: "/meet/internet.webp" // Optional icon URL
-            });
-            notification.onclick = function () {
-              console.log("Notification clicked");
-            };
-          }
         }
       }, 12500, meeting );
 

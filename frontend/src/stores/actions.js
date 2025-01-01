@@ -66,9 +66,17 @@ export const actions = {
                 if (state.remoteStreams['audio'].hasOwnProperty(stream.id)) {
                     state.remoteStreams['audio'][stream.id] = stream
                     let audio  = document.getElementById(stream.id);
+                    let newElement = false;
+                    if  (! audio) {
+                        audio  = document.createElement('audio');
+                        newElement = true
+                    }
                     audio.autoplay = true;
                     audio.srcObject = stream;
                     audio.load();
+                    if (newElement) {
+                        document.getElementById('main').appendChild(audio);
+                    }
                 } else {
                     state.remoteStreams['audio'][stream.id] = stream
                     let audio  = document.createElement('audio');
@@ -249,7 +257,13 @@ export const actions = {
         }
         else if (data.media === 'camera') {
             constraints = {
-                video: data.video ? ( {deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined} ) : false,
+                video: {
+                    width: { max: 320 },
+                    height: { max: 240 },
+                    aspectRatio: { max: 4 / 3 },
+                    frameRate: { max: 60 },
+                    deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined,
+                },
                 audio: false,
             };
 
