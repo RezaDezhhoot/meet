@@ -154,7 +154,7 @@ export default {
             };
           }
         }
-      }, 105000, meeting );
+      }, 12500, meeting );
 
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
