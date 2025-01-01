@@ -41,16 +41,18 @@ export const actions = {
                 }
             }
             state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
-                console.log(stream.id)
-                if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
-                    console.log('old')
-                    // state.remoteStreams['camera'][stream.id] = stream
-                    // const player = document.getElementById(`${stream.id}_player`)
-                    // player.srcObject = stream
-                } else {
-                    console.log('new')
-                    state.remoteStreams['camera'][stream.id] = stream
-                    dispatch('setDynamicGrid')
+                track.onunmute = () => {
+                    console.log(stream.id)
+                    if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
+                        console.log('old')
+                        state.remoteStreams['camera'][stream.id] = stream
+                        const player = document.getElementById(`${stream.id}_player`)
+                        player.srcObject = stream
+                    } else {
+                        console.log('new')
+                        state.remoteStreams['camera'][stream.id] = stream
+                        dispatch('setDynamicGrid')
+                    }
                 }
             };
             // state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
@@ -64,7 +66,11 @@ export const actions = {
             // Set remote audio stream
             state.peerConnections[id]['pc']['audio'].ontrack = async function ({track , streams: [stream]}) {
                 if (state.remoteStreams['audio'].hasOwnProperty(stream.id)) {
-
+                    state.remoteStreams['audio'][stream.id] = stream
+                    let audio  = document.getElementById(stream.id);
+                    audio.autoplay = true;
+                    audio.srcObject = stream;
+                    audio.load();
                 } else {
                     state.remoteStreams['audio'][stream.id] = stream
                     let audio  = document.createElement('audio');
