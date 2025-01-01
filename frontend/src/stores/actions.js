@@ -40,6 +40,16 @@ export const actions = {
                     screen: new RTCPeerConnection(iceConfiguration)
                 }
             }
+            state.peerConnections[id]['pc']['video'].oniceconnectionstatechange = () => {
+                if (state.peerConnections[id]['pc']['video'].iceConnectionState === 'disconnected') {
+                    console.log("Peer disconnected. Attempting to reconnect...");
+                    // Handle reconnection logic here
+                }
+            };
+            state.peerConnections[id]['pc']['video'].addTransceiver('video', { direction: 'sendrecv', sendEncodings: [
+                    { maxBitrate: 1500000 }, // Limit bandwidth usage
+                    { scaleResolutionDownBy: 2.0 }
+                ]});
             state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
                 console.log(stream.id)
                 if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
@@ -370,21 +380,21 @@ export const actions = {
                     console.log(v)
                     // Make RTC screen offer
                     if (media.includes('screen') && state.displayStream ) {
-                        offer['screen'] = await state.peerConnections[v]['pc']['screen'].createOffer();
+                        offer['screen'] = await state.peerConnections[v]['pc']['screen'].createOffer({ iceRestart: false });
                         streamID['screen'] = state.displayStream.id;
                         state.remoteStreams['screen'][data.from] = streamID['screen'];
                         await state.peerConnections[v]['pc']['screen'].setLocalDescription(new RTCSessionDescription(offer['screen']));
                     }
                     // Make RTC audio offer
                     if (media.includes('audio') && state.localStream) {
-                        offer['audio'] = await state.peerConnections[v]['pc']['audio'].createOffer();
+                        offer['audio'] = await state.peerConnections[v]['pc']['audio'].createOffer({ iceRestart: false });
                         streamID['audio'] = state.localStream.id;
                         state.remoteStreams['audio'][data.from] = streamID['audio'];
                         await state.peerConnections[v]['pc']['audio'].setLocalDescription(new RTCSessionDescription(offer['audio']));
                     }
                     // Make RTC video offer
                     if (media.includes('camera') && state.videoStream) {
-                        offer['camera'] = await state.peerConnections[v]['pc']['video'].createOffer();
+                        offer['camera'] = await state.peerConnections[v]['pc']['video'].createOffer({ iceRestart: false });
                         streamID['camera'] = state.videoStream.id;
                         await state.peerConnections[v]['pc']['video'].setLocalDescription(new RTCSessionDescription(offer['camera']));
                     }
