@@ -24,7 +24,7 @@
           c0.464,0.269,0.982,0.402,1.5,0.402s1.036-0.134,1.5-0.402l21.966-12.682c0.929-0.535,1.5-1.525,1.5-2.598
           C46.605,39.733,46.034,38.742,45.105,38.207z M24.639,48.291V33.318l12.966,7.486L24.639,48.291z" />
 
-            <line v-if="! active" x1="0" y1="0" x2="100" y2="100" stroke="red" stroke-width="6" />
+            <line v-if="! status" x1="0" y1="0" x2="100" y2="100" stroke="red" stroke-width="6" />
           </g>
         </svg>
         <span v-if="label" class="mr-[0.5rem] mt-[0.15rem]">{{ label }}</span>
@@ -45,7 +45,7 @@
           C46.605,39.733,46.034,38.742,45.105,38.207z M24.639,48.291V33.318l12.966,7.486L24.639,48.291z" />
 
 
-            <line v-if="! active" x1="0" y1="0" x2="100" y2="100" stroke="red" stroke-width="6" />
+            <line v-if="! status" x1="0" y1="0" x2="100" y2="100" stroke="red" stroke-width="6" />
           </g>
         </svg>
         <span v-if="label" class="mr-[0.5rem] mt-[0.15rem]">{{ label }}</span>
@@ -73,7 +73,7 @@
             <path :fill="fill ? fill : (status ? '#62dc82' : '#dbdbdb')" opacity="1.00" d="M45.105,38.207L23.139,25.523c-0.928-0.536-2.072-0.536-3,0s-1.5,1.526-1.5,2.598v25.365c0,1.072,0.572,2.063,1.5,2.598
           c0.464,0.269,0.982,0.402,1.5,0.402s1.036-0.134,1.5-0.402l21.966-12.682c0.929-0.535,1.5-1.525,1.5-2.598
           C46.605,39.733,46.034,38.742,45.105,38.207z M24.639,48.291V33.318l12.966,7.486L24.639,48.291z" />
-            <line v-if="! active" x1="0" y1="0" x2="100" y2="100" stroke="red" stroke-width="6" />
+            <line v-if="! status" x1="0" y1="0" x2="100" y2="100" stroke="red" stroke-width="6" />
           </g>
         </svg>
         <span v-if="label" class="mr-[0.5rem] mt-[0.15rem]">{{ label }}</span>
@@ -88,7 +88,6 @@ export default {
   props:{
     height: 0,
     width: 0,
-    active: false,
     show: false,
     fill: "#dbdbdb",
     user: Object,
@@ -106,7 +105,6 @@ export default {
     }
   },
   async mounted() {
-    this.status = this.$props.active;
     this.wires();
     this.socket = this.$store.state.socket;
   },
@@ -131,6 +129,7 @@ export default {
         await this.shareCamera();
       } else {
         this.endCamera();
+        this.status = false;
       }
     },
     endCamera(){

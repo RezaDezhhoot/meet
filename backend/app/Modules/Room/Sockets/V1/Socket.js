@@ -35,17 +35,17 @@ module.exports.createRoom = (io , socket , room) => {
 }
 
 module.exports.shareFile = async (io,socket,data,room) => {
-    users[room.key][socket.id].media.settings.screen = true;
+    users[room.key][socket.id].media.settings.file = data;
     users[room.key][socket.id].media.media.remote.screen = true;
     io.emit('share-file',data);
 }
 
-module.exports.getShareFile = async (io,socket,data,room) => {
+module.exports.shareFileTo = async (io,socket,data,room) => {
     socket.to(data.to).emit('share-file',data.file);
 }
 
-module.exports.checkSpeakers = async (io,socket,data,room) => {
-    socket.broadcast.emit('check-speakers');
+module.exports.getShareFile = async (io,socket,data,room) => {
+    socket.to(data.to).emit('share-file',data.file);
 }
 
 module.exports.join = async (io,socket,data,room) => {
@@ -87,10 +87,11 @@ module.exports.join = async (io,socket,data,room) => {
                                 }
                             },
                             settings: {
-                                hand_rising: p.settings.hand_rising ?? false,
-                                camera: p.settings.camera ?? false,
-                                audio: p.settings.audio ?? false,
-                                screen: p.settings.screen ?? false,
+                                hand_rising: false,
+                                camera: false,
+                                audio: false,
+                                screen: false,
+                                file: false,
                             }
                         }
                     } else {
@@ -156,10 +157,11 @@ module.exports.join = async (io,socket,data,room) => {
                         }
                     },
                     settings: {
-                        hand_rising: p.settings.hand_rising ?? false,
-                        camera: p.settings.camera ?? false,
-                        audio: p.settings.audio ?? false,
-                        screen: p.settings.screen ?? false,
+                        hand_rising: false,
+                        camera: false,
+                        audio: false,
+                        screen: false,
+                        file: false,
                     }
                 }
             } else {
@@ -190,6 +192,11 @@ module.exports.join = async (io,socket,data,room) => {
         users: users[room.key],
         room_id: room.id
     }),'lists');
+    if (users[room.key] && users[room.key].hasOwnProperty(socket.id)) {
+        socket.broadcast.emit("join-the-streams" , {
+            from: users[room.key][socket.id]
+        })
+    }
 
     io.emit('get-users',{
         data:{
@@ -260,14 +267,6 @@ module.exports.ping = async (io,socket,data,room , callback) => {
     return callback("ok")
 }
 
-module.exports.clearVideoEl = async (io,socket,data,room) => {
-    socket.broadcast.emit('clear-video-el',{
-        data: {
-            data: typistUsers[room.key]
-        }, status:200
-    });
-}
-
 module.exports.noTyping = async (io,socket,data,room) => {
     delete typistUsers[room.key][socket.id];
     socket.broadcast.emit('get-typists',{
@@ -278,9 +277,9 @@ module.exports.noTyping = async (io,socket,data,room) => {
 }
 
 module.exports.shareStream = async (io,socket,data,room) => {
-    const media = Object.values(data.media);
-
-    if (media.includes('camera')) {
+    const media = data.media;
+    const firstTime = data?.firstTime ?? false
+    if (media.includes('camera') && firstTime) {
         users[room.key][socket.id].media.settings.camera = data.streamID.camera;
         users[room.key][socket.id].media.media.remote.camera = true;
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
@@ -292,8 +291,8 @@ module.exports.shareStream = async (io,socket,data,room) => {
         }),'logLists');
     }
 
-    if (media.includes('audio')) {
-        users[room.key][socket.id].media.settings.audio = data.streamID;
+    if (media.includes('audio') && firstTime) {
+        users[room.key][socket.id].media.settings.audio = data.streamID.audio;
         users[room.key][socket.id].media.media.remote.microphone = true;
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
@@ -304,8 +303,8 @@ module.exports.shareStream = async (io,socket,data,room) => {
         }),'logLists');
     }
 
-    if (media.includes('screen')) {
-        users[room.key][socket.id].media.settings.screen = data.streamID;
+    if (media.includes('screen') && firstTime) {
+        users[room.key][socket.id].media.settings.screen = data.streamID.screen;
         users[room.key][socket.id].media.media.remote.screen = true;
         await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
             room_id: room.id,
@@ -315,64 +314,47 @@ module.exports.shareStream = async (io,socket,data,room) => {
             user_name: users[room.key][socket.id].name,
         }),'logLists');
     }
-
-    if (Object.values(data.to).length > 0) {
-        socket.to(Object.values(data.to)).emit("get-offer",{
-            data: {
-                offer: data.offer,
-                from: socket.id,
-                media: data.media,
-                streamID: data.streamID
-            } , status: 200
+    if (data.to.length > 0) {
+        socket.to(data.to).emit("get-offer",{
+            offer: data.offer,
+            from: socket.id,
+            media: data.media,
+            streamID: data.streamID,
+            name: users[room.key][socket.id]?.user?.name ?? null
         })
     }
 }
 
-module.exports.makeAnswer = async (io,socket,data,room) => {
-    socket.to(data.to).emit('answer-made',{
-        data:{
-            answer: data.answer,
-            from: socket.id,
-            media: data.media
-        } , status: 200
+module.exports.makeAnswer = async (io,socket, {to , answer , from , media},room) => {
+    socket.to(to).emit('answer-made',{
+        answer,
+        from: socket.id,
+        media,
+        status: 200
     });
 }
 
 module.exports.endStream = async (io,socket,data,room) => {
     if (users[room.key] && users[room.key][socket.id]) {
-        let camera = false , screen = false , audio = false;
-        if (data.media.includes('camera')) {
-            users[room.key][socket.id].media.settings.camera = false;
-            camera = data.camera;
-        }
-
-        if (data.media.includes('screen')) {
+        if (data.streams.hasOwnProperty('screen')) {
+            data.streams['screen'] = users[room.key][socket.id].media.settings.screen;
+            data.streams['file'] = users[room.key][socket.id].media.settings.file;
             users[room.key][socket.id].media.settings.screen = false;
-            screen = true;
+            users[room.key][socket.id].media.settings.file = false;
         }
-
-        if (data.media.includes('audio')) {
+        if (data.streams.hasOwnProperty('camera')) {
+            data.streams['camera'] = users[room.key][socket.id].media.settings.camera;
+            users[room.key][socket.id].media.settings.camera = false;
+        }
+        if (data.streams.hasOwnProperty('audio')) {
+            data.streams['audio'] = users[room.key][socket.id].media.settings.audio;
             users[room.key][socket.id].media.settings.audio = false;
-            audio = true;
         }
 
 
-        io.emit('end-stream',{
-            data: {
-                camera, screen, audio,
-                from: socket.id
-            }
-        });
-    }
-}
-
-module.exports.getShared = async (io,socket,data,room) => {
-    if (Object.values(data.media).length > 0) {
-        socket.to(data.to).emit('send-shared',{
-            data:{
-                from: data.from,
-                media: data.media
-            }, status: 200
+        socket.broadcast.emit('end-stream',{
+            streams: data.streams,
+            from: socket.id
         });
     }
 }
@@ -469,13 +451,6 @@ module.exports.kickClient = async (io,socket,data,room) => {
                     user_id: Number(targetUser?.user?.id),
                     user_ip: targetUser.ip,
                 });
-                await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-                    room_id: room.id,
-                    action: 'kicked-out',
-                    user_id: Number(targetUser.user.id )?? null,
-                    user_ip: targetUser.ip,
-                    user_name: targetUser.name,
-                }),'logLists');
             } catch (err) {
                 console.log(err)
             }
@@ -489,8 +464,25 @@ module.exports.kickClient = async (io,socket,data,room) => {
     }
 }
 
-module.exports.sendCandidate = async (io,socket,data,room) => {
-    socket.broadcast.emit('add-candidate',data);
+module.exports.sendSenderCandidate = async (io,socket,data,room) => {
+    socket.to(data.to).emit('add-sender-candidate',{
+        ... data,
+        from: socket.id
+    });
+}
+
+module.exports.reconnect = async (io,socket,data,room) => {
+    socket.to(data.to).emit("reconnect",{
+        media: data.media,
+        from: users[room.key][socket.id]
+    })
+}
+
+module.exports.sendReceiverCandidate = async (io,socket,data,room) => {
+    socket.to(data.to).emit('add-receiver-candidate',{
+        ... data,
+        from: socket.id
+    });
 }
 
 module.exports.disconnect = async (io,socket,data,room) => {
@@ -505,15 +497,15 @@ module.exports.disconnect = async (io,socket,data,room) => {
                     },status: 200
                 });
             }
+            const streams = {
+                camera: users[room.key][socket.id].media.settings.camera,
+                screen: users[room.key][socket.id].media.settings.screen,
+                audio: users[room.key][socket.id].media.settings.audio,
+            }
             io.emit('end-stream',{
-                data: {
-                    camera: users[room.key][socket.id].media.settings.camera,
-                    screen: users[room.key][socket.id].media.settings.screen,
-                    audio: users[room.key][socket.id].media.settings.audio,
-                    from: socket.id
-                }
+                streams,
+                from: socket.id
             });
-            // // check if user was login , check action (refresh or logout) , save media data for next time
             if (users[room.key][socket.id].user.hasOwnProperty("id")) {
                 permissions[room.key] = {}
                 permissions[room.key][users[room.key][socket.id].user.id] = users[room.key][socket.id].media

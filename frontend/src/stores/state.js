@@ -1,27 +1,32 @@
 export const state = {
+    clients: Array,
+    WebRTC: null,
+    loaders: {
+        screen: false
+    },
+
     mainLoading: false,
     mediaLoading: false,
     cameraLoading: false,
-
     main_content: true,
     progress: 0,
     localStream: null,
     recorderLocalStream: null,
     videoStream: null,
     displayStream: null,
+    file: null,
     remoteStreams: {
         camera: {},
         audio: {},
-        screen: {}
+        screen: {},
+        file: null
     },
 
     room: Object,
     host: Object,
     hostClient: Object,
 
-    clients: Array,
-
-    sound: true,
+    sound: false,
     user: {
         media:{
             settings: {

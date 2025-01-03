@@ -1,260 +1,98 @@
 import Swal from "sweetalert2";
+import RTCConnection from "../services/RTCConnection";
 const iceConfiguration = {
     iceServers: [
         {
-            urls: `turn:${import.meta.env.VITE_ICE_SERVER_URL}`,
+            urls: import.meta.env.VITE_ICE_SERVER_URL,
             username: import.meta.env.VITE_ICE_SERVER_USERNAME,
             credential: import.meta.env.VITE_ICE_SERVER_PASSWORD
         },
-        {
-            "urls": "stun:stun2.1.google.com:19302"
-        }
-    ]
+    ],
+    iceCandidatePoolSize: 0,
+    // iceTransportPolicy: "relay",
 }
+const WebRTC = new RTCConnection(iceConfiguration)
+
 export const actions = {
-    async addIceCandidate({state} , data) {
-        for (const id in state.peerConnections) {
-            if (state.peerConnections[id]['pc']) {
-                try {
-                    if (data.candidate) {
-                        await state.peerConnections[id]['pc'][data.media].addIceCandidate(data.candidate)
-                    }
-                } catch (err) {
-                    console.log(err , data)
-                }
-            }
+    async addSenderIceCandidate({state} , {media , from , candidate}) {
+        const types = WebRTC.getTypes()
+        let conn
+        switch (media) {
+            case types.camera:
+                conn = WebRTC.findCameraSenderConnection(from)
+                break;
+            case types.screen:
+                conn = WebRTC.findScreenSenderConnection(from)
+                break;
+            case types.audio:
+                conn = WebRTC.findAudioSenderConnection(from)
+                break;
         }
+        if (! conn) return
+        conn.addIceCandidate(candidate)
     },
-    fillRTCs({state , dispatch} , data){
-        const clients = data.clients
-        // Creating RTC connection for each user to local
-        function makeNewPc(id , user_id) {
-            state.peerConnections[id] = {
-                user_id,
-                pc: {
-                    // Audio RTC peer connection
-                    audio: new RTCPeerConnection(iceConfiguration),
-                    // Video RTC peer connection
-                    video: new RTCPeerConnection(iceConfiguration),
-                    // Screen RTC peer connection
-                    screen: new RTCPeerConnection(iceConfiguration)
-                }
-            }
-            state.peerConnections[id]['pc']['video'].oniceconnectionstatechange = () => {
-                if (state.peerConnections[id]['pc']['video'].iceConnectionState === 'disconnected') {
-                    console.log("Peer disconnected. Attempting to reconnect...");
-                    // Handle reconnection logic here
-                }
-            };
-            state.peerConnections[id]['pc']['video'].addTransceiver('video', { direction: 'sendrecv', sendEncodings: [
-                    { maxBitrate: 1500000 }, // Limit bandwidth usage
-                    { scaleResolutionDownBy: 2.0 }
-                ]});
-            state.peerConnections[id]['pc']['video'].ontrack = async function ({track , streams: [stream]}) {
-                console.log(stream.id)
-                if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
-                    console.log('old')
-                    // state.remoteStreams['camera'][stream.id] = stream
-                    // const player = document.getElementById(`${stream.id}_player`)
-                    // player.srcObject = stream
-                } else {
-                    console.log('new')
-                    state.remoteStreams['camera'][stream.id] = stream
-                    dispatch('setDynamicGrid')
-                }
-            };
-            // state.peerConnections[id]['pc']['video'].onicecandidate = function (event) {
-            //     if (event.candidate) {
-            //         state.socket.emit("send-candidate" , {
-            //             candidate: event.candidate,
-            //             media: "video"
-            //         })
-            //     }
-            // }
-            // Set remote audio stream
-            state.peerConnections[id]['pc']['audio'].ontrack = async function ({track , streams: [stream]}) {
-                if (state.remoteStreams['audio'].hasOwnProperty(stream.id)) {
-                    state.remoteStreams['audio'][stream.id] = stream
-                    let audio  = document.getElementById(stream.id);
-                    let newElement = false;
-                    if  (! audio) {
-                        audio  = document.createElement('audio');
-                        newElement = true
-                    }
-                    audio.autoplay = true;
-                    audio.srcObject = stream;
-                    audio.load();
-                    if (newElement) {
-                        document.getElementById('main').appendChild(audio);
-                    }
-                } else {
-                    state.remoteStreams['audio'][stream.id] = stream
-                    let audio  = document.createElement('audio');
-                    audio.autoplay = true;
-                    audio.defaultMuted  = false;
-                    audio.classList.add('hidden');
-                    audio.id = stream.id;
-                    audio.setAttribute("muted","true")
-                    audio.srcObject = stream;
-                    audio.load();
-                    document.getElementById('main').appendChild(audio);
-                }
-            };
-            // state.peerConnections[id]['pc']['audio'].onicecandidate = function (event) {
-            //     if (event.candidate) {
-            //         state.socket.emit("send-candidate" , {
-            //             candidate: event.candidate,
-            //             media: "audio"
-            //         })
-            //     }
-            // }
-            // Set remote screen stream
-            state.peerConnections[id]['pc']['screen'].ontrack = async function (stream) {
-                document.getElementById('screen-player').srcObject = stream.streams[0];
-            };
-            // state.peerConnections[id]['pc']['screen'].onicecandidate = function (event) {
-            //     if (event.candidate) {
-            //         state.socket.emit("send-candidate" , {
-            //             candidate: event.candidate,
-            //             media: "screen"
-            //         })
-            //     }
-            // }
+    async addReceiverIceCandidate({state} , {media , from , candidate}) {
+        const types = WebRTC.getTypes()
+        let conn
+        switch (media) {
+            case types.camera:
+                conn = WebRTC.findCameraReceiverConnection(from)
+                break;
+            case types.screen:
+                conn = WebRTC.findScreenReceiverConnection(from)
+                break;
+            case types.audio:
+                conn = WebRTC.findAudioReceiverConnection(from)
+                break;
         }
-        if (data.from === state.socket.id) {
-            for (const index in clients) {
-                if (state.user && state.user.hasOwnProperty('user') && index !== state.socket.id) {
-                    if ( ! state.peerConnections[index] || ! state.peerConnections[index]['pc'] ) {
-                        makeNewPc(index,clients[index].user.id);
-                    }
-                    // If the user has started a stream, it joins the old stream
-                    dispatch('joinStream',clients[index]);
-                }
-            }
-        } else {
-            makeNewPc(data.from,clients[data.from].user.id)
-        }
-
-        for (const id in state.peerConnections) {
-            if(! Object.keys(clients).includes(id)) {
-                delete state.peerConnections[id];
-            }
-        }
-
-        if (state.displayStream) {
-            dispatch('screenShare',{
-                media: ['screen'],stream: state.displayStream
-            });
-        }
-
-        if (state.localStream) {
-            dispatch('audioShare',{
-                media: ['audio'],stream: state.localStream
-            });
-        }
-
-        // if (state.videoStream) {
-        //     dispatch('videoShare',{
-        //         media: ['camera'], localStream: state.videoStream
-        //     });
-        // }
+        if (! conn) return
+        conn.addIceCandidate(candidate)
     },
-    joinStream({state , dispatch} , client){
-        let media = [];
-        if (client.media.settings.camera) {
-            media.push('camera');
-        }
-        if (client.media.settings.audio) {
-            media.push('audio');
-        }
-        if (client.media.settings.screen) {
-            media.push('screen');
-        }
-        if (media.length > 0) {
-            state.socket.emit('get-shared' , {
-                from: state.socket.id,
-                to: client.socketId,
-                media
-            })
-        }
-    },
-    async screenShare(context , {media, stream}){
-        let to = [];
-        try {
-            for (const id in context.state.peerConnections) {
-                if (context.state.peerConnections[id]['pc']) {
-                    context.state.displayStream.getTracks().forEach(track => {
-                        track.shareing = true;
-                        context.state.peerConnections[id]['pc']['screen'].addTrack(track,stream)
-                    });
-                    to.push(id);
-                }
-            }
-        } catch (err) {}
+    async screenShare(context){
         context.state.shareScreen = true;
-        await context.dispatch('startStream',{from: context.state.socket.id,to ,media })
+        context.commit('setContent' , true);
+        context.commit('setShareScreen' , true);
+        context.commit('controlScreenLoader' , false);
+        context.state.remoteStreams['screen'][context.state.displayStream.id] = context.state.displayStream
+        await context.dispatch('updateShareScreen')
+        await context.dispatch('startStream',{from: context.state.socket.id,to: context.state.clients ,media: ['screen'] ,firstTime: true})
     },
-    async audioShare(context , {media, stream}) {
-        let to = [];
+    async audioShare(context ) {
         context.state.socket.emit('control-local-media',{
             device: 'microphone',
             action: true
         });
-
-        try {
-            for (const id in context.state.peerConnections) {
-                if (context.state.peerConnections[id]['pc']) {
-                    context.state.localStream.getTracks().forEach(track => {
-                        context.state.peerConnections[id]['pc']['audio'].addTrack(track,stream)
-                    });
-                    to.push(id);
-                }
-            }
-        } catch (err) {}
         context.state.user.media.media.local.microphone = true;
-        context.commit('controlMicrophone', context.state.user.media.media.local.microphone);
-        await context.dispatch('startStream',{from: context.state.socket.id,to ,media })
+        await context.dispatch('startStream',{from: context.state.socket.id,to:context.state.clients ,media: ['audio'],firstTime: true })
     },
-    async videoShare(context , {media, localStream}) {
-        let to = [];
-        context.state.socket.emit('control-local-media',{
+    async videoShare({state , dispatch}) {
+        state.socket.emit('control-local-media',{
             device: 'camera',
             action: true
         });
-        try {
-            for (const id in context.state.peerConnections) {
-                if (context.state.peerConnections[id]['pc']) {
-                    context.state.videoStream.getTracks().forEach(track => {
-                        context.state.peerConnections[id]['pc']['video'].addTrack(track,localStream)
-                    });
-                    to.push(id);
-                }
-            }
-        } catch (err) {}
-        context.state.user.media.media.local.camera = true;
-        context.commit('controlCameraLoader' , false);
-        await context.dispatch('startStream',{from: context.state.socket.id,to ,media})
+        state.user.media.media.local.camera = true;
+        state.remoteStreams['camera'][state.videoStream.id] = {
+            stream: state.videoStream, name: state?.user?.user?.name + '(شما) '
+        }
+        await dispatch('setDynamicGrid')
+        await dispatch('startStream',{from: state.socket.id,to: state.clients ,media: ['camera'],firstTime: true})
     },
     async shareStream(context , data) {
-        let constraints , media , to = [];
-        if (data.hasOwnProperty('screen') && data.screen) {
-            constraints = { video: true, audio: false};
-            navigator.mediaDevices.getDisplayMedia(constraints).then(async function(stream){
+        let constraints;
+        if (data === 'screen') {
+            navigator.mediaDevices.getDisplayMedia({ video: true, audio: false}).then(async function(stream){
                 stream.getVideoTracks()[0].onended = function () {
-                    context.dispatch('endScreen',{
-                        media: 'screen'
+                    context.dispatch('endStream',{
+                        media: ['screen']
                     })
                 };
                 context.state.displayStream = stream;
-                media = 'screen';
-                context.commit('controlMediaLoader');
-                context.commit('setContent' , true)
-                context.commit('setShareScreen' , true)
-                await context.dispatch('screenShare',{stream ,media: [media] })
+                await context.dispatch('screenShare')
             }).catch(function (err) {
+                console.log(err)
                 context.commit('setContent' , false)
                 context.commit('setShareScreen' , false)
-                context.commit('controlMediaLoader' , false);
+                context.commit('controlScreenLoader' , false);
                 Swal.fire({
                     position: 'top-start',
                     text: "مشکلی در عملیات اشتراک گذاری رخ داده است!",
@@ -268,27 +106,19 @@ export const actions = {
         else if (data.media === 'camera') {
             constraints = {
                 video: {
-                    width: { max: 320 },
-                    height: { max: 240 },
+                    width: { ideal: 640  },
+                    height: { ideal: 360 },
                     aspectRatio: { max: 4 / 3 },
-                    frameRate: { max: 60 },
+                    frameRate: { max: 15 },
                     deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined,
                 },
                 audio: false,
             };
-
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
                 context.commit('controlCameraLoader');
-                const localStream = stream;
-                context.state.videoStream = localStream;
-                context.state.showing = true;
-                media = 'camera';
-                context.state.remoteStreams['camera'][localStream.id] = localStream
-                context.dispatch('setDynamicGrid')
-                await context.dispatch('videoShare',{media: [media],localStream: stream  });
+                context.state.videoStream = stream;
+                await context.dispatch('videoShare');
             }).catch(function (err) {
-                console.log(err)
-                context.commit('controlCameraLoader' , false);
                 Swal.fire({
                     position: 'top-start',
                     text: "عدم دسترسی به دوربین!",
@@ -298,10 +128,11 @@ export const actions = {
                     timer: 3500,
                 })
             });
-        } else {
+        }
+        else {
             constraints = {
                 video: false,
-                audio: data.audio ? ( {
+                audio:  {
                     aspectRatio: true,
                     deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined ,
                     echoCancellation: true,
@@ -314,10 +145,9 @@ export const actions = {
                     volume: 1.0,
                     googEchoCancellation: true,
                     googAutoGainControl: true,
-                } ) : false,
-            };
+                }
+            }
 
-            //
             try {
                 const stream = context.state.recorderLocalStream ? context.state.recorderLocalStream : await navigator.mediaDevices.getUserMedia(constraints)
                 const ctx = new AudioContext();
@@ -333,11 +163,11 @@ export const actions = {
                 gainNode.connect(audioDest);
                 gainNode.gain.value = 0.75;
                 source.connect(gainNode);
-
                 context.state.localStream = audioDest.stream;
-                media = 'audio';
-                await context.dispatch('audioShare',{media: [media], stream })
+                await context.dispatch('audioShare')
             } catch (err) {
+                console.log(err)
+
                 let text = 'عدم دسترسی به میکروفون!';
                 await Swal.fire({
                     position: 'top-start',
@@ -350,336 +180,524 @@ export const actions = {
             }
         }
     },
-    async startStream({state , dispatch} , data) {
-        const media = Object.values(data.media);
+    async startStream({state , dispatch , commit} , {media , to , from , firstTime = false}) {
+        if (media.length === 0) return
+        to = Object.values(to);
         let offer = {} , streamID = {};
-        if (media.includes('screen') && state.displayStream ) {
-            if (! state.remoteStreams['screen'] ) {
-                state.remoteStreams['screen'] = {}
-            }
+        if (media.includes('screen') && state.displayStream)
             streamID['screen'] = state.displayStream.id;
-        }
-
-        if (media.includes('audio') && state.localStream) {
-            if (! state.remoteStreams['audio'] ) {
-                state.remoteStreams['audio'] = {}
-            }
+        if (media.includes('audio') && state.localStream)
             streamID['audio'] = state.localStream.id;
-        }
-
-        if (media.includes('camera') && state.videoStream) {
-            if (! state.remoteStreams['camera'] ) {
-                state.remoteStreams['camera'] = {}
-            }
+        if (media.includes('camera') && state.videoStream)
             streamID['camera'] = state.videoStream.id;
-        }
-
-        if (media.length > 0) {
-            if (data.to.length > 0) {
-                for (const v of data.to) {
-                    console.log(v)
-                    // Make RTC screen offer
-                    if (media.includes('screen') && state.displayStream ) {
-                        offer['screen'] = await state.peerConnections[v]['pc']['screen'].createOffer({ iceRestart: false });
-                        streamID['screen'] = state.displayStream.id;
-                        state.remoteStreams['screen'][data.from] = streamID['screen'];
-                        await state.peerConnections[v]['pc']['screen'].setLocalDescription(new RTCSessionDescription(offer['screen']));
-                    }
-                    // Make RTC audio offer
-                    if (media.includes('audio') && state.localStream) {
-                        offer['audio'] = await state.peerConnections[v]['pc']['audio'].createOffer({ iceRestart: false });
-                        streamID['audio'] = state.localStream.id;
-                        state.remoteStreams['audio'][data.from] = streamID['audio'];
-                        await state.peerConnections[v]['pc']['audio'].setLocalDescription(new RTCSessionDescription(offer['audio']));
-                    }
-                    // Make RTC video offer
-                    if (media.includes('camera') && state.videoStream) {
-                        offer['camera'] = await state.peerConnections[v]['pc']['video'].createOffer({ iceRestart: false });
-                        streamID['camera'] = state.videoStream.id;
-                        await state.peerConnections[v]['pc']['video'].setLocalDescription(new RTCSessionDescription(offer['camera']));
-                    }
-
-                    state.socket.emit("share-stream", {
-                        offer,
-                        from: data.from,
-                        to: [v],
-                        media: data.media,
-                        streamID
-                    });
+        if (to.length > 0) {
+            for (const user of to) {
+                if (user.socketId === from) continue
+                if (media.includes('camera') && state.videoStream) {
+                    const conn = WebRTC.newCameraSenderConnection(
+                        user.socketId,
+                        () => {
+                            console.log('1 ice', conn.getICEState())
+                        },
+                        (e) => {
+                            if (e.candidate) {
+                                state.socket.emit("send-receiver-candidate" , {
+                                    candidate: e.candidate,
+                                    media: WebRTC.getTypes().camera,
+                                    to: user.socketId
+                                })
+                            }
+                        },
+                        async () => {
+                            console.log('1 ', conn.getState())
+                        }
+                    )
+                    state.videoStream.getTracks().forEach(track => conn.addTrack(track,state.videoStream));
+                    offer['camera'] = await conn.makeOffer(true , false , true);
                 }
-            } else {
+                if (media.includes('screen') && state.displayStream ) {
+                    const conn = WebRTC.newScreenSenderConnection(
+                        user.socketId,
+                        () => {
+                            console.log('1 ice', conn.getICEState())
+                        },
+                        (e) => {
+                            if (e.candidate) {
+                                state.socket.emit("send-receiver-candidate" , {
+                                    candidate: e.candidate,
+                                    media: WebRTC.getTypes().screen,
+                                    to: user.socketId
+                                })
+                            }
+                        },
+                        () => {
+                            switch (conn.getState()) {
+
+                            }
+                            // hande failed to reconnect
+                            console.log('1 ', conn.getState())
+                        }
+                    )
+                    state.displayStream.getTracks().forEach(track => conn.addTrack(track,state.displayStream));
+                    offer['screen'] = await conn.makeOffer(true , false , true);
+                }
+                if (media.includes('audio') && state.localStream) {
+                    const conn = WebRTC.newAudioSenderConnection(
+                        user.socketId,
+                        () => {
+                            console.log('1 ice', conn.getICEState())
+                        },
+                        (e) => {
+                            if (e.candidate) {
+                                state.socket.emit("send-receiver-candidate" , {
+                                    candidate: e.candidate,
+                                    media: WebRTC.getTypes().audio,
+                                    to: user.socketId
+                                })
+                            }
+                        },
+                        () => {
+                            // hande failed to reconnect
+                            console.log('1 ', conn.getState())
+                        }
+                    )
+                    state.localStream.getTracks().forEach(track => conn.addTrack(track,state.localStream));
+                    offer['audio'] = await conn.makeOffer(true , true , false);
+                }
                 state.socket.emit("share-stream", {
                     offer,
-                    from: data.from,
-                    to: [],
-                    media: data.media,
-                    streamID
+                    from: from,
+                    to: [user.socketId],
+                    media,
+                    streamID,
+                    firstTime
                 });
+            }
+        } else {
+            state.socket.emit("share-stream", {
+                offer,
+                from,
+                to: [],
+                media,
+                streamID,
+                firstTime
+            });
+        }
+    },
+    async getOffer({state , commit , dispatch} , {media , offer , from , name= null}) {
+        if (media.length === 0) return
+        let answer = {};
+        if (media.includes('camera') && offer.hasOwnProperty('camera')) {
+            let conn = WebRTC.findCameraReceiverConnection(from)
+            if (! conn || conn.getState() !== "new") {
+                conn = WebRTC.newCameraReceiverConnection(
+                    from,
+                    ({track , streams: [stream]}) => {
+                        if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
+                            state.remoteStreams['camera'][stream.id] = {
+                                stream, name
+                            }
+                            const player = document.getElementById(`${stream.id}_player`)
+                            player.srcObject = stream
+                        } else {
+                            state.remoteStreams['camera'][stream.id] = {
+                                stream, name
+                            }
+                            dispatch('setDynamicGrid')
+                        }
+                    },
+                    () => {
+                        console.log('camera 2 ice', conn.getICEState())
+                    },
+                    (e) => {
+                        if (e.candidate) {
+                            state.socket.emit("send-sender-candidate" , {
+                                candidate: e.candidate,
+                                media: WebRTC.getTypes().camera,
+                                to: from
+                            })
+                        }
+                    },
+                    () => {
+                        switch (conn.getState()) {
+                            case "failed":
+                                WebRTC.clearReceiverCameraConnections(from)
+                                state.socket.emit("reconnect" , {
+                                    media: ['camera'],
+                                    to: from
+                                })
+                                break
+                        }
+                        console.log( 'camera 2 ',conn.getState())
+                    }
+                )
+            }
+            await conn.setRemoteDesc(offer.camera);
+            answer['camera'] = await conn.makeAnswer()
+        }
+        if (media.includes('screen') && offer.hasOwnProperty('screen')) {
+            let conn = WebRTC.findScreenReceiverConnection(from)
+            if (! conn || conn.getState() !== "new") {
+                conn = WebRTC.newScreenReceiverConnection(
+                    from,
+                    ({track , streams: [stream]}) => {
+                        state.remoteStreams['screen'][stream.id] = stream
+                        dispatch('updateShareScreen')
+                    },
+                    () => {
+                        console.log('2 ice', conn.getICEState())
+                    },
+                    (e) => {
+                        if (e.candidate) {
+                            state.socket.emit("send-sender-candidate" , {
+                                candidate: e.candidate,
+                                media: WebRTC.getTypes().screen,
+                                to: from
+                            })
+                        }
+                    },
+                    () => {
+                        switch (conn.getState()) {
+                            case "connected":
+                                commit('setContent' , true);
+                                commit('setShareScreen' , true);
+                                commit('controlScreenLoader' , false);
+                                break
+                            case "failed":
+                                WebRTC.clearReceiverScreenConnection(from)
+                                state.socket.emit("reconnect" , {
+                                    media: ['screen'],
+                                    to: from
+                                })
+                                commit('setContent' , false);
+                                commit('setShareScreen' , false);
+                                commit('controlScreenLoader' , true);
+                                break;
+                            case "new":
+                            case "connecting":
+                                commit('controlScreenLoader' , true);
+                                break
+                            default:
+                                commit('setContent' , false);
+                                commit('setShareScreen' , false);
+                                commit('controlScreenLoader' , true);
+                        }
+                        console.log('screen 2 ',conn.getState())
+                    }
+                )
+            }
+            await conn.setRemoteDesc(offer.screen);
+            answer['screen'] = await conn.makeAnswer()
+        }
+        if (media.includes('audio') && offer.hasOwnProperty('audio')) {
+            let conn = WebRTC.findAudioReceiverConnection(from)
+            if (! conn || conn.getState() !== "new") {
+                conn = WebRTC.newAudioReceiverConnection(
+                    from,
+                    ({track , streams: [stream]}) => {
+                        if (state.remoteStreams['audio'].hasOwnProperty(stream.id)) {
+                            state.remoteStreams['audio'][stream.id] = stream
+                            let audio  = document.getElementById(stream.id);
+                            let newElement = false;
+                            if  (! audio) {
+                                audio  = document.createElement('audio');
+                                newElement = true
+                            }
+                            audio.autoplay = true;
+                            audio.srcObject = stream;
+                            audio.load();
+                            if (newElement) {
+                                document.getElementById('main').appendChild(audio);
+                            }
+                        } else {
+                            state.remoteStreams['audio'][stream.id] = stream
+                            let audio  = document.createElement('audio');
+                            audio.autoplay = true;
+                            audio.defaultMuted  = false;
+                            audio.classList.add('hidden');
+                            audio.id = stream.id;
+                            audio.setAttribute("muted","true")
+                            audio.srcObject = stream;
+                            audio.load();
+                            document.getElementById('main').appendChild(audio);
+                        }
+                        commit('controlSound' , {
+                            value: state.sound
+                        })
+                    },
+                    () => {
+                        console.log('audio 2 ice', conn.getICEState())
+                    },
+                    (e) => {
+                        if (e.candidate) {
+                            state.socket.emit("send-sender-candidate" , {
+                                candidate: e.candidate,
+                                media: WebRTC.getTypes().audio,
+                                to: from
+                            })
+                        }
+                    },
+                    () => {
+                        switch (conn.getState()) {
+                            case "failed":
+                                WebRTC.clearReceiverAudioConnection(from)
+                                state.socket.emit("reconnect" , {
+                                    media: ['audio'],
+                                    to: from
+                                })
+                                break
+                        }
+                        console.log('audio 2 ',conn.getState())
+                    }
+                )
+            }
+            await conn.setRemoteDesc(offer.audio);
+            answer['audio'] = await conn.makeAnswer()
+        }
+        state.socket.emit('make-answer',{
+            answer,
+            to: from,
+            media
+        })
+    },
+    async answerMade({state , dispatch} , {media ,from , answer})  {
+        if (media.length > 0) {
+            if (media.includes('camera') && answer.hasOwnProperty('camera')) {
+                let conn = WebRTC.findCameraSenderConnection(from)
+                if (! conn) {
+                    throw new Error("peer connection not found")
+                }
+                await conn.setRemoteDesc(answer.camera)
+            }
+            if (media.includes('screen') && answer.hasOwnProperty('screen')) {
+                let conn = WebRTC.findScreenSenderConnection(from)
+                if (! conn) {
+                    throw new Error("peer connection not found")
+                }
+                await conn.setRemoteDesc(answer.screen)
+            }
+            if (media.includes('audio') && answer.hasOwnProperty('audio')) {
+                let conn = WebRTC.findAudioSenderConnection(from)
+                if (! conn) {
+                    throw new Error("peer connection not found")
+                }
+                await conn.setRemoteDesc(answer.audio)
             }
         }
     },
-    async getOffer({state , commit , dispatch} , data) {
-        const media = Object.values(data.data.media);
-        let answer = {};
-        console.log(data.data)
 
-
-        if (state.peerConnections[data.data.from] && state.peerConnections[data.data.from]['pc'] && media.length > 0) {
-            // Make RTC screen answer
-            if (media.includes('screen') && data.data.offer.hasOwnProperty('screen')) {
-                try {
-                    commit('controlMediaLoader');
-                    await state.peerConnections[data.data.from]['pc']['screen'].setRemoteDescription(
-                        new RTCSessionDescription(data.data.offer.screen)
-                    );
-                    answer['screen'] = await state.peerConnections[data.data.from]['pc']['screen'].createAnswer();
-                    await state.peerConnections[data.data.from]['pc']['screen'].setLocalDescription(new RTCSessionDescription(answer['screen']));
-                    commit('setContent' , true);
-                    commit('setShareScreen' , true);
-
-                    if (! state.remoteStreams['screen'] ) {
-                        state.remoteStreams['screen'] = {}
-                    }
-
-                    if (data.data.streamID.hasOwnProperty('screen')) {
-                        state.remoteStreams['screen'][data.data.from] = data.data.streamID['screen'];
-                    }
-                } catch (err) {
-                    console.log(err)
-                }
+    shareFile({state} , data) {
+        state.socket.emit("share-file", data);
+    },
+    shareFileTo({state} , data) {
+        state.socket.emit("share-file-to", data);
+    },
+    getSharedFile({state , commit}) {
+        const iframeContainer = document.getElementById("iframeContainer");
+        if (iframeContainer && state.remoteStreams['file']) {
+            iframeContainer.innerHTML = "";
+            const data = state.remoteStreams['file']
+            if (data.mime === "application/pdf") {
+                const embed = document.createElement("object");
+                embed.data  = data.url;
+                embed.style.width = "100%";
+                embed.style.height = "100%";
+                embed.style.border = "none";
+                iframeContainer.appendChild(embed);
+            } else if (data.mime === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || data.mime === "application/vnd.ms-powerpoint") {
+                const embed = document.createElement("object");
+                embed.data  = `https://docs.google.com/gview?url=${data.url}&embedded=true`;
+                embed.style.width = "100%";
+                embed.style.height = "100%";
+                embed.style.border = "none";
+                iframeContainer.appendChild(embed);
+            } else {
+                const img = document.createElement("img");
+                img.src = data.url;
+                img.style.maxWidth = "100%";
+                img.style.maxHeight = "100%";
+                img.style.border = "none";
+                iframeContainer.appendChild(img);
             }
-            // Make RTC video answer
-            if (media.includes('camera') && data.data.offer.hasOwnProperty('camera')) {
-               try {
-                   commit('controlCameraLoader');
+            commit("setContent" , true)
+            commit("setShareFile" , data)
+        }
+    },
 
-                   await state.peerConnections[data.data.from]['pc']['video'].setRemoteDescription(
-                       new RTCSessionDescription(data.data.offer.camera)
-                   );
-
-                   answer['camera'] = await state.peerConnections[data.data.from]['pc']['video'].createAnswer();
-                   await state.peerConnections[data.data.from]['pc']['video'].setLocalDescription(new RTCSessionDescription(answer['camera']));
-
-                   if (! state.remoteStreams['camera'] ) {
-                       state.remoteStreams['camera'] = {}
-                   }
-
-                   console.log('offer')
-                   // if (data.data.streamID.hasOwnProperty('camera')) {
-                   //     state.remoteStreams['camera'][data.data.from] = data.data.streamID['camera'];
-                   // }
-
-                   commit('controlCameraLoader',false);
-               } catch (err) {
-                   console.log(err)
-               }
-                // dispatch('updateVideoGrid');
+    endStream({state , commit , dispatch} , {media}) {
+        let streams = {}
+        if (media.includes('screen')) {
+            streams['screen'] = true
+            if (state.displayStream) {
+                delete state.remoteStreams['screen'][state.displayStream.id]
+                state.displayStream.getTracks().forEach(function(track) { track.stop(); })
+                state.shareScreen = false;
+                state.displayStream = null;
             }
-            // Make RTC audio answer
-            if (media.includes('audio') && data.data.offer.hasOwnProperty('audio')) {
-              try {
-                  await state.peerConnections[data.data.from]['pc']['audio'].setRemoteDescription(
-                      new RTCSessionDescription(data.data.offer.audio)
-                  );
-                  answer['audio'] = await state.peerConnections[data.data.from]['pc']['audio'].createAnswer();
-                  await state.peerConnections[data.data.from]['pc']['audio'].setLocalDescription(new RTCSessionDescription(answer['audio']));
+            WebRTC.traverseSenderScreenConnections((pc , key) => {
+                pc.close()
+                WebRTC.clearSenderScreenConnection(key)
+            })
+            commit('setContent' , false)
+            commit('setShareScreen' , false)
+            commit('setShareFile' , false)
+            commit('controlScreenLoader',false);
+        }
 
-                  if (! state.remoteStreams['audio'] ) {
-                      state.remoteStreams['audio'] = {}
-                  }
-
-                  if (data.data.streamID.hasOwnProperty('audio')) {
-                      state.remoteStreams['audio'][data.data.from] = data.data.streamID['audio'];
-                  }
-                  commit('controlSound' , {
-                      value: state.sound
-                  })
-              } catch (err) {
-                  console.log(err)
-              }
-
+        if (media.includes('camera')) {
+            if (state.videoStream) {
+                streams['camera'] = true
+                delete state.remoteStreams['camera'][state.videoStream.id]
+                state.videoStream.getTracks().forEach(function(track) { track.stop(); })
+                state.videoStream = null;
             }
-            // Broadcast answers
-            state.socket.emit('make-answer',{
-                answer,
-                to: data.data.from,
-                media: data.data.media
+            WebRTC.traverseSenderCameraConnections((pc , key) => {
+                pc.close()
+                WebRTC.clearSenderCameraConnections(key)
+            })
+            commit('controlCamera',false);
+            commit('controlCameraLoader',false);
+            dispatch('setDynamicGrid');
+        }
+
+        if (media.includes('audio')) {
+            if (state.localStream) {
+                streams['audio'] = true
+                delete state.remoteStreams['audio'][state.localStream.id]
+                state.localStream.getTracks().forEach(function(track) { track.stop(); })
+                state.localStream = null;
+            }
+            WebRTC.traverseSenderAudioConnections((pc , key) => {
+                pc.close()
+                WebRTC.clearSenderAudioConnection(key)
+            })
+            commit('controlMicrophone',false);
+        }
+
+        if (media.length > 0) {
+            state.socket.emit('end-stream' , {
+                streams,
             })
         }
     },
-    async answerMade(context , data)  {
-        const media = Object.values(data.data.media);
-        let callbacks = [];
-
-        if (media.length > 0) {
-            if (media.includes('screen')) {
-               try {
-                   await context.state.peerConnections[data.data.from]['pc']['screen'].setRemoteDescription(
-                       new RTCSessionDescription(data.data.answer.screen)
-                   );
-               } catch (err) {
-                   console.log(err)
-               }
-                context.commit('controlMediaLoader',false);
-
-                if (! context.state.peerConnections[data.data.from]['pc']['screen_shared']) {
-                    callbacks.push('screen');
-                    context.state.peerConnections[data.data.from]['pc']['screen_shared'] = true;
+    clearRemoteStream({state,commit,dispatch} , {streams , from}){
+        if (streams) {
+            console.log(streams.file)
+            if (streams.hasOwnProperty('screen') && streams.screen) {
+                commit('controlScreenLoader',false);
+                commit('setContent' , false)
+                commit('setShareScreen' , false)
+                commit('setShareFile' , false)
+                delete state.remoteStreams['screen'][streams['screen']]
+                const conn = WebRTC.findScreenReceiverConnection(from)
+                if (conn) {
+                    conn.close()
+                    WebRTC.clearReceiverScreenConnection(from)
                 }
             }
-
-            if (media.includes('audio')) {
-                try {
-                    await context.state.peerConnections[data.data.from]['pc']['audio'].setRemoteDescription(
-                        new RTCSessionDescription(data.data.answer.audio)
-                    );
-                } catch (err) {
-                    console.log(err)
-                }
-                if (! context.state.peerConnections[data.data.from]['pc']['audio_shared']) {
-                    callbacks.push('audio');
-                    context.state.peerConnections[data.data.from]['pc']['audio_shared'] = true;
-                }
+            if (streams.hasOwnProperty('file') && streams.file) {
+                commit('controlScreenLoader',false);
+                commit('setContent' , false)
+                commit('setShareScreen' , false)
+                commit('setShareFile' , false)
+                state.remoteStreams['file'] = null
+                state.file = null
             }
 
-            if (media.includes('camera')) {
-                try {
-                    await context.state.peerConnections[data.data.from]['pc']['video'].setRemoteDescription(
-                        new RTCSessionDescription(data.data.answer.camera)
-                    );
-                } catch (err) {
-                    console.log(err)
-                }
-                context.commit('controlCameraLoader',false);
-
-                if (! context.state.peerConnections[data.data.from]['pc']['camera_shared']) {
-                    callbacks.push('camera');
-                    context.state.peerConnections[data.data.from]['pc']['camera_shared'] = true;
-                }
-            }
-
-            if (callbacks.length > 0) {
-                await context.dispatch('startStream', {
-                    media: data.data.media,
-                    from: context.state.socket.id,
-                    to:[data.data.from]
-                })
-                if (media.includes("audio")) {
-                    context.state.socket.emit("check-speakers")
-                }
-            }
-
-        }
-    },
-    async sendShared({state , dispatch} , data) {
-        const media = Object.values(data.data.media);
-        let calls = [];
-
-        console.log(data);
-        if (media.length > 0) {
-            if (state.videoStream && media.includes('camera') && state.peerConnections[data.data.from]['pc']['video'].getSenders().length === 0 ) {
-                state.videoStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['video'].addTrack(track, state.videoStream));
-                calls.push('camera');
-            }
-
-            if (state.localStream && media.includes('audio') && state.peerConnections[data.data.from]['pc']['audio'].getSenders().length === 0  ) {
-                state.localStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['audio'].addTrack(track, state.localStream));
-                calls.push('audio');
-            }
-
-            if (state.displayStream && media.includes('screen') && state.peerConnections[data.data.from]['pc']['screen'].getSenders().length === 0 ) {
-                state.displayStream.getTracks().forEach(track => state.peerConnections[data.data.from]['pc']['screen'].addTrack(track, state.displayStream));
-                calls.push('screen');
-            } else if (state.shareFile) {
-                state.socket.emit('get-shared-file' , {
-                    file: state.shareFile,
-                    to: data.data.from
-                })
-            }
-            if (calls.length > 0) {
-                dispatch('startStream',{
-                    from: state.socket.id,
-                    to: [data.data.from],
-                    media: data.data.media
-                })
-            }
-        }
-    },
-    endStream({state , commit} , data) {
-        try {
-            let media = Object.values(data.media);
-
-            if (media.includes('audio')) {
-                if (state.localStream) {
-                    state.localStream.getTracks().forEach(function(track) { track.stop(); })
-                    state.localStream = null;
-                }
-                commit('controlMicrophone',false);
-            }
-            let camera
-            if (media.includes('camera')) {
-                if (state.videoStream) {
-                    camera = state.videoStream.id
-                    state.videoStream.getTracks().forEach(function(track) { track.stop(); })
-                    state.videoStream = null;
-                }
-                commit('controlCamera',false);
+            if (streams.hasOwnProperty('camera') && streams.camera) {
                 commit('controlCameraLoader',false);
-            }
-
-            if (media.length > 0) {
-                state.socket.emit('end-stream' , {
-                    media,
-                    camera
-                })
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    },
-    endScreen({state , commit}  , data) {
-        if (state.displayStream) {
-            state.displayStream.getTracks().forEach(function(track) { track.stop(); })
-            state.shareScreen = false;
-            state.displayStream = null;
-        }
-        state.socket.emit('end-stream' , {
-            media: ['screen'],
-        })
-        commit('setContent' , false)
-        commit('setShareScreen' , false)
-        commit('setShareFile' , false)
-        commit('controlMediaLoader',false);
-    },
-    clearRemoteStream(context , data){
-        let el;
-        if (data.data.hasOwnProperty('camera') && data.data.camera) {
-            context.state.showing = false;
-            context.commit('controlCameraLoader',false);
-            delete context.state.remoteStreams['camera'][data.data.camera];
-            context.dispatch('setDynamicGrid');
-        }
-        if (data.data.from !== context.state.socket.id) {
-            if (data.data.hasOwnProperty('screen') && data.data.screen ) {
-                context.state.shareScreen = false;
-                context.commit('controlMediaLoader',false);
-                context.commit('setContent' , false)
-                context.commit('setShareScreen' , false)
-                context.commit('setShareFile' , false)
-            }
-            if (data.data.hasOwnProperty('audio') && data.data.audio ) {
-                context.commit('controlMediaLoader',false);
-                if (context.state.remoteStreams['audio'].hasOwnProperty(data.data.from)) {
-                    el = document.getElementById(data.data.audio);
-                    if (el) {
-                        el.remove();
-                    }
-                    el = null;
-                    delete context.state.remoteStreams['audio'][data.data.audio];
+                delete state.remoteStreams['camera'][streams['camera']]
+                const conn = WebRTC.findCameraReceiverConnection(from)
+                if (conn) {
+                    conn.close()
+                    WebRTC.clearReceiverCameraConnections(from)
                 }
+                dispatch('setDynamicGrid');
+            }
+            if (streams.hasOwnProperty('audio')  && streams.audio) {
+                delete state.remoteStreams['audio'][streams['audio']]
+                const conn = WebRTC.findAudioReceiverConnection(from)
+                if (conn) {
+                    conn.close()
+                    WebRTC.clearReceiverAudioConnection(from)
+                }
+                const el = document.getElementById(streams['audio']);
+                if (el) el.remove()
             }
         }
     },
+
+    async joinStream({state , dispatch} , {from}) {
+        if (state.videoStream) {
+            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['camera'] ,firstTime: false})
+        }
+        if (state.localStream) {
+            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['audio'] ,firstTime: false})
+        }
+        if (state.displayStream) {
+            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['screen'] ,firstTime: false})
+        }
+        if (state.file) {
+            dispatch('shareFileTo' , {
+                file: state.file,
+                to: from.socketId
+            })
+        }
+    },
+    async reconnect({state , dispatch} , {from , media}) {
+        if (state.videoStream && media.includes('camera')) {
+            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['camera'] ,firstTime: false})
+        }
+        if (state.localStream && media.includes('audio')) {
+            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['audio'] ,firstTime: false})
+        }
+        if (state.displayStream  && media.includes('screen')) {
+            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['screen'] ,firstTime: false})
+        }
+    },
+
+    setDynamicGrid({state}) {
+        const streams = Object.entries(state.remoteStreams['camera'] ?? {})
+        const boxCount = streams.length
+        const outerBox = document.querySelector('.outer-box');
+        if (boxCount > 0) {
+            outerBox.innerHTML = '';
+            let columns = Math.ceil(Math.sqrt(boxCount));
+            let rows = Math.ceil(boxCount / columns);
+            let columnWidth = 100 / columns;
+            let rowHeight = 100 / rows;
+            outerBox.style.gridTemplateColumns = `repeat(${columns}, ${columnWidth}%)`;
+            outerBox.style.gridTemplateRows = `repeat(${rows}, ${rowHeight}%)`;
+            for (const [key , value] of streams) {
+                const box = document.createElement('div')
+                const name = document.createElement('span')
+                box.id = key;
+                box.classList.add('inner-box');
+                name.classList.add('inner-box-label');
+                name.classList.add('rounded');
+                name.innerHTML = value?.name ?? 'ناشناس'
+                const video = document.createElement('video')
+                video.srcObject = value.stream;
+                video.muted = true;
+                video.id = `${key}_player` ;
+                video.autoplay = true;
+                video.playsinline = true;
+                box.appendChild(video)
+                box.appendChild(name)
+                outerBox.appendChild(box);
+            }
+        } else {
+            outerBox.innerHTML = '';
+            state.remoteStreams['camera'] = {}
+        }
+    },
+    updateShareScreen({state}) {
+        const streams = Object.entries(state.remoteStreams['screen'] ?? {})
+        for (const [key , value] of streams) {
+            document.getElementById('screen-player').srcObject = value;
+        }
+    },
+
     async setDevices({state,dispatch}) {
         // try {
         //     let stream = await navigator.mediaDevices.getUserMedia({
@@ -801,98 +819,6 @@ export const actions = {
                     })
                 });
             })
-        }
-    },
-    updateVideoGrid({state}){
-        let itemCount = Object.entries(state.remoteStreams['camera'] ?? {}).length;
-        const video_grid = document.getElementById('video-grid-container');
-
-
-        if (itemCount === 0) {
-            state.remoteStreams['camera'] = {};
-            document.getElementById('video-empty').classList.remove('hidden');
-            document.getElementById('video-grid').classList.add('hidden');
-            document.getElementById('video-grid-container').innerHTML = null;
-            return;
-        } else {
-            document.getElementById('video-empty').classList.add('hidden');
-            document.getElementById('video-grid').classList.remove('hidden');
-        }
-
-        const top = Math.ceil(itemCount / 10);
-        const cols =  itemCount === 2 ? 2 : Math.ceil( (itemCount / (top+1)) );
-        const rows = Math.ceil(itemCount / cols);
-        const cols_percent = 100 / cols;
-        const rows_percent = 100 / rows;
-        let row = "" , col = "";
-        for (let  i = 1;i<= rows; i++){
-            row += `${rows_percent}% `;
-        }
-        for (let  i = 1;i<= cols; i++){
-            col += `${cols_percent}% `;
-        }
-        video_grid.style.gridTemplateColumns = col.trim();
-        video_grid.style.gridTemplateRows = row.trim();
-    },
-    shareFile({state} , data) {
-        state.socket.emit("share-file", data);
-    },
-    getSharedFile({state , commit} , data) {
-        const iframeContainer = document.getElementById("iframeContainer");
-        iframeContainer.innerHTML = "";
-        if (data.mime === "application/pdf") {
-            const embed = document.createElement("object");
-            embed.data  = data.url;
-            embed.style.width = "100%";
-            embed.style.height = "100%";
-            embed.style.border = "none";
-            iframeContainer.appendChild(embed);
-        } else if (data.mime === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || data.mime === "application/vnd.ms-powerpoint") {
-            const embed = document.createElement("object");
-            embed.data  = `https://docs.google.com/gview?url=${data.url}&embedded=true`;
-            embed.style.width = "100%";
-            embed.style.height = "100%";
-            embed.style.border = "none";
-            iframeContainer.appendChild(embed);
-        } else {
-            const img = document.createElement("img");
-            img.src = data.url;
-            img.style.maxWidth = "100%";
-            img.style.maxHeight = "100%";
-            img.style.border = "none";
-            iframeContainer.appendChild(img);
-        }
-        commit("setContent" , true)
-        commit("setShareFile" , data)
-    },
-    setDynamicGrid({state , commit}) {
-        const streams = Object.entries(state.remoteStreams['camera'] ?? {})
-        const boxCount = streams.length
-        const outerBox = document.querySelector('.outer-box');
-        if (boxCount > 0) {
-            outerBox.innerHTML = '';
-            let columns = Math.ceil(Math.sqrt(boxCount));
-            let rows = Math.ceil(boxCount / columns);
-            let columnWidth = 100 / columns;
-            let rowHeight = 100 / rows;
-            outerBox.style.gridTemplateColumns = `repeat(${columns}, ${columnWidth}%)`;
-            outerBox.style.gridTemplateRows = `repeat(${rows}, ${rowHeight}%)`;
-            for (const [key , value] of streams) {
-                const box = document.createElement('div')
-                box.id = key;
-                box.className = 'inner-box';
-                const video = document.createElement('video')
-                video.srcObject = value;
-                video.muted = true;
-                video.id = `${key}_player` ;
-                video.autoplay = true;
-                video.playsinline = true;
-                box.appendChild(video)
-                outerBox.appendChild(box);
-            }
-        } else {
-            outerBox.innerHTML = '';
-            state.remoteStreams['camera'] = {}
         }
     },
 }

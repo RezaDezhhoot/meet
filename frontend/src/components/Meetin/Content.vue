@@ -31,7 +31,7 @@
             <!--            </div>-->
             <!--          </button>-->
 
-            <label for="mediaInput" class="flex cursor-pointer text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">
+            <label for="mediaInput" v-if="$store.state?.user?.user?.type === 'login' " class="flex cursor-pointer text-[#616161] border border-[#d1d1d1] rounded-[0.3rem] justify-center items-center h-full mx-[0.5rem]">
               <div class="flex px-[0.5rem] py-[0.4rem]">
                 <span  class="font-bold text-[#616161] px-[0.8rem]">فایل</span>
 
@@ -160,7 +160,7 @@ export default {
   components: {loader},
   computed:{
     loading() {
-      return this.$store.state.mediaLoading
+      return this.$store.state.loaders.screen;
     },
     content(){
       return this.$store.state.content
@@ -184,14 +184,9 @@ export default {
       uploading: false,
     }
   },
-  watch:{
-    "$store.state.displayStream"(value) {
-      if (value && value.active) {
-        document.getElementById('screen-player').srcObject = value;
-      } else {
-        this.$store.state.shareScreen = false;
-      }
-    },
+  mounted() {
+    this.$store.dispatch('updateShareScreen')
+    this.$store.dispatch('getSharedFile')
   },
   methods:{
     downloadSharedFile(){
@@ -262,7 +257,9 @@ export default {
           });
           this.file = uploadedFile;
           this.filePreview = data.data.addr
-          this.$store.dispatch('shareFile' , {mime: this.file.type , url: data.data.addr})
+          const fileData = {mime: this.file.type , url: data.data.addr}
+          this.$store.state.file = fileData
+          this.$store.dispatch('shareFile' , fileData)
         } catch (error) {
           this.file = null;
           this.filePreview = null
@@ -283,13 +280,11 @@ export default {
       }
     },
     startShareScreen() {
-      this.$store.dispatch('shareStream',{
-        screen: true  , media: 'screen'
-      });
+      this.$store.dispatch('shareStream','screen');
     },
     end() {
-      this.$store.dispatch('endScreen',{
-        media: 'screen'
+      this.$store.dispatch('endStream',{
+        media: ['screen']
       });
       this.$store.commit('setContent' , false)
       this.$store.commit('setShareFile' , false)

@@ -32,6 +32,14 @@ WORKDIR /home/app
 
 COPY /admin .
 
+COPY /images/php/php.ini /usr/local/etc/php
+COPY /supervisors/admin/admin-consumers.conf /etc/supervisor/conf.d
+
+COPY /images/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod a+x /usr/local/bin/entrypoint.sh
+
+
 RUN chown -R www-data:www-data \
         /home/app/storage \
         /home/app/bootstrap/cache
@@ -40,6 +48,6 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN composer install --ignore-platform-reqs
 
-CMD php artisan serve --host=0.0.0.0
-
 EXPOSE 8000
+
+ENTRYPOINT /usr/local/bin/entrypoint.sh

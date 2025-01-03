@@ -102,7 +102,9 @@ export default {
       }
     },
     endAudio(){
-      this.$store.commit('controlMicrophone',false);
+      this.$store.dispatch('endStream',{
+        media: ['audio']
+      })
     },
     async shareAudio(){
       if (! this.$store.state.localStream) {
@@ -113,11 +115,7 @@ export default {
     },
     async startAudio() {
       if (this.user && this.user.media && this.user.media.media.remote.microphone) {
-        this.$store.dispatch('shareStream',{
-          audio: true,
-          video: false,
-          media: 'audio',
-        });
+        this.$store.dispatch('shareStream','audio');
       }
     },
     wires(){},

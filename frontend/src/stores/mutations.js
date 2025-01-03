@@ -1,4 +1,14 @@
+import RTCConnection from "../services/RTCConnection";
+
 export const mutations = {
+    setClients(state , clients) {
+        state.clients = clients;
+    },
+
+    controlScreenLoader(state , value = true) {
+        state.loaders.screen = value;
+    },
+
     setLocalStream(state , stream){
         state.localStream = stream;
     },
@@ -22,9 +32,6 @@ export const mutations = {
     },
     setShareFile(state , status) {
         state.shareFile = status;
-    },
-    setClients(state , clients) {
-        state.clients = clients;
     },
     setUser(state,user){
         state.user = user;

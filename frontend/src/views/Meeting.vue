@@ -26,6 +26,7 @@ import io from 'socket.io-client';
 import {inject} from 'vue';
 import axios from 'axios'
 import Camera from "../components/Meetin/Camera.vue";
+import Swal from "sweetalert2";
 
 export default {
   components: {
@@ -50,7 +51,6 @@ export default {
       logo: null,
       conected: false,
       lowSignal: false,
-      reload: false,
       onLine: navigator.onLine,
       pingValue: 0,
     };
@@ -101,6 +101,26 @@ export default {
     if (this.room.ui === 2) {
       this.$store.commit('setMainContent' , false)
     }
+    Swal.fire({
+      position: 'center-center',
+      text: "فعال سازی بلندگو ها؟",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "بله, فعال شود!",
+      cancelButtonText: "خیر , فعال نشود"
+    }).then((res) => {
+      if (res.isConfirmed) {
+        this.$store.commit('controlSound', {
+          value: true,
+        });
+      } else {
+        this.$store.commit('controlSound', {
+          value: false,
+        });
+      }
+    })
   },
   methods:{
     requestPermission() {
@@ -147,40 +167,31 @@ export default {
         }
       }, 12500, meeting );
 
+      this.socket.on('join' , async data => {
+
+      })
+
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
           this.clients = data.data.users;
           this.user = data.data.users[this.socket.id];
           this.$store.commit('setUser',this.user);
           this.$store.commit('setClients',this.clients);
-
-          if (data.data.event === 'joined') {
-            this.$store.dispatch('fillRTCs', {
-              clients: this.clients,
-              from: data.data.from
-            });
-            setTimeout(() => {
-              this.$store.commit('controlMainLoader' , false);
-            },2000);
-          }
         }
-        this.reload = true;
-
-        const mediaPlayers = document.querySelectorAll('audio');
-        Array.from(mediaPlayers).forEach(el => {
-          el.muted = false;
-          el.defaultMuted = false;
-          // el.defaultMuted = ! value.value;
-          el.load();
-          // await el.play();
-        })
-
       });
 
-      this.socket.on('add-candidate',async data => {
-        this.$store.dispatch('addIceCandidate',data);
+      this.socket.on('add-sender-candidate',async data => {
+        this.$store.dispatch('addSenderIceCandidate',data);
       });
-
+      this.socket.on('add-receiver-candidate',async data => {
+        this.$store.dispatch('addReceiverIceCandidate',data);
+      });
+      this.socket.on('join-the-streams' , async (data) => {
+        await this.$store.dispatch('joinStream' , data);
+      })
+      this.socket.on('reconnect' , async (data) => {
+        await this.$store.dispatch('reconnect' , data);
+      })
       this.socket.on('host-joined',async data => {
         if (data.status === 200) {
           this.hostClient = data.data.host;
@@ -191,8 +202,6 @@ export default {
         this.conected = true;
         this.lowSignal = false;
         this.join();
-        if (this.reload)
-          window.location.reload(true);
       });
       this.socket.on('disconnect',async data => {
         this.lowSignal = true;
@@ -231,22 +240,9 @@ export default {
       this.socket.on('answer-made' , async data => {
         this.$store.dispatch('answerMade',data);
       });
-      this.socket.on('check-speakers' , async data => {
-        if ( localStorage.getItem('sound') === "true") {
-          this.$store.commit("controlSound",{
-            value: false
-          })
-          this.$store.commit("controlSound",{
-            value: true
-          })
-        }
-      });
-
       this.socket.on('share-file' , async data => {
-        this.$store.dispatch('getSharedFile',data);
-      });
-      this.socket.on('send-shared' , async data => {
-        this.$store.dispatch('sendShared', data)
+        this.$store.state.remoteStreams['file'] = data
+        this.$store.dispatch('getSharedFile');
       });
       this.socket.on('end-stream',async data => {
         this.$store.dispatch('clearRemoteStream',data)
@@ -262,7 +258,7 @@ export default {
           room
         }
       }).then(() => {
-        location.reload();
+        // location.reload();
       });
     },
     async ping() {

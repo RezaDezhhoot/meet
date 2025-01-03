@@ -84,42 +84,9 @@ export default {
       return this.$store.state.remoteStreams['camera'] ?? {}
     }
   },
-  beforeCreate() {
-    this.$store.state.socket.on('disconnect' , async data => {
-      if (this.$store.state.videoStream) {
-        // this.reConnectVideo();
-      }
-    })
-  },
   mounted() {
     this.$store.dispatch('setDynamicGrid')
   },
-  methods:{
-    reConnectVideo() {
-      this.$store.dispatch('videoShare',{
-        media: ['camera'],localStream: this.$store.state.videoStream
-      });
-    },
-    async shareCamera(){
-      if (this.$store.state.videoStream) {
-        this.$store.commit('controlCamera',true);
-      } else {
-        this.$store.dispatch('shareStream',{
-          video: true , audio: false , media: 'camera'
-        });
-      }
-    },
-    toggleDropdown() {
-      this.showDropdown = !this.showDropdown;
-    },
-    selectOption(option) {
-      this.$store.dispatch('setDefaultDevice',{
-        type: 'camera',
-        value: option
-      });
-      this.showDropdown = false;
-    },
-  }
 }
 </script>
 

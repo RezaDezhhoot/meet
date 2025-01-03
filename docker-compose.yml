@@ -23,10 +23,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./images/php/php.ini:/usr/local/etc/php/php.ini
       - ./admin:/home/app
       - /home/app/vendor
-      - ./supervisors/admin:/etc/supervisor/conf.d/
     networks:
       - main
   npm:
@@ -88,7 +86,7 @@ services:
     networks:
       - main
   mysql:
-    image: docker.arvancloud.ir/mysql
+    image: mysql
     container_name: ${DATABASE_CONTAINER}
     restart: on-failure
     tty: true

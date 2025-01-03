@@ -24,6 +24,7 @@ exports.make = (user , room , type  ) => {
             camera: false,
             audio: false,
             screen: false,
+            file: false,
         }
     };
 }
