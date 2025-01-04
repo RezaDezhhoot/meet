@@ -25,6 +25,7 @@ services:
     volumes:
       - ./storage:/home/app/storage/app/public
       - ./admin:/home/app
+      - /home/app/vendor
     networks:
       - main
   npm:
