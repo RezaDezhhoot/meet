@@ -209,6 +209,15 @@ export const actions = {
                             }
                         },
                         async () => {
+                            switch (conn.getState()) {
+                                case "failed": {
+                                    dispatch("startStream" , {
+                                        media: ['camera'],
+                                        to: [user],
+                                        from
+                                    })
+                                }
+                            }
                             console.log('1 ', conn.getState())
                         }
                     )
@@ -234,7 +243,7 @@ export const actions = {
                             switch (conn.getState()) {
                                 case "failed": {
                                     dispatch("startStream" , {
-                                        media: ['camera'],
+                                        media: ['screen'],
                                         to: [user],
                                         from
                                     })
@@ -263,7 +272,11 @@ export const actions = {
                             }
                         },
                         () => {
-                            // hande failed to reconnect
+                            dispatch("startStream" , {
+                                media: ['audio'],
+                                to: [user],
+                                from
+                            })
                             console.log('1 ', conn.getState())
                         }
                     )
