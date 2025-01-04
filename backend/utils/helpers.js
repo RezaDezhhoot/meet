@@ -11,7 +11,7 @@ module.exports.normalizeIranianPhoneNumber = (phone) => {
 }
 
 module.exports.asset = function (path) {
-    return process.env.APP_URL.replace(/^\/|\/$/g, '') + '/' + path.replace(/^\/|\/$/g, '')
+    return process.env.APP_URL.replace(/^\/|\/$/g, '') + '/' + (path ? path.replace(/^\/|\/$/g, '') : null)
 }
 
 module.exports.normalizePhoneNumber = (country_code,phone) => {
