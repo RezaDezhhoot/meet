@@ -419,7 +419,7 @@ module.exports.controlLocalMedia = async (io,socket,data,room) => {
 }
 
 module.exports.handRising = async (io,socket,data,room) => {
-    if (users[room.key][socket.id].user.id === room.host_id || data.to === socket.id) {
+    if (users[room.key] && users[room.key].hasOwnProperty(socket.id) && users[room.key][socket.id]?.user?.id === room?.host_id || data.to === socket.id) {
         const user = users[room.key][data.to];
         users[room.key][data.to].media.settings.hand_rising = ! user.media.settings.hand_rising;
         if (users[room.key][socket.id].user.id !== room.host_id && Object.entries(host[room.key]).length > 0) {
