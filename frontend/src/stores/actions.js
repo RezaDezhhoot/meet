@@ -107,8 +107,8 @@ export const actions = {
         else if (data.media === 'camera') {
             constraints = {
                 video: {
-                    width: { ideal: 640  },
-                    height: { ideal: 360 },
+                    width: { ideal: 320  },
+                    height: { ideal: 280 },
                     aspectRatio: { max: 4 / 3 },
                     frameRate: { max: 15 },
                     deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined,
@@ -232,7 +232,13 @@ export const actions = {
                         },
                         () => {
                             switch (conn.getState()) {
-
+                                case "failed": {
+                                    dispatch("startStream" , {
+                                        media: ['camera'],
+                                        to: [user],
+                                        from
+                                    })
+                                }
                             }
                             // hande failed to reconnect
                             console.log('1 ', conn.getState())
