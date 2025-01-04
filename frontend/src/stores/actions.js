@@ -211,6 +211,7 @@ export const actions = {
                         async () => {
                             switch (conn.getState()) {
                                 case "failed": {
+                                    WebRTC.clearSenderCameraConnections(from)
                                     dispatch("startStream" , {
                                         media: ['camera'],
                                         to: [user],
@@ -242,6 +243,7 @@ export const actions = {
                         () => {
                             switch (conn.getState()) {
                                 case "failed": {
+                                    WebRTC.clearSenderScreenConnection(from)
                                     dispatch("startStream" , {
                                         media: ['screen'],
                                         to: [user],
@@ -272,11 +274,16 @@ export const actions = {
                             }
                         },
                         () => {
-                            dispatch("startStream" , {
-                                media: ['audio'],
-                                to: [user],
-                                from
-                            })
+                            switch (conn.getState()) {
+                                case "failed": {
+                                    WebRTC.clearSenderAudioConnection(from)
+                                    dispatch("startStream" , {
+                                        media: ['audio'],
+                                        to: [user],
+                                        from
+                                    })
+                                }
+                            }
                             console.log('1 ', conn.getState())
                         }
                     )
