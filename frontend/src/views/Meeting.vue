@@ -170,7 +170,7 @@ export default {
         } catch (err) {
           meeting.lowSignal = true
         }
-      }, 12500, meeting );
+      }, 1000, meeting );
 
       this.socket.on('join' , async (data) => {
         this.user = data.user;
