@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import Swal from "sweetalert2";
 export default {
   name: "Screen",
   props:{
@@ -23,6 +24,13 @@ export default {
   },
   methods:{
     control(){
+      if (this.$store.state.displayStream) {
+        Swal.fire({
+          icon: "warning",
+          title: "امکان صدور دسترسی هنگام اشتراک گزاری صفحه ممکن نیست",
+        });
+        return
+      }
       this.$store.state.socket.emit('control-remote-media',{
         to: this.client.socketId,
         device: 'screen'

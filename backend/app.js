@@ -18,7 +18,7 @@ require(path.join(appDir,'app/Providers/LibraryServiceProvider')).load(app);
 require(path.join(appDir,'app/Providers/RouteServiceProvider')).loadApiRoutes(app);
 require(path.join(appDir,'app/Providers/SocketServiceProvider')).load(server);
 
-app.use('/uploads', express.static('uploads'));
+app.use('/storage', express.static('storage'));
 
 app.use(function( req, res, next){
     return res.status(404).json({

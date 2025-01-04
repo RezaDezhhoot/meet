@@ -10,6 +10,10 @@ module.exports.normalizeIranianPhoneNumber = (phone) => {
     return phone.startsWith('9') ? '0'+phone :  phone;
 }
 
+module.exports.asset = function (path) {
+    return process.env.APP_URL.replace(/^\/|\/$/g, '') + '/' + path.replace(/^\/|\/$/g, '')
+}
+
 module.exports.normalizePhoneNumber = (country_code,phone) => {
     country_code = this.normalizeCountryCallingCode(country_code);
     return phone.startsWith('09') ? country_code + phone.substring(1) : country_code+phone;
@@ -116,10 +120,6 @@ exports.uploadFIle = async (file , quality , uploadPath , filename , file_ext) =
             file.mv(`${uploadPath}/${filename}`);
             return filename;
     }
-}
-
-exports.asset = (file) => {
-    return `${process.env.APP_URL}/storage/${file}`;
 }
 
 exports.getLocale = (req = null) => {

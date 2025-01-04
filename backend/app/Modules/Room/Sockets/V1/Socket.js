@@ -87,11 +87,11 @@ module.exports.join = async (io,socket,data,room) => {
                                 }
                             },
                             settings: {
-                                hand_rising: false,
-                                camera: false,
-                                audio: false,
-                                screen: false,
-                                file: false,
+                                hand_rising: p.settings.hand_rising ?? false,
+                                camera: p.settings.camera ?? false,
+                                audio: p.settings.audio ?? false,
+                                screen: p.settings.screen ?? false,
+                                file: p.settings.file ?? false,
                             }
                         }
                     } else {
@@ -157,11 +157,11 @@ module.exports.join = async (io,socket,data,room) => {
                         }
                     },
                     settings: {
-                        hand_rising: false,
-                        camera: false,
-                        audio: false,
-                        screen: false,
-                        file: false,
+                        hand_rising: p.settings.hand_rising ?? false,
+                        camera: p.settings.camera ?? false,
+                        audio: p.settings.audio ?? false,
+                        screen: p.settings.screen ?? false,
+                        file: p.settings.file ?? false,
                     }
                 }
             } else {
@@ -197,7 +197,6 @@ module.exports.join = async (io,socket,data,room) => {
             from: users[room.key][socket.id]
         })
     }
-
     io.emit('get-users',{
         data:{
             users: users[room.key] ,
@@ -206,6 +205,9 @@ module.exports.join = async (io,socket,data,room) => {
         },
         status
     });
+    socket.emit('join' , {
+        user: users[room.key][socket.id]
+    })
 }
 
 module.exports.leave = async (io,socket,data,room) => {
@@ -385,34 +387,35 @@ module.exports.controlRemoteMedia = async (io,socket,data,room) => {
 }
 
 module.exports.controlLocalMedia = async (io,socket,data,room) => {
-    const user = users[room.key][socket.id];
-    let status;
+    if (users[room.key] && users[room.key].hasOwnProperty(socket.id)) {
+        const user = users[room.key][socket.id];
+        let status;
 
-    if (user) {
-        if (data.hasOwnProperty('action')) {
-            status = data.action;
-        } else {
-            status = ! user.media.media.local[data.device];
+        if (user) {
+            if (data.hasOwnProperty('action')) {
+                status = data.action;
+            } else {
+                status = ! user.media.media.local[data.device];
+            }
+
+            users[room.key][socket.id].media.media.local[data.device] = status;
+
+            if (user.user.id === room.host_id) {
+                host[room.key][socket.id] = user;
+                io.emit('host-joined',{
+                    data:{
+                        host: host[room.key]
+                    },status: 200
+                });
+            }
         }
-
-        users[room.key][socket.id].media.media.local[data.device] = status;
-
-        if (user.user.id === room.host_id) {
-            host[room.key][socket.id] = user;
-            io.emit('host-joined',{
-                data:{
-                    host: host[room.key]
-                },status: 200
-            });
-        }
-
-        io.emit('get-users',{
-            data:{
-                users: users[room.key], from: socket.id
-            },
-            status: 200
-        });
     }
+    io.emit('get-users',{
+        data:{
+            users: users[room.key], from: socket.id
+        },
+        status: 200
+    });
 }
 
 module.exports.handRising = async (io,socket,data,room) => {

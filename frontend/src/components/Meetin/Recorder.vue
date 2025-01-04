@@ -34,6 +34,7 @@ export default {
       recordedChunks: [],
       timer: null,
       stream: null,
+      progress:0,
     }
   },
   computed: {
@@ -52,6 +53,12 @@ export default {
     progress(){
       return this.$store.state.progress;
     }
+  },
+  mounted() {
+    window.addEventListener("beforeunload", this.handleBeforeUnload);
+  },
+  beforeDestroy() {
+    window.removeEventListener("beforeunload", this.handleBeforeUnload);
   },
   methods:{
     end() {
@@ -131,6 +138,10 @@ export default {
     },
     async stopAndSave() {
       if (this.recordedChunks.length > 0) {
+        await Swal.fire({
+          title: `در حال بارگزاری فایل ظبط شده...`,
+          timer: 2000
+        });
         const now = new Date()
         const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
         const fileName = `${this.room.title}_${now.getFullYear()}_${now.getMonth()}_${now.getDay()}_${Date.now()}.webm`
@@ -140,6 +151,7 @@ export default {
         this.stream = null
         this.$store.commit('setRecorderLocalStream' , null)
         this.recordedChunks = []
+        clearInterval(this.timer)
         try {
           const {data} = await axios.post("/v1/files", formData, {
             headers: {
@@ -149,15 +161,22 @@ export default {
             },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
-                this.$store.commit('updateProgress' , Math.round(
+                this.progress = Math.round(
                     (progressEvent.loaded / progressEvent.total) * 100
-                ));
+                )
+                this.$store.commit('updateProgress' , this.progress);
               }
             },
           });
+          await Swal.fire({
+            title: "بارگزاری فایل با موفقیت انجام شد.",
+            icon: "success",
+            draggable: true,
+            timer: 2000,
+          });
         } catch (error) {
           console.log(error)
-          Swal.fire({
+          await Swal.fire({
             position: 'top-start',
             text: "خطا در هنگام ارسال فایل ضبط شده!",
             icon: 'warning',
@@ -168,13 +187,12 @@ export default {
         }
       }
       this.$store.commit('updateProgress' , 0);
-
+      this.progress = 0
       if (this.mediaRecorder) {
         this.mediaRecorder.stop();
         this.mediaRecorder = null;
       }
       this.recording = false;
-      clearInterval(this.timer)
     },
     startTime() {
       let totalSeconds = 0;
@@ -190,6 +208,11 @@ export default {
 
         timerElement.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
       }, 1000);
+    },
+    async handleBeforeUnload(event) {
+      if (this.mediaRecorder) {
+        await this.stopAndSave()
+      }
     },
   }
 }

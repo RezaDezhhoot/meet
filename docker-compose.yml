@@ -23,8 +23,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./storage:/home/app/storage/app/public
       - ./admin:/home/app
-      - /home/app/vendor
     networks:
       - main
   npm:
@@ -49,8 +49,8 @@ services:
     ports:
       - '3000:3000'
     volumes:
+      - ./storage:/app/storage
       - ./backend:/app
-      - ./storage:/app/uploads
       - /app/node_modules
     command: npm run dev
     environment:

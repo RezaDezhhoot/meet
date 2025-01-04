@@ -38,7 +38,7 @@
 <script>
 import "../../lib/jquery.min.js";
 import axios from "axios";
-import { inject } from 'vue';
+import {useFavicon} from "@vueuse/core/index";
 
 export default {
   name: "Auth",
@@ -54,15 +54,25 @@ export default {
     },
   },
   mounted() {
+    axios.get('/v1/settings/base?lang=fa').then(base => {
+      if (base && base.data.data.title) {
+        this.app_name = base.data.data.title;
+      }
+      if (base && base.data.data.logo) {
+        const icon = useFavicon();
+        icon.value = base.data.data.logo;
+      }
+      document.title = this.app_name;
+    }).catch(() => {
+      document.title = 'خطا در برقراری ارتباط'
+    });
+
     axios.get(`/v1/rooms/exists?room=${this.$route.query.room}`).then(response => {
       this.room_exists = true;
       this.$emit("check-for-login",this.$route.query.room,this.room_exists);
     }).catch(error => {
       this.room_exists = false;
     });
-
-    this.app_name = inject('AppName');
-    document.title = this.app_name;
   },
 }
 </script>

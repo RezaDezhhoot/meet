@@ -65,7 +65,7 @@ export const actions = {
         context.state.user.media.media.local.microphone = true;
         await context.dispatch('startStream',{from: context.state.socket.id,to:context.state.clients ,media: ['audio'],firstTime: true })
     },
-    async videoShare({state , dispatch}) {
+    async videoShare({state , dispatch , commit}) {
         state.socket.emit('control-local-media',{
             device: 'camera',
             action: true
@@ -74,6 +74,7 @@ export const actions = {
         state.remoteStreams['camera'][state.videoStream.id] = {
             stream: state.videoStream, name: state?.user?.user?.name + '(شما) '
         }
+        commit('controlCameraLoader');
         await dispatch('setDynamicGrid')
         await dispatch('startStream',{from: state.socket.id,to: state.clients ,media: ['camera'],firstTime: true})
     },
@@ -115,7 +116,6 @@ export const actions = {
                 audio: false,
             };
             navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
-                context.commit('controlCameraLoader');
                 context.state.videoStream = stream;
                 await context.dispatch('videoShare');
             }).catch(function (err) {
@@ -582,7 +582,6 @@ export const actions = {
     },
     clearRemoteStream({state,commit,dispatch} , {streams , from}){
         if (streams) {
-            console.log(streams.file)
             if (streams.hasOwnProperty('screen') && streams.screen) {
                 commit('controlScreenLoader',false);
                 commit('setContent' , false)
@@ -655,6 +654,20 @@ export const actions = {
             await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['screen'] ,firstTime: false})
         }
     },
+    async reconnectToAll({state , dispatch} , media) {
+        if (state.videoStream && media.includes('camera')) {
+            await dispatch('videoShare')
+        }
+        if (state.localStream && media.includes('audio')) {
+            await dispatch('audioShare')
+        }
+        if (state.displayStream && media.includes('screen')) {
+            await dispatch('screenShare')
+        }
+        if (state.file && media.includes('file')) {
+            dispatch('shareFile' , state.file)
+        }
+    },
 
     setDynamicGrid({state}) {
         const streams = Object.entries(state.remoteStreams['camera'] ?? {})
@@ -699,18 +712,18 @@ export const actions = {
     },
 
     async setDevices({state,dispatch}) {
-        // try {
-        //     let stream = await navigator.mediaDevices.getUserMedia({
-        //         video: true,
-        //         audio: true,
-        //     });
-        //     stream.getTracks().forEach(function (track) {
-        //         track.stop()
-        //     })
-        //     stream = null
-        // } catch (error) {
-        //     console.error('Permission denied or error occurred:', error);
-        // }
+        try {
+            let stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+            });
+            stream.getTracks().forEach(function (track) {
+                track.stop()
+            })
+            stream = null
+        } catch (error) {
+            console.error('Permission denied or error occurred:', error);
+        }
         function updateDevice() {
             navigator.mediaDevices
                 .enumerateDevices()

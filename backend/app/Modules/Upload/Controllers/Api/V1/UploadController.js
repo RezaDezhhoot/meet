@@ -1,4 +1,4 @@
-const {asset} = require("../../../../../../helpers")
+const helpers = require("../../../../../../utils/helpers")
 const path = require("path")
 
 module.exports.uploadScreenRecorder = (req , res) => {
@@ -16,7 +16,7 @@ module.exports.uploadFile = (req , res) => {
     console.log(req.file.path)
     return res.status(201).json({
         data: {
-            addr: asset(req.file.path)
+            addr: helpers.asset(req.file.path)
         }
     });
 }

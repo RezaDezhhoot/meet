@@ -119,7 +119,8 @@
             </g>
           </svg>
         </button>
-
+<!--        <button @click="dis">dis</button>-->
+<!--        <button @click="con">con</button>-->
         <button title="کاربران" @click="controlUserBox" class="mx-2">
           <svg width="25" height="25" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <g id="#000000ff">
@@ -233,6 +234,12 @@ export default {
     },
   },
   methods:{
+    dis() {
+      this.$store.state.socket.disconnect();
+    },
+    con() {
+      this.$store.state.socket.connect();
+    },
     logout(){
       this.$emit('logout');
     },

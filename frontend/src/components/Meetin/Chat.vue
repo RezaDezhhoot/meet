@@ -6,7 +6,7 @@
           <div class="close-mini-menu hidden"></div>
         </div>
 
-        <span class="mx-[0.5rem]">گفت و گو</span>
+        <span class="mx-[0.5rem]">گفتوگو</span>
       </div>
 
       <div class="flex text-[#616161] font-bold">
@@ -21,7 +21,7 @@
 
     <div class="box-sidbar-chats" id="chat-box">
       <ul >
-        <li v-for="(chat) in this.messages">
+        <li v-for="(chat) in messages">
           <span>{{ chat.sender }}</span>
 
           <span class="mx-[0.5rem]">:</span>
@@ -80,9 +80,12 @@ export default {
     this.loadOldChats();
   },
   updated() {
-    this.$nextTick(() => {
-      this.scrollToBottom();
-    });
+    setTimeout(() => {
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
+    }, 500); // Adjust the delay if needed
+
   },
   methods:{
     setLinks(text) {
@@ -97,7 +100,10 @@ export default {
     },
     scrollToBottom() {
       const chatMessages = document.getElementById('chat-box');
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatMessages.scrollTo({
+        top: chatMessages.scrollHeight,
+        behavior: "smooth",
+      });
     },
     typing(){
       this.socket.emit('typing',{

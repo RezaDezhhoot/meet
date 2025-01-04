@@ -1,5 +1,7 @@
 <template>
   <div :class="{'full-screen': (full)}" v-if="user" :style="'height:'+height+'%'" class="video-tab relative  overflow-y-auto w-full mr-[0.5rem]  bg-white rounded-b-[0.5rem]  lg:rounded-[0.5rem] ">
+    <div class="upload-progress"  :style="{ width: progress + '%' }"></div>
+
     <div class="camera-controller ">
       <div  class="video-controller">
         <ul>
@@ -82,6 +84,9 @@ export default {
     },
     cameras() {
       return this.$store.state.remoteStreams['camera'] ?? {}
+    },
+    progress(){
+      return this.$store.state.progress;
     }
   },
   mounted() {

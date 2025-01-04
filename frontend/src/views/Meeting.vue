@@ -53,6 +53,8 @@ export default {
       lowSignal: false,
       onLine: navigator.onLine,
       pingValue: 0,
+      auth: null,
+      lowSignalAudio: null
     };
   },
   computed:{
@@ -71,10 +73,8 @@ export default {
     this.$store.commit('controlMainLoader' , true);
   },
   beforeMount() {
-    window.addEventListener("online", this.updateConnectionStatus);
-    window.addEventListener("offline", this.updateConnectionStatus);
-
     this.user = this.$cookies.get('auth');
+    this.auth = this.user;
     axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
       this.room = res.data.room;
       this.$store.commit('setLogo' , this.room.logo);
@@ -122,6 +122,21 @@ export default {
       }
     })
   },
+  watch: {
+    lowSignal(value) {
+      if (value) {
+        if (! this.lowSignalAudio) {
+          this.lowSignalAudio = new Audio("/smooth-completed-notify-starting-alert-274739.mp3");
+        }
+        this.lowSignalAudio.loop = true;
+        this.lowSignalAudio.play();
+      } else {
+        if (this.lowSignalAudio) {
+          this.lowSignalAudio.pause()
+        }
+      }
+    }
+  },
   methods:{
     requestPermission() {
       if (Notification.permission !== "granted") {
@@ -129,9 +144,6 @@ export default {
           console.log("Notification permission:", permission);
         });
       }
-    },
-    updateConnectionStatus() {
-      this.lowSignal = navigator.onLine; // Update status
     },
     async connect(){
       this.socket = io(`${this.baseUrl}/channel/v1-${this.$route.params.key}`,{
@@ -143,18 +155,11 @@ export default {
       return this.socket;
     },
     join(){
-      console.log(this.socket.id)
-
       this.socket.emit('join',{
-        token: this.user.token,
-        type: this.user.type,
-        name: this.user.name,
+        token: this.auth.token,
+        type: this.auth.type,
+        name: this.auth.name,
       })
-    },
-    async disconnect(){
-      this.$store.dispatch('endStream',{
-        media: ['camera','audio']
-      });
     },
     wires() {
       let meeting = this;
@@ -167,15 +172,34 @@ export default {
         }
       }, 12500, meeting );
 
-      this.socket.on('join' , async data => {
-
+      this.socket.on('join' , async (data) => {
+        this.user = data.user;
+        this.$store.commit('setUser',this.user);
+        let media = []
+        if (this.user?.media?.settings?.camera) {
+          media.push('camera')
+        }
+        if (this.user?.media?.settings?.audio) {
+          media.push('audio')
+        }
+        if (this.user?.media?.settings?.screen) {
+          media.push('screen')
+        }
+        if (this.user?.media?.settings?.file) {
+          media.push('file')
+        }
+        if (media.length > 0) {
+          await this.$store.dispatch('reconnectToAll' , media)
+        } else {
+          this.disconnect()
+        }
       })
 
       this.socket.on('get-users',async data => {
         if (data.status === 200) {
-          this.clients = data.data.users;
           this.user = data.data.users[this.socket.id];
           this.$store.commit('setUser',this.user);
+          this.clients = data.data.users;
           this.$store.commit('setClients',this.clients);
         }
       });
@@ -198,7 +222,7 @@ export default {
           this.$store.commit('setHostClient',this.hostClient);
         }
       });
-      this.socket.on('connect',async data => {
+      this.socket.on('connect', async data => {
         this.conected = true;
         this.lowSignal = false;
         this.join();
@@ -206,7 +230,6 @@ export default {
       this.socket.on('disconnect',async data => {
         this.lowSignal = true;
       });
-
       this.socket.on('error', async data => {
         if (data.data.code !== 404) {
           this.clearCookie();
@@ -247,6 +270,11 @@ export default {
       this.socket.on('end-stream',async data => {
         this.$store.dispatch('clearRemoteStream',data)
       });
+    },
+    disconnect() {
+      this.$store.dispatch('endStream' , {
+        media: ['screen','audio','camera']
+      })
     },
     redirectClientIfHappenedError(room = null , code = null){
       this.$router.push({

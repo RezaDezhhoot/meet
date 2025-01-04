@@ -1,5 +1,6 @@
 const UserResource = require("../../../../User/Resources/Api/V1/UserResource");
 const User = require("../../../../User/Models/User");
+const helpers = require('../../../../../../utils/helpers')
 
 exports.make =  async (room  , ignore = [] ) => {
     const host = await User.findByPk(room.host_id);
@@ -13,7 +14,7 @@ exports.make =  async (room  , ignore = [] ) => {
         capacity: room.capacity,
         key: room?.key,
         host: UserResource.make(host,null,['email','phone','status']),
-        logo: room?.logo,
+        logo: helpers.asset(room?.logo),
         ui: room?.ui,
     }
 }

@@ -70,9 +70,9 @@
                 @can('index_chats')
                     <x-admin.menu-item href="{{route('admin.chat.index')}}" icon="flaticon-chat" :active="request()->routeIs(['admin.chat.index'])" label="چت ها" />
                 @endcan
-                @can('show_tokens')
-                    <x-admin.menu-item href="{{route('admin.token.index')}}" icon="fas fa-key" :active="request()->routeIs(['admin.token.index','admin.token.store'])" label="کلید های دسترسی " />
-                @endcan
+{{--                @can('show_tokens')--}}
+{{--                    <x-admin.menu-item href="{{route('admin.token.index')}}" icon="fas fa-key" :active="request()->routeIs(['admin.token.index','admin.token.store'])" label="کلید های دسترسی " />--}}
+{{--                @endcan--}}
                 @can('index_penalties')
                     <x-admin.menu-item href="{{route('admin.penalty.index')}}" icon="fa fa-user-times" :active="request()->routeIs(['admin.penalty.index'])" label="جریمه ها" />
                 @endcan
@@ -92,9 +92,9 @@
                 @can('show_rooms')
                     <x-admin.menu-item href="{{route('admin.room.index')}}" icon="flaticon2-group" :active="request()->routeIs(['admin.room.index','admin.room.store'])" label="اتاق ها  " />
                 @endcan
-                @can('show_subscriptions')
-                    <x-admin.menu-item href="{{route('admin.subscription.index')}}" icon="flaticon2-box" :active="request()->routeIs(['admin.subscription.index','admin.subscription.store'])" label="اشتراک ها" />
-                @endcan
+{{--                @can('show_subscriptions')--}}
+{{--                    <x-admin.menu-item href="{{route('admin.subscription.index')}}" icon="flaticon2-box" :active="request()->routeIs(['admin.subscription.index','admin.subscription.store'])" label="اشتراک ها" />--}}
+{{--                @endcan--}}
                 @can('show_settings')
                     <x-admin.menu-group icon="flaticon2-settings" :active="request()->routeIs(['admin.setting.base'])" label="تنظیمات" >
                         @can('edit_base_settings')
