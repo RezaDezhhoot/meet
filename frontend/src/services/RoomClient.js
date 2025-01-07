@@ -267,12 +267,14 @@ export default class RoomClient {
               break
 
             case 'connected':
+              this.context.state.connected = true;
               //remoteVideo.srcObject = await stream;
               //await socket.request('resume');
               break
 
             case 'failed':
               this.consumerTransport.close()
+              await this.initTransports(device)
               // Swal.fire({
               //   position: 'center-center',
               //   text: 'مشکلی در ارتباط شما رخ داده است در حال برقراری ارتباط مجدد!',
