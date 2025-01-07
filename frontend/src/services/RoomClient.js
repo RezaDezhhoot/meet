@@ -274,21 +274,6 @@ export default class RoomClient {
             case 'failed':
               this.consumerTransport.close()
               await this.initTransports(device)
-              const hasVideo = this.hasProducer(RoomClient.mediaType.video)
-              const hasMicrophone = this.hasProducer(RoomClient.mediaType.audio)
-              if (
-                  this.context.state.user.media.media.local.camera &&
-                  this.context.state.user.media.media.remote.camera && hasVideo
-              ) {
-                await this.produce(RoomClient.mediaType.video)
-              }
-
-              if (
-                  this.context.state.user.media.media.local.microphone &&
-                  this.context.state.user.media.media.remote.microphone && hasMicrophone
-              ) {
-                await this.produce(RoomClient.mediaType.audio)
-              }
               break
 
             default:
