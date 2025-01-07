@@ -50,7 +50,6 @@ services:
     ports:
       - '3000:3000'
       - "10000-10100:10000-10100"
-      - "3478:3478"
     volumes:
       - ./storage:/app/storage
       - ./backend:/app
