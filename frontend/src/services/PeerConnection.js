@@ -5,9 +5,9 @@ export default class PeerConnection {
         this.#peerConnection = peerConnection
     }
 
-    addVideoTransceiver() {
+    addVideoTransceiver(direction = 'sendrecv') {
         this.#peerConnection.addTransceiver('video' , {
-            direction: 'sendrecv',
+            direction,
             sendEncodings: [
                 { maxBitrate: 1500000 }, { scaleResolutionDownBy: 2.0 }
             ]

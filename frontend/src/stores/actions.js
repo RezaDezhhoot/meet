@@ -12,20 +12,39 @@ const iceConfiguration = {
     // iceTransportPolicy: "relay",
 }
 const WebRTC = new RTCConnection(iceConfiguration)
+import RoomClient from '../services/RoomClient'
+let rc
 
 export const actions = {
+    async init(context , {room , name}) {
+        const videoArea = document.getElementById('outer-box')
+        const audioArea = document.getElementById('audios')
+        context.state.videoArea = videoArea
+
+        rc = new RoomClient(context.state.videoArea,context.state.videoArea,audioArea,window.mediasoupClient,context.state.socket,room.key , name , context,function (){},function (kind = null) {
+            if (!kind || kind === 'video') {
+                context.dispatch('setDynamicGrid')
+            }
+        })
+    },
+    async controlDevices({state} , media) {
+        if (rc) {
+            switch (media) {
+                case 'camera':
+                    rc.closeProducer(RoomClient.mediaType.video)
+                    break;
+                case 'microphone':
+                    rc.closeProducer(RoomClient.mediaType.audio)
+                    break
+            }
+        }
+    },
     async addSenderIceCandidate({state} , {media , from , candidate}) {
         const types = WebRTC.getTypes()
         let conn
         switch (media) {
-            case types.camera:
-                conn = WebRTC.findCameraSenderConnection(from)
-                break;
             case types.screen:
-                conn = WebRTC.findScreenSenderConnection(from)
-                break;
-            case types.audio:
-                conn = WebRTC.findAudioSenderConnection(from)
+                conn = WebRTC.findScreenConnection(from)
                 break;
         }
         if (! conn) return
@@ -35,14 +54,8 @@ export const actions = {
         const types = WebRTC.getTypes()
         let conn
         switch (media) {
-            case types.camera:
-                conn = WebRTC.findCameraReceiverConnection(from)
-                break;
             case types.screen:
-                conn = WebRTC.findScreenReceiverConnection(from)
-                break;
-            case types.audio:
-                conn = WebRTC.findAudioReceiverConnection(from)
+                conn = WebRTC.findScreenConnection(from)
                 break;
         }
         if (! conn) return
@@ -57,127 +70,104 @@ export const actions = {
         await context.dispatch('updateShareScreen')
         await context.dispatch('startStream',{from: context.state.socket.id,to: context.state.clients ,media: ['screen'] ,firstTime: true})
     },
-    async audioShare(context ) {
-        context.state.socket.emit('control-local-media',{
-            device: 'microphone',
-            action: true
-        });
-        context.state.user.media.media.local.microphone = true;
-        await context.dispatch('startStream',{from: context.state.socket.id,to:context.state.clients ,media: ['audio'],firstTime: true })
-    },
-    async videoShare({state , dispatch , commit}) {
-        state.socket.emit('control-local-media',{
-            device: 'camera',
-            action: true
-        });
-        state.user.media.media.local.camera = true;
-        state.remoteStreams['camera'][state.videoStream.id] = {
-            stream: state.videoStream, name: state?.user?.user?.name + '(شما) '
-        }
-        commit('controlCameraLoader');
-        await dispatch('setDynamicGrid')
-        await dispatch('startStream',{from: state.socket.id,to: state.clients ,media: ['camera'],firstTime: true})
-    },
-    async shareStream(context , data) {
-        let constraints;
-        if (data === 'screen') {
-            navigator.mediaDevices.getDisplayMedia({ video: true, audio: false}).then(async function(stream){
-                stream.getVideoTracks()[0].onended = function () {
-                    context.dispatch('endStream',{
-                        media: ['screen']
+    async shareStream({state , dispatch} , data) {
+        switch (data.media) {
+            case 'screen':
+                navigator.mediaDevices.getDisplayMedia({ video: true, audio: false}).then(async function(stream){
+                    stream.getVideoTracks()[0].onended = function () {
+                        dispatch('endStream',{
+                            media: ['screen']
+                        })
+                    };
+                    state.displayStream = stream;
+                    await dispatch('screenShare')
+                }).catch(function (err) {
+                    console.log(err)
+                    context.commit('setContent' , false)
+                    context.commit('setShareScreen' , false)
+                    context.commit('controlScreenLoader' , false);
+                    Swal.fire({
+                        position: 'top-start',
+                        text: "مشکلی در عملیات اشتراک گذاری رخ داده است!",
+                        icon: 'warning',
+                        showConfirmButton: false,
+                        backdrop: false,
+                        timer: 3500,
                     })
-                };
-                context.state.displayStream = stream;
-                await context.dispatch('screenShare')
-            }).catch(function (err) {
-                console.log(err)
-                context.commit('setContent' , false)
-                context.commit('setShareScreen' , false)
-                context.commit('controlScreenLoader' , false);
-                Swal.fire({
-                    position: 'top-start',
-                    text: "مشکلی در عملیات اشتراک گذاری رخ داده است!",
-                    icon: 'warning',
-                    showConfirmButton: false,
-                    backdrop: false,
-                    timer: 3500,
-                })
-            });
-        }
-        else if (data.media === 'camera') {
-            constraints = {
-                video: {
-                    width: { ideal: 320  },
-                    height: { ideal: 280 },
-                    aspectRatio: { max: 4 / 3 },
-                    frameRate: { max: 15 },
-                    deviceId: context.state.selectedVideoDevice ? {exact: context.state.selectedVideoDevice} : undefined,
-                },
-                audio: false,
-            };
-            navigator.mediaDevices.getUserMedia(constraints).then(async function (stream) {
-                context.state.videoStream = stream;
-                await context.dispatch('videoShare');
-            }).catch(function (err) {
-                Swal.fire({
-                    position: 'top-start',
-                    text: "عدم دسترسی به دوربین!",
-                    icon: 'warning',
-                    showConfirmButton: false,
-                    backdrop: false,
-                    timer: 3500,
-                })
-            });
-        }
-        else {
-            constraints = {
-                video: false,
-                audio:  {
-                    aspectRatio: true,
-                    deviceId: context.state.selectedAudioDevice ? {exact: context.state.selectedAudioDevice} : undefined ,
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true,
-                    googNoiseSuppression: true,
-                    googHighpassFilter: true,
-                    googTypingNoiseDetection: true,
-                    googNoiseReduction: true,
-                    volume: 1.0,
-                    googEchoCancellation: true,
-                    googAutoGainControl: true,
+                });
+                break
+            case 'camera':
+                if (! state.user.media.media.local.camera) {
+                    await rc.produce(RoomClient.mediaType.video , state.selectedVideoDevice ,function (ok , err) {
+                        state.user.media.media.local.camera = true;
+                        if (ok) {
+                            state.socket.emit('control-local-media',{
+                                device: 'camera',
+                                action: true
+                            });
+                        } else {
+                            state.user.media.media.local.camera = false;
+                            console.log(err)
+                            let text = 'مشکلی در یافتن اطلاعات دوربین رخ داده است لطفا مجدد تلاش کنید!';
+                            Swal.fire({
+                                position: 'top-start',
+                                text,
+                                icon: 'warning',
+                                showConfirmButton: false,
+                                backdrop: false,
+                                timer: 3500,
+                            })
+                        }
+                    })
+                } else {
+                    rc.closeProducer(RoomClient.mediaType.video)
+                    state.socket.emit('control-local-media',{
+                        device: 'camera',
+                        action: false
+                    });
+                    state.user.media.media.local.camera = false;
                 }
-            }
-
-            try {
-                const stream = context.state.recorderLocalStream ? context.state.recorderLocalStream : await navigator.mediaDevices.getUserMedia(constraints)
-                const ctx = new AudioContext();
-                const gainNode = ctx.createGain();
-                const sinWave = ctx.createOscillator();
-
-                const audioDest = ctx.createMediaStreamDestination();
-                const source = ctx.createMediaStreamSource(stream);
-
-
-                // gainNode is set to 0.5
-                sinWave.connect(gainNode);
-                gainNode.connect(audioDest);
-                gainNode.gain.value = 0.75;
-                source.connect(gainNode);
-                context.state.localStream = audioDest.stream;
-                await context.dispatch('audioShare')
-            } catch (err) {
-                console.log(err)
-
-                let text = 'عدم دسترسی به میکروفون!';
-                await Swal.fire({
-                    position: 'top-start',
-                    text,
-                    icon: 'warning',
-                    showConfirmButton: false,
-                    backdrop: false,
-                    timer: 3500,
-                })
-            }
+                break
+            case 'microphone':
+                if (! state.user.media.media.local.microphone) {
+                    if (rc.hasProducer(RoomClient.mediaType.audio)) {
+                        rc.resumeProducer(RoomClient.mediaType.audio)
+                        state.socket.emit('control-local-media',{
+                            device: 'microphone',
+                            action: true
+                        });
+                        state.user.media.media.local.microphone = true;
+                        return
+                    }
+                    await rc.produce(RoomClient.mediaType.audio , state.selectedAudioDevice ,function (ok , err) {
+                        if (ok) {
+                            state.socket.emit('control-local-media',{
+                                device: 'microphone',
+                                action: true
+                            });
+                            state.user.media.media.local.microphone = true;
+                        } else {
+                            console.log(err)
+                            let text = 'مشکلی در یافتن اطلاعات میکروفون رخ داده است لطفا مجدد تلاش کنید!';
+                            Swal.fire({
+                                position: 'top-start',
+                                text,
+                                icon: 'warning',
+                                showConfirmButton: false,
+                                backdrop: false,
+                                timer: 3500,
+                            })
+                        }
+                    })
+                } else {
+                    rc.pauseProducer(RoomClient.mediaType.audio)
+                    state.socket.emit('control-local-media',{
+                        device: 'microphone',
+                        action: false
+                    });
+                    state.user.media.media.local.microphone = false;
+                }
+                break
         }
     },
     async startStream({state , dispatch , commit} , {media , to , from , firstTime = false}) {
@@ -186,48 +176,15 @@ export const actions = {
         let offer = {} , streamID = {};
         if (media.includes('screen') && state.displayStream)
             streamID['screen'] = state.displayStream.id;
-        if (media.includes('audio') && state.localStream)
-            streamID['audio'] = state.localStream.id;
-        if (media.includes('camera') && state.videoStream)
-            streamID['camera'] = state.videoStream.id;
+
         if (to.length > 0) {
             for (const user of to) {
                 if (user.socketId === from) continue
-                if (media.includes('camera') && state.videoStream) {
-                    const conn = WebRTC.newCameraSenderConnection(
+                if (media.includes('screen') && state.displayStream) {
+                    const conn = WebRTC.newScreenConnection(
                         user.socketId,
-                        () => {
-                            console.log('1 ice', conn.getICEState())
-                        },
-                        (e) => {
-                            if (e.candidate) {
-                                state.socket.emit("send-receiver-candidate" , {
-                                    candidate: e.candidate,
-                                    media: WebRTC.getTypes().camera,
-                                    to: user.socketId
-                                })
-                            }
-                        },
-                        async () => {
-                            switch (conn.getState()) {
-                                case "failed": {
-                                    WebRTC.clearSenderCameraConnections(from)
-                                    dispatch("startStream" , {
-                                        media: ['camera'],
-                                        to: [user],
-                                        from
-                                    })
-                                }
-                            }
-                            console.log('1 ', conn.getState())
-                        }
-                    )
-                    state.videoStream.getTracks().forEach(track => conn.addTrack(track,state.videoStream));
-                    offer['camera'] = await conn.makeOffer(true , false , true);
-                }
-                if (media.includes('screen') && state.displayStream ) {
-                    const conn = WebRTC.newScreenSenderConnection(
-                        user.socketId,
+                        'sendonly',
+                        null,
                         () => {
                             console.log('1 ice', conn.getICEState())
                         },
@@ -243,52 +200,20 @@ export const actions = {
                         () => {
                             switch (conn.getState()) {
                                 case "failed": {
-                                    WebRTC.clearSenderScreenConnection(from)
+                                    WebRTC.clearScreenConnection(from)
                                     dispatch("startStream" , {
-                                        media: ['screen'],
+                                        media: 'screen',
                                         to: [user],
                                         from
                                     })
                                 }
                             }
                             // hande failed to reconnect
-                            console.log('1 ', conn.getState())
+                            console.log('sender ', conn.getState())
                         }
                     )
                     state.displayStream.getTracks().forEach(track => conn.addTrack(track,state.displayStream));
                     offer['screen'] = await conn.makeOffer(true , false , true);
-                }
-                if (media.includes('audio') && state.localStream) {
-                    const conn = WebRTC.newAudioSenderConnection(
-                        user.socketId,
-                        () => {
-                            console.log('1 ice', conn.getICEState())
-                        },
-                        (e) => {
-                            if (e.candidate) {
-                                state.socket.emit("send-receiver-candidate" , {
-                                    candidate: e.candidate,
-                                    media: WebRTC.getTypes().audio,
-                                    to: user.socketId
-                                })
-                            }
-                        },
-                        () => {
-                            switch (conn.getState()) {
-                                case "failed": {
-                                    WebRTC.clearSenderAudioConnection(from)
-                                    dispatch("startStream" , {
-                                        media: ['audio'],
-                                        to: [user],
-                                        from
-                                    })
-                                }
-                            }
-                            console.log('1 ', conn.getState())
-                        }
-                    )
-                    state.localStream.getTracks().forEach(track => conn.addTrack(track,state.localStream));
-                    offer['audio'] = await conn.makeOffer(true , true , false);
                 }
                 state.socket.emit("share-stream", {
                     offer,
@@ -313,59 +238,12 @@ export const actions = {
     async getOffer({state , commit , dispatch} , {media , offer , from , name= null}) {
         if (media.length === 0) return
         let answer = {};
-        if (media.includes('camera') && offer.hasOwnProperty('camera')) {
-            let conn = WebRTC.findCameraReceiverConnection(from)
-            if (! conn || conn.getState() !== "new") {
-                conn = WebRTC.newCameraReceiverConnection(
-                    from,
-                    ({track , streams: [stream]}) => {
-                        if (state.remoteStreams['camera'].hasOwnProperty(stream.id)) {
-                            state.remoteStreams['camera'][stream.id] = {
-                                stream, name
-                            }
-                            const player = document.getElementById(`${stream.id}_player`)
-                            player.srcObject = stream
-                        } else {
-                            state.remoteStreams['camera'][stream.id] = {
-                                stream, name
-                            }
-                            dispatch('setDynamicGrid')
-                        }
-                    },
-                    () => {
-                        console.log('camera 2 ice', conn.getICEState())
-                    },
-                    (e) => {
-                        if (e.candidate) {
-                            state.socket.emit("send-sender-candidate" , {
-                                candidate: e.candidate,
-                                media: WebRTC.getTypes().camera,
-                                to: from
-                            })
-                        }
-                    },
-                    () => {
-                        switch (conn.getState()) {
-                            case "failed":
-                                WebRTC.clearReceiverCameraConnections(from)
-                                state.socket.emit("reconnect" , {
-                                    media: ['camera'],
-                                    to: from
-                                })
-                                break
-                        }
-                        console.log( 'camera 2 ',conn.getState())
-                    }
-                )
-            }
-            await conn.setRemoteDesc(offer.camera);
-            answer['camera'] = await conn.makeAnswer()
-        }
         if (media.includes('screen') && offer.hasOwnProperty('screen')) {
-            let conn = WebRTC.findScreenReceiverConnection(from)
+            let conn = WebRTC.findScreenConnection(from)
             if (! conn || conn.getState() !== "new") {
-                conn = WebRTC.newScreenReceiverConnection(
+                conn = WebRTC.newScreenConnection(
                     from,
+                    'recvonly',
                     ({track , streams: [stream]}) => {
                         state.remoteStreams['screen'][stream.id] = stream
                         dispatch('updateShareScreen')
@@ -390,7 +268,7 @@ export const actions = {
                                 commit('controlScreenLoader' , false);
                                 break
                             case "failed":
-                                WebRTC.clearReceiverScreenConnection(from)
+                                WebRTC.clearScreenConnection(from)
                                 state.socket.emit("reconnect" , {
                                     media: ['screen'],
                                     to: from
@@ -415,71 +293,6 @@ export const actions = {
             await conn.setRemoteDesc(offer.screen);
             answer['screen'] = await conn.makeAnswer()
         }
-        if (media.includes('audio') && offer.hasOwnProperty('audio')) {
-            let conn = WebRTC.findAudioReceiverConnection(from)
-            if (! conn || conn.getState() !== "new") {
-                conn = WebRTC.newAudioReceiverConnection(
-                    from,
-                    ({track , streams: [stream]}) => {
-                        if (state.remoteStreams['audio'].hasOwnProperty(stream.id)) {
-                            state.remoteStreams['audio'][stream.id] = stream
-                            let audio  = document.getElementById(stream.id);
-                            let newElement = false;
-                            if  (! audio) {
-                                audio  = document.createElement('audio');
-                                newElement = true
-                            }
-                            audio.autoplay = true;
-                            audio.srcObject = stream;
-                            audio.load();
-                            if (newElement) {
-                                document.getElementById('main').appendChild(audio);
-                            }
-                        } else {
-                            state.remoteStreams['audio'][stream.id] = stream
-                            let audio  = document.createElement('audio');
-                            audio.autoplay = true;
-                            audio.defaultMuted  = false;
-                            audio.classList.add('hidden');
-                            audio.id = stream.id;
-                            audio.setAttribute("muted","true")
-                            audio.srcObject = stream;
-                            audio.load();
-                            document.getElementById('main').appendChild(audio);
-                        }
-                        commit('controlSound' , {
-                            value: state.sound
-                        })
-                    },
-                    () => {
-                        console.log('audio 2 ice', conn.getICEState())
-                    },
-                    (e) => {
-                        if (e.candidate) {
-                            state.socket.emit("send-sender-candidate" , {
-                                candidate: e.candidate,
-                                media: WebRTC.getTypes().audio,
-                                to: from
-                            })
-                        }
-                    },
-                    () => {
-                        switch (conn.getState()) {
-                            case "failed":
-                                WebRTC.clearReceiverAudioConnection(from)
-                                state.socket.emit("reconnect" , {
-                                    media: ['audio'],
-                                    to: from
-                                })
-                                break
-                        }
-                        console.log('audio 2 ',conn.getState())
-                    }
-                )
-            }
-            await conn.setRemoteDesc(offer.audio);
-            answer['audio'] = await conn.makeAnswer()
-        }
         state.socket.emit('make-answer',{
             answer,
             to: from,
@@ -488,26 +301,12 @@ export const actions = {
     },
     async answerMade({state , dispatch} , {media ,from , answer})  {
         if (media.length > 0) {
-            if (media.includes('camera') && answer.hasOwnProperty('camera')) {
-                let conn = WebRTC.findCameraSenderConnection(from)
-                if (! conn) {
-                    throw new Error("peer connection not found")
-                }
-                await conn.setRemoteDesc(answer.camera)
-            }
             if (media.includes('screen') && answer.hasOwnProperty('screen')) {
-                let conn = WebRTC.findScreenSenderConnection(from)
+                let conn = WebRTC.findScreenConnection(from)
                 if (! conn) {
                     throw new Error("peer connection not found")
                 }
                 await conn.setRemoteDesc(answer.screen)
-            }
-            if (media.includes('audio') && answer.hasOwnProperty('audio')) {
-                let conn = WebRTC.findAudioSenderConnection(from)
-                if (! conn) {
-                    throw new Error("peer connection not found")
-                }
-                await conn.setRemoteDesc(answer.audio)
             }
         }
     },
@@ -560,46 +359,15 @@ export const actions = {
                 state.shareScreen = false;
                 state.displayStream = null;
             }
-            WebRTC.traverseSenderScreenConnections((pc , key) => {
+            WebRTC.traverseScreenConnections((pc , key) => {
                 pc.close()
-                WebRTC.clearSenderScreenConnection(key)
+                WebRTC.clearScreenConnection(key)
             })
             commit('setContent' , false)
             commit('setShareScreen' , false)
             commit('setShareFile' , false)
             commit('controlScreenLoader',false);
         }
-
-        if (media.includes('camera')) {
-            if (state.videoStream) {
-                streams['camera'] = true
-                delete state.remoteStreams['camera'][state.videoStream.id]
-                state.videoStream.getTracks().forEach(function(track) { track.stop(); })
-                state.videoStream = null;
-            }
-            WebRTC.traverseSenderCameraConnections((pc , key) => {
-                pc.close()
-                WebRTC.clearSenderCameraConnections(key)
-            })
-            commit('controlCamera',false);
-            commit('controlCameraLoader',false);
-            dispatch('setDynamicGrid');
-        }
-
-        if (media.includes('audio')) {
-            if (state.localStream) {
-                streams['audio'] = true
-                delete state.remoteStreams['audio'][state.localStream.id]
-                state.localStream.getTracks().forEach(function(track) { track.stop(); })
-                state.localStream = null;
-            }
-            WebRTC.traverseSenderAudioConnections((pc , key) => {
-                pc.close()
-                WebRTC.clearSenderAudioConnection(key)
-            })
-            commit('controlMicrophone',false);
-        }
-
         if (media.length > 0) {
             state.socket.emit('end-stream' , {
                 streams,
@@ -614,10 +382,10 @@ export const actions = {
                 commit('setShareScreen' , false)
                 commit('setShareFile' , false)
                 delete state.remoteStreams['screen'][streams['screen']]
-                const conn = WebRTC.findScreenReceiverConnection(from)
+                const conn = WebRTC.findScreenConnection(from)
                 if (conn) {
                     conn.close()
-                    WebRTC.clearReceiverScreenConnection(from)
+                    WebRTC.clearScreenConnection(from)
                 }
             }
             if (streams.hasOwnProperty('file') && streams.file) {
@@ -628,37 +396,10 @@ export const actions = {
                 state.remoteStreams['file'] = null
                 state.file = null
             }
-
-            if (streams.hasOwnProperty('camera') && streams.camera) {
-                commit('controlCameraLoader',false);
-                delete state.remoteStreams['camera'][streams['camera']]
-                const conn = WebRTC.findCameraReceiverConnection(from)
-                if (conn) {
-                    conn.close()
-                    WebRTC.clearReceiverCameraConnections(from)
-                }
-                dispatch('setDynamicGrid');
-            }
-            if (streams.hasOwnProperty('audio')  && streams.audio) {
-                delete state.remoteStreams['audio'][streams['audio']]
-                const conn = WebRTC.findAudioReceiverConnection(from)
-                if (conn) {
-                    conn.close()
-                    WebRTC.clearReceiverAudioConnection(from)
-                }
-                const el = document.getElementById(streams['audio']);
-                if (el) el.remove()
-            }
         }
     },
 
     async joinStream({state , dispatch} , {from}) {
-        if (state.videoStream) {
-            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['camera'] ,firstTime: false})
-        }
-        if (state.localStream) {
-            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['audio'] ,firstTime: false})
-        }
         if (state.displayStream) {
             await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['screen'] ,firstTime: false})
         }
@@ -670,23 +411,11 @@ export const actions = {
         }
     },
     async reconnect({state , dispatch} , {from , media}) {
-        if (state.videoStream && media.includes('camera')) {
-            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['camera'] ,firstTime: false})
-        }
-        if (state.localStream && media.includes('audio')) {
-            await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['audio'] ,firstTime: false})
-        }
         if (state.displayStream  && media.includes('screen')) {
             await dispatch('startStream',{from: state.socket.id,to: [from] ,media: ['screen'] ,firstTime: false})
         }
     },
     async reconnectToAll({state , dispatch} , media) {
-        if (state.videoStream && media.includes('camera')) {
-            await dispatch('videoShare')
-        }
-        if (state.localStream && media.includes('audio')) {
-            await dispatch('audioShare')
-        }
         if (state.displayStream && media.includes('screen')) {
             await dispatch('screenShare')
         }
@@ -695,39 +424,22 @@ export const actions = {
         }
     },
 
-    setDynamicGrid({state}) {
-        const streams = Object.entries(state.remoteStreams['camera'] ?? {})
-        const boxCount = streams.length
-        const outerBox = document.querySelector('.outer-box');
-        if (boxCount > 0) {
-            outerBox.innerHTML = '';
+    setDynamicGrid({state} , refresh = false) {
+        const outerBox = state.videoArea;
+        if (outerBox) {
+            const boxCount = outerBox?.querySelectorAll('.inner-box')?.length ?? 0;
             let columns = Math.ceil(Math.sqrt(boxCount));
             let rows = Math.ceil(boxCount / columns);
             let columnWidth = 100 / columns;
             let rowHeight = 100 / rows;
             outerBox.style.gridTemplateColumns = `repeat(${columns}, ${columnWidth}%)`;
             outerBox.style.gridTemplateRows = `repeat(${rows}, ${rowHeight}%)`;
-            for (const [key , value] of streams) {
-                const box = document.createElement('div')
-                const name = document.createElement('span')
-                box.id = key;
-                box.classList.add('inner-box');
-                name.classList.add('inner-box-label');
-                name.classList.add('rounded');
-                name.innerHTML = value?.name ?? 'ناشناس'
-                const video = document.createElement('video')
-                video.srcObject = value.stream;
-                video.muted = true;
-                video.id = `${key}_player` ;
-                video.autoplay = true;
-                video.playsinline = true;
-                box.appendChild(video)
-                box.appendChild(name)
-                outerBox.appendChild(box);
+            if (refresh) {
+                const newBox = document.querySelector('.outer-box')
+                if (newBox) {
+                    newBox.replaceWith(outerBox)
+                }
             }
-        } else {
-            outerBox.innerHTML = '';
-            state.remoteStreams['camera'] = {}
         }
     },
     updateShareScreen({state}) {
@@ -738,18 +450,6 @@ export const actions = {
     },
 
     async setDevices({state,dispatch}) {
-        try {
-            let stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-            stream.getTracks().forEach(function (track) {
-                track.stop()
-            })
-            stream = null
-        } catch (error) {
-            console.error('Permission denied or error occurred:', error);
-        }
         function updateDevice() {
             navigator.mediaDevices
                 .enumerateDevices()

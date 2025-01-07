@@ -1,5 +1,5 @@
 <template>
-  <div v-if="! conected" class="loader">
+  <div v-if="! connected" class="loader">
     <loader></loader>
   </div>
   <top2 v-if="room.ui === 2" :ping="pingValue" @logout="logout" :room="room" :host="host" :user="user" :clients="clients" :socket="socket"></top2>
@@ -14,6 +14,9 @@
     </template>
     <content v-if="content"></content>
   </main>
+  <div id="audios" class="hidden">
+
+  </div>
 </template>
 <script>
 import Top from "../components/Meetin/Top.vue";
@@ -27,6 +30,7 @@ import {inject} from 'vue';
 import axios from 'axios'
 import Camera from "../components/Meetin/Camera.vue";
 import Swal from "sweetalert2";
+// const mediasoupClient = await import('mediasoup-client');
 
 export default {
   components: {
@@ -49,7 +53,6 @@ export default {
       mainLoading: true,
       baseUrl: inject('BaseUrl'),
       logo: null,
-      conected: false,
       lowSignal: false,
       onLine: navigator.onLine,
       pingValue: 0,
@@ -63,6 +66,9 @@ export default {
     },
     showChatBox() {
       return this.$store.state.top.chat;
+    },
+    connected() {
+      return this.$store.state.connected;
     },
     content(){
       return this.$store.state.main_content
@@ -101,26 +107,6 @@ export default {
     if (this.room.ui === 2) {
       this.$store.commit('setMainContent' , false)
     }
-    Swal.fire({
-      position: 'center-center',
-      text: "فعال سازی بلندگو ها؟",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "بله, فعال شود!",
-      cancelButtonText: "خیر , فعال نشود"
-    }).then((res) => {
-      if (res.isConfirmed) {
-        this.$store.commit('controlSound', {
-          value: true,
-        });
-      } else {
-        this.$store.commit('controlSound', {
-          value: false,
-        });
-      }
-    })
   },
   watch: {
     lowSignal(value) {
@@ -154,12 +140,13 @@ export default {
       this.$store.dispatch('setDevices');
       return this.socket;
     },
-    join(){
+    async join(){
       this.socket.emit('join',{
         token: this.auth.token,
         type: this.auth.type,
         name: this.auth.name,
       })
+      await this.$store.dispatch('init' , {room: this.room ,name: this.auth.name});
     },
     wires() {
       let meeting = this;
@@ -223,9 +210,9 @@ export default {
         }
       });
       this.socket.on('connect', async data => {
-        this.conected = true;
+        this.$store.state.connected = true;
         this.lowSignal = false;
-        this.join();
+        await this.join();
       });
       this.socket.on('disconnect',async data => {
         this.lowSignal = true;
@@ -234,6 +221,7 @@ export default {
         if (data.data.code !== 404) {
           this.clearCookie();
         }
+        this.socket.disconnect()
         this.redirectClientIfHappenedError(this.$route.params.key , data.data.code);
       });
       this.socket.on('get-offer' , async data => {
@@ -247,16 +235,12 @@ export default {
             });
             this.$store.state.shareScreen = false;
           } else if (data.data.device === 'microphone') {
-            this.$store.dispatch('endStream',{
-              media: ['audio']
-            })
             this.status = false;
+            this.$store.dispatch('controlDevices','microphone')
           }
           else if (data.data.device === 'camera') {
-            this.$store.dispatch('endStream',{
-              media: ['camera']
-            })
             this.status = false;
+            this.$store.dispatch('controlDevices','camera')
           }
         }
       });

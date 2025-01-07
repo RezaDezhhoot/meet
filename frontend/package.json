@@ -11,6 +11,7 @@
     "@vueuse/core": "^10.5.0",
     "axios": "^1.5.1",
     "jszip": "^3.10.1",
+    "mediasoup-client": "^3.8.1",
     "pdfjs-dist": "^4.9.155",
     "pinia": "^2.1.6",
     "primevue": "^3.43.0",

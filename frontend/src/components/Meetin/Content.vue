@@ -280,14 +280,7 @@ export default {
       }
     },
     startShareScreen() {
-      if (Object.entries(this.$store.state.remoteStreams['screen']).length > 0) {
-        Swal.fire({
-          icon: "warning",
-          title: "پیش از شما یک کاربر دیگر در حال اشتراک گزاری صفحفه می باشد",
-        });
-        return
-      }
-      this.$store.dispatch('shareStream','screen');
+      this.$store.dispatch('shareStream',{media: 'screen'});
     },
     end() {
       this.$store.dispatch('endStream',{

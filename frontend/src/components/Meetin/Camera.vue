@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'full-screen': (full)}" v-if="user" :style="'height:'+height+'%'" class="video-tab relative  overflow-y-auto w-full mr-[0.5rem]  bg-white rounded-b-[0.5rem]  lg:rounded-[0.5rem] ">
+  <div :class="{'full-screen': (full)}" v-if="user" :style="'height:'+height+'%'" class="video-tab relative mb-2 overflow-y-auto w-full mr-[0.5rem]  bg-white rounded-b-[0.5rem]  lg:rounded-[0.5rem] ">
     <div class="upload-progress"  :style="{ width: progress + '%' }"></div>
 
     <div class="camera-controller ">
@@ -43,10 +43,12 @@
         </ul>
       </div>
     </div>
-    <div :class="{hidden: Object.entries(cameras).length > 0}" class="flex items-center h-full w-full justify-center">
-      <span  class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
-    </div>
-    <div :class="{hidden: Object.entries(cameras).length === 0}" class="h-full  outer-box text-center">
+<!--    <div :class="{hidden: Object.entries(cameras).length > 0}" class="flex items-center h-full w-full justify-center">-->
+<!--    </div>-->
+    <div id="outer-box" class="h-full  outer-box text-center">
+      <div class="h-full empty-video w-full flex justify-center items-center">
+        <span  class="text-[#b8b8b8] font-bold">هیج ویدئویی نمایش داده نمی شود</span>
+      </div>
     </div>
   </div>
 </template>
@@ -90,7 +92,7 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('setDynamicGrid')
+    this.$store.dispatch('setDynamicGrid' , true)
   },
 }
 </script>

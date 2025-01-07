@@ -11,12 +11,80 @@ let typistUsers = {};
 let host = {};
 let host_socket_id = {};
 const validator = require('validator');
+const mediasoup = require('mediasoup')
+const config = require('../../../../webRTC/config')
+const Room = require('../../../../webRTC/Room')
+const Peer = require('../../../../webRTC/Peer')
 
 const UserResource = require('../../../User/Resources/Api/V1/UserResource');
 const MediaResource = require('../../Resources/Api/V1/MediaResource');
 const ChatResoource = require('../../Resources/Api/V1/ChatResoource');
 
-module.exports.createRoom = (io , socket , room) => {
+let workers = []
+let nextMediasoupWorkerIdx = 0
+let roomList = new Map()
+
+;(async () => {
+    await createWorkers()
+})()
+
+async function createWorkers() {
+    let { numWorkers } = config.mediasoup
+
+    for (let i = 0; i < numWorkers; i++) {
+        let worker = await mediasoup.createWorker({
+            logLevel: config.mediasoup.worker.logLevel,
+            logTags: config.mediasoup.worker.logTags,
+            rtcMinPort: config.mediasoup.worker.rtcMinPort,
+            rtcMaxPort: config.mediasoup.worker.rtcMaxPort
+        })
+        worker.on('died', () => {
+            console.error('mediasoup worker died, exiting in 2 seconds... [pid:%d]', worker.pid)
+            setTimeout(() => process.exit(1), 2000)
+        })
+        workers.push(worker)
+    }
+}
+
+function getMediasoupWorker() {
+    const worker = workers[nextMediasoupWorkerIdx]
+
+    if (++nextMediasoupWorkerIdx === workers.length) nextMediasoupWorkerIdx = 0
+
+    return worker
+}
+
+module.exports.createRoom2 = async (io,socket,data,room , callback) => {
+    if (roomList.has(room.key)) {
+        callback('already exists')
+    } else {
+        console.log('Created room', { room_id: room.key })
+        let worker = await getMediasoupWorker()
+        roomList.set(room.key, new Room(room.key, worker, io))
+        callback(room.key)
+    }
+}
+
+module.exports.join2 = async (io,socket,{ room_id, name },room , callback) => {
+    console.log('User joined', {
+        room_id: room_id,
+        name: name
+    })
+
+    if (!roomList.has(room_id)) {
+        return callback({
+            error: 'Room does not exist'
+        })
+    }
+
+    roomList.get(room_id).addPeer(new Peer(socket.id, name))
+    socket.room_id = room_id
+
+    callback(roomList.get(room_id).toJson())
+}
+
+
+module.exports.createRoom = async (io , socket , room) => {
     if (! users[room.key]) {
         users[room.key] = {};
     }
@@ -210,6 +278,115 @@ module.exports.join = async (io,socket,data,room) => {
     })
 }
 
+module.exports.getProducers = async (io,socket,data,room) => {
+    if (!roomList.has(room.key)) return
+    console.log('Get producers', { name: `${roomList.get(room.key).getPeers().get(socket.id).name}` })
+    let producerList = roomList.get(room.key).getProducerListForPeer()
+
+    socket.emit('newProducers', producerList)
+}
+
+module.exports.getRouterRtpCapabilities = async (io,socket,data,room , callback) => {
+    console.log('Get RouterRtpCapabilities', {
+        name: `${roomList.get(room.key).getPeers().get(socket.id)?.name}`
+    })
+    try {
+        callback(roomList.get(room.key).getRtpCapabilities())
+    } catch (e) {
+        callback({
+            error: e.message
+        })
+    }
+}
+
+module.exports.createWebRtcTransport = async (io,socket,data,room , callback) => {
+    console.log('Create webrtc transport', {
+        name: `${roomList.get(room.key).getPeers().get(socket.id).name}`
+    })
+    try {
+        const { params } = await roomList.get(room.key).createWebRtcTransport(socket.id)
+        callback(params)
+    } catch (err) {
+        callback({
+            error: err.message
+        })
+    }
+}
+
+module.exports.connectTransport = async (io,socket,{ transport_id, dtlsParameters },room , callback) => {
+    console.log('Connect transport', { name: `${roomList.get(room.key).getPeers().get(socket.id).name}` })
+
+    if (!roomList.has(room.key)) return
+    await roomList.get(room.key).connectPeerTransport(socket.id, transport_id, dtlsParameters)
+
+    callback('success')
+}
+
+module.exports.produce = async (io,socket,{ kind, rtpParameters, producerTransportId },room , callback) => {
+    if (!roomList.has(room.key)) {
+        return callback({ error: 'not is a room' })
+    }
+    let producer_id = await roomList.get(room.key).produce(socket.id, producerTransportId, rtpParameters, kind)
+
+    console.log('Produce', {
+        type: `${kind}`,
+        name: `${roomList.get(room.key).getPeers().get(socket.id).name}`,
+        id: `${producer_id}`
+    })
+
+    callback({
+        producer_id
+    })
+}
+
+module.exports.consume = async (io,socket,{ consumerTransportId, producerId, rtpCapabilities },room , callback) => {
+    //TODO null handling
+    let params = await roomList.get(room.key).consume(socket.id, consumerTransportId, producerId, rtpCapabilities)
+
+    console.log('Consuming', {
+        name: `${roomList.get(room.key) && roomList.get(room.key).getPeers().get(socket.id).name}`,
+        producer_id: `${producerId}`,
+        consumer_id: `${params.id}`
+    })
+
+    callback(params)
+}
+
+module.exports.resume = async (io,socket,data,room , callback) => {
+    await consumer.resume()
+    callback()
+}
+
+module.exports.producerClosed = async (io,socket,{ producer_id },room) => {
+    console.log('Producer close', {
+        name: `${roomList.get(room.key) && roomList.get(room.key).getPeers().get(socket.id).name}`
+    })
+    roomList.get(room.key).closeProducer(socket.id, producer_id)
+}
+
+module.exports.exitRoom = async (io,socket,data,room , callback) => {
+    console.log('Exit room', {
+        name: `${roomList.get(room.key) && roomList.get(room.key).getPeers().get(socket.id).name}`
+    })
+
+    if (!roomList.has(room.key)) {
+        callback({
+            error: 'not currently in a room'
+        })
+        return
+    }
+    // close transports
+    await roomList.get(room.key).removePeer(socket.id)
+    if (roomList.get(room.key).getPeers().size === 0) {
+        roomList.delete(room.key)
+    }
+    callback('successfully exited room')
+}
+
+module.exports.getMyRoomInfo = async (io,socket,data,room , callback) => {
+    callback(roomList.get(room.key).toJson())
+}
+
 module.exports.leave = async (io,socket,data,room) => {
     const user = users[room.key][socket.id]
     if (user && user.hasOwnProperty('user') && permissions.hasOwnProperty(room.key) && permissions[room.key].hasOwnProperty(user.id)) {
@@ -281,30 +458,6 @@ module.exports.noTyping = async (io,socket,data,room) => {
 module.exports.shareStream = async (io,socket,data,room) => {
     const media = data.media;
     const firstTime = data?.firstTime ?? false
-    if (media.includes('camera') && firstTime) {
-        users[room.key][socket.id].media.settings.camera = data.streamID.camera;
-        users[room.key][socket.id].media.media.remote.camera = true;
-        await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-            room_id: room.id,
-            action: 'share-camera',
-            user_id: Number(users[room.key][socket.id].user.id) ?? null,
-            user_ip: socket.handshake.address,
-            user_name: users[room.key][socket.id].name,
-        }),'logLists');
-    }
-
-    if (media.includes('audio') && firstTime) {
-        users[room.key][socket.id].media.settings.audio = data.streamID.audio;
-        users[room.key][socket.id].media.media.remote.microphone = true;
-        await RabbitMQ.directPublish('rooms','logs',JSON.stringify({
-            room_id: room.id,
-            action: 'share-audio',
-            user_id: Number(users[room.key][socket.id].user.id) ?? null,
-            user_ip: socket.handshake.address,
-            user_name: users[room.key][socket.id].name,
-        }),'logLists');
-    }
-
     if (media.includes('screen') && firstTime) {
         users[room.key][socket.id].media.settings.screen = data.streamID.screen;
         users[room.key][socket.id].media.media.remote.screen = true;
@@ -344,15 +497,6 @@ module.exports.endStream = async (io,socket,data,room) => {
             users[room.key][socket.id].media.settings.screen = false;
             users[room.key][socket.id].media.settings.file = false;
         }
-        if (data.streams.hasOwnProperty('camera')) {
-            data.streams['camera'] = users[room.key][socket.id].media.settings.camera;
-            users[room.key][socket.id].media.settings.camera = false;
-        }
-        if (data.streams.hasOwnProperty('audio')) {
-            data.streams['audio'] = users[room.key][socket.id].media.settings.audio;
-            users[room.key][socket.id].media.settings.audio = false;
-        }
-
 
         socket.broadcast.emit('end-stream',{
             streams: data.streams,
@@ -489,6 +633,13 @@ module.exports.sendReceiverCandidate = async (io,socket,data,room) => {
 }
 
 module.exports.disconnect = async (io,socket,data,room) => {
+    console.log('ohoh')
+    console.log('Disconnect', {
+        name: `${roomList.get(room.key) && roomList.get(room.key).getPeers().get(socket.id)?.name}`
+    })
+    if (roomList.has(room.key)) {
+        await roomList.get(room.key).removePeer(socket.id)
+    }
     try {
         if (users && users.hasOwnProperty(room.key) && users[room.key].hasOwnProperty(socket.id) && users[room.key][socket.id]) {
             if (users[room.key][socket.id].user.id === room.host_id) {
@@ -501,9 +652,7 @@ module.exports.disconnect = async (io,socket,data,room) => {
                 });
             }
             const streams = {
-                camera: users[room.key][socket.id].media.settings.camera,
                 screen: users[room.key][socket.id].media.settings.screen,
-                audio: users[room.key][socket.id].media.settings.audio,
             }
             io.emit('end-stream',{
                 streams,

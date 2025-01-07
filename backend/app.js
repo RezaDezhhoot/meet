@@ -5,6 +5,7 @@ const app = express();
 const appDir = path.dirname(require.main.filename);
 const sequelize = require('./config/database');
 const cors = require('cors');
+const https = require('httpolyglot')
 
 app.use(express.urlencoded({limit: '5000mb',extended: false}));
 app.use(express.json({limit: '5000mb'}));
@@ -12,7 +13,7 @@ app.use(cors());
 
 app.set('trust proxy', '127.0.0.1');
 
-const server = http.createServer(app);
+const server = https.createServer({},app);
 
 require(path.join(appDir,'app/Providers/LibraryServiceProvider')).load(app);
 require(path.join(appDir,'app/Providers/RouteServiceProvider')).loadApiRoutes(app);

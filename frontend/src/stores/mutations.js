@@ -1,4 +1,5 @@
 import RTCConnection from "../services/RTCConnection";
+// window.mediasoupClient = mediasoup
 
 export const mutations = {
     setClients(state , clients) {
@@ -38,6 +39,17 @@ export const mutations = {
     },
     setSocket(state , socket){
         state.socket = socket;
+        state.socket.request = function request(type, data = {}) {
+            return new Promise((resolve, reject) => {
+                socket.emit(type, data, (data) => {
+                    if (data.error) {
+                        reject(data.error)
+                    } else {
+                        resolve(data)
+                    }
+                })
+            })
+        }
     },
     updateHiddenCamera(state , status) {
         state.hiddenVideo = status;
@@ -69,13 +81,7 @@ export const mutations = {
         const mediaPlayers = document.querySelectorAll('audio');
         Array.from(mediaPlayers).forEach(async el => {
             el.volume = value.value ? 1.0 : 0;
-            if (value.value) {
-                el.removeAttribute("muted")
-            } else {
-                el.setAttribute("muted","true")
-            }
             el.load();
-            // await el.play();
         })
         localStorage.setItem('sound' , value.value)
     },

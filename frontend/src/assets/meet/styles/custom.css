@@ -453,6 +453,7 @@
     box-sizing: border-box;
     overflow: hidden; /* Prevent scrolling */
     position: relative;
+    z-index: 2;
 }
 
 .inner-box > video {
@@ -470,4 +471,11 @@
     padding: 1%;
     font-size: 12px;
     box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+
+.empty-video {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
 }

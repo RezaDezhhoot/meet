@@ -49,6 +49,8 @@ services:
       - mysql
     ports:
       - '3000:3000'
+      - "10000-10100:10000-10100"
+      - "3478:3478"
     volumes:
       - ./storage:/app/storage
       - ./backend:/app
@@ -64,14 +66,6 @@ services:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-    deploy:
-      replicas: 1
-      update_config:
-        delay: 5s
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [ node.hostname == slave1 ]
     networks:
       - main
   frontend:

@@ -4,8 +4,9 @@ export const state = {
     loaders: {
         screen: false
     },
-
     mainLoading: false,
+    connected: false,
+    videoArea: null,
     mediaLoading: false,
     cameraLoading: false,
     main_content: true,

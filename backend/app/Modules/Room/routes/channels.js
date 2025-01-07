@@ -14,9 +14,10 @@ module.exports.ChannelV1 = async (io) => {
         const room = await Room.findOne({where:{key:namespace}});
         if (room && room.status === OPEN) {
             const nsp = socket.nsp;
-            SocketV1.createRoom(nsp,socket,room)
-
+            await SocketV1.createRoom(nsp,socket,room)
             socket.on('ping', async (data , callback) => await SocketV1.ping(nsp,socket,data,room , callback))
+            socket.on('createRoom', async (data , callback) => await SocketV1.createRoom2(nsp,socket,data,room , callback))
+            socket.on('join2', async (data , callback) => await SocketV1.join2(nsp,socket,data,room , callback))
             socket.on('join', async data => await SocketV1.join(nsp,socket,data,room))
             socket.on('share-file', async data => await SocketV1.shareFile(nsp,socket,data,room))
             socket.on('share-file-to', async data => await SocketV1.shareFileTo(nsp,socket,data,room))
@@ -36,6 +37,17 @@ module.exports.ChannelV1 = async (io) => {
             socket.on('send-sender-candidate', async data => await SocketV1.sendSenderCandidate(nsp,socket,data,room))
             socket.on('send-receiver-candidate', async data => await SocketV1.sendReceiverCandidate(nsp,socket,data,room))
             socket.on('reconnect', async data => await SocketV1.reconnect(nsp,socket,data,room))
+
+            socket.on('getRouterRtpCapabilities', async (data , callback) => await SocketV1.getRouterRtpCapabilities(nsp,socket,data,room , callback))
+            socket.on('getProducers', async (data , callback) => await SocketV1.getProducers(nsp,socket,data,room , callback))
+            socket.on('createWebRtcTransport', async (data , callback) => await SocketV1.createWebRtcTransport(nsp,socket,data,room , callback))
+            socket.on('connectTransport', async (data , callback) => await SocketV1.connectTransport(nsp,socket,data,room , callback))
+            socket.on('produce', async (data , callback) => await SocketV1.produce(nsp,socket,data,room , callback))
+            socket.on('consume', async (data , callback) => await SocketV1.consume(nsp,socket,data,room , callback))
+            socket.on('resume', async (data , callback) => await SocketV1.resume(nsp,socket,data,room , callback))
+            socket.on('getMyRoomInfo', async (data , callback) => await SocketV1.getMyRoomInfo(nsp,socket,data,room , callback))
+            socket.on('producerClosed', async (data) => await SocketV1.producerClosed(nsp,socket,data,room))
+            socket.on('exitRoom', async (data,callback) => await SocketV1.exitRoom(nsp,socket,data,room,callback))
         } else {
             socket.emit('error',{
                 data:{
