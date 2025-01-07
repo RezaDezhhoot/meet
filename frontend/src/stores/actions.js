@@ -450,6 +450,12 @@ export const actions = {
     },
 
     async setDevices({state,dispatch}) {
+        try {
+            let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            stream = null
+        } catch (error) {
+            console.error("Error accessing media devices:", error);
+        }
         function updateDevice() {
             navigator.mediaDevices
                 .enumerateDevices()
