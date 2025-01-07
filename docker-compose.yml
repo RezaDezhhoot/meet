@@ -49,7 +49,7 @@ services:
       - mysql
     ports:
       - '3000:3000'
-      - "10000-10100:10000-10100"
+      - "10000-10500:10000-10500"
     volumes:
       - ./storage:/app/storage
       - ./backend:/app

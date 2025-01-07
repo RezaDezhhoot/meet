@@ -25,7 +25,7 @@ RUN npm rebuild mediasoup --build-from-source
 RUN npm install -g nodemon@2.0.7
 
 EXPOSE 3000
-EXPOSE 10000-10100
+EXPOSE 10000-10500
 
 # Copy the rest of the application code
 COPY ./backend .
