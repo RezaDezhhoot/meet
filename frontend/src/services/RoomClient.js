@@ -273,7 +273,7 @@ export default class RoomClient {
 
             case 'failed':
               this.consumerTransport.close()
-              await this.initTransports(device)
+              await this.join(this.name,this.room_id)
               break
 
             default:
