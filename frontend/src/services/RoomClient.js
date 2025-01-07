@@ -275,6 +275,19 @@ export default class RoomClient {
             case 'failed':
               this.consumerTransport.close()
               await this.initTransports(device)
+              if (
+                  this.context.state.user.media.media.local.camera &&
+                  this.context.state.user.media.media.remote.camera && hasVideo
+              ) {
+                await this.produce(RoomClient.mediaType.video)
+              }
+
+              if (
+                  this.context.state.user.media.media.local.microphone &&
+                  this.context.state.user.media.media.remote.microphone && hasMicrophone
+              ) {
+                await this.produce(RoomClient.mediaType.audio)
+              }
               // Swal.fire({
               //   position: 'center-center',
               //   text: 'مشکلی در ارتباط شما رخ داده است در حال برقراری ارتباط مجدد!',
@@ -510,7 +523,7 @@ export default class RoomClient {
         callback(true , null)
       }
     } catch (err) {
-      callback(false , err)
+      // callback(false , err)
       console.log('Produce error:', err)
     }
   }
