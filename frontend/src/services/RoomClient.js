@@ -222,7 +222,6 @@ export default class RoomClient {
               break
 
             default:
-              this.context.state.connected = false;
               break
           }
         }.bind(this)
@@ -290,14 +289,6 @@ export default class RoomClient {
               ) {
                 await this.produce(RoomClient.mediaType.audio)
               }
-              // Swal.fire({
-              //   position: 'center-center',
-              //   text: 'مشکلی در ارتباط شما رخ داده است در حال برقراری ارتباط مجدد!',
-              //   icon: 'warning',
-              //   showConfirmButton: false,
-              //   backdrop: false,
-              //   timer: 3500,
-              // })
               break
 
             default:
