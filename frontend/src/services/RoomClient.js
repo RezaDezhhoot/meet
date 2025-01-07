@@ -246,7 +246,6 @@ export default class RoomClient {
               break
 
             case 'failed':
-              this.context.state.connected = false;
               const hasVideo = this.hasProducer(RoomClient.mediaType.video)
               const hasMicrophone = this.hasProducer(RoomClient.mediaType.audio)
 
