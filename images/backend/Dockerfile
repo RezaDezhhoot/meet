@@ -20,7 +20,7 @@ COPY ./backend/package*.json .
 # Install app dependencies
 RUN npm install
 
-RUN npm npm rebuild mediasoup --build-from-source
+RUN npm rebuild mediasoup --build-from-source
 
 RUN npm install -g nodemon@2.0.7
 
