@@ -192,35 +192,33 @@ export default class RoomClient {
     )
   }
 
-  async initTransports(device) {
-    // init producerTransport
-    {
-      const data = await this.socket.request('createWebRtcTransport', {
-        forceTcp: false,
-        rtpCapabilities: device.rtpCapabilities
-      })
+  async initProducerTransport(device) {
+    const data = await this.socket.request('createWebRtcTransport', {
+      forceTcp: false,
+      rtpCapabilities: device.rtpCapabilities
+    })
 
-      if (data.error) {
-        console.error(data.error)
-        return
-      }
+    if (data.error) {
+      console.error(data.error)
+      return
+    }
 
-      this.producerTransport = device.createSendTransport(data)
+    this.producerTransport = device.createSendTransport(data)
 
-      this.producerTransport.on(
+    this.producerTransport.on(
         'connect',
         async function ({ dtlsParameters }, callback, errback) {
           this.socket
-            .request('connectTransport', {
-              dtlsParameters,
-              transport_id: data.id
-            })
-            .then(callback)
-            .catch(errback)
+              .request('connectTransport', {
+                dtlsParameters,
+                transport_id: data.id
+              })
+              .then(callback)
+              .catch(errback)
         }.bind(this)
-      )
+    )
 
-      this.producerTransport.on(
+    this.producerTransport.on(
         'produce',
         async function ({ kind, rtpParameters }, callback, errback) {
           try {
@@ -236,9 +234,9 @@ export default class RoomClient {
             errback(err)
           }
         }.bind(this)
-      )
+    )
 
-      this.producerTransport.on(
+    this.producerTransport.on(
         'connectionstatechange',
         async function (state) {
           console.log(state)
@@ -253,7 +251,7 @@ export default class RoomClient {
               const hasMicrophone = this.hasProducer(RoomClient.mediaType.audio)
 
               this.producerTransport.close()
-              await this.initTransports(device)
+              await this.initProducerTransport(device)
               this.closeProducer(RoomClient.mediaType.audio)
               this.closeProducer(RoomClient.mediaType.video)
 
@@ -270,15 +268,18 @@ export default class RoomClient {
               ) {
                 await this.produce(RoomClient.mediaType.audio)
               }
-              await this.initConsumerTransport(device)
               break
 
             default:
               break
           }
         }.bind(this)
-      )
-    }
+    )
+  }
+
+  async initTransports(device) {
+    // init producerTransport
+    await  this.initProducerTransport(device)
 
     // init consumerTransport
     await this.initConsumerTransport(device)
