@@ -100,7 +100,7 @@ export default {
     }
     setInterval(async () => {
       await this.ping()
-    }, 5000);
+    }, 10000);
     await this.connect()
     await this.ping()
 
