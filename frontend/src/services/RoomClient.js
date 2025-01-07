@@ -270,6 +270,7 @@ export default class RoomClient {
               ) {
                 await this.produce(RoomClient.mediaType.audio)
               }
+              await this.initConsumerTransport(device)
               break
 
             default:
