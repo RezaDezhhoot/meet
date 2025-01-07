@@ -394,7 +394,9 @@ export default class RoomClient {
     }
     if (this.producerLabel.has(type)) {
       console.log('Producer already exists for this type ' + type)
-      callback(false , 'Producer already exists for this type ' + type)
+      if (callback) {
+        callback(false , 'Producer already exists for this type ' + type)
+      }
       return
     }
     console.log('Mediacontraints:', mediaConstraints)
