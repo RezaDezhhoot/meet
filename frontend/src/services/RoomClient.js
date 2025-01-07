@@ -515,7 +515,7 @@ export default class RoomClient {
       function ({ consumer, stream, kind }) {
         this.consumers.set(consumer.id, consumer)
 
-        console.log(consumer)
+        console.log(stream)
         let elem
         if (kind === 'video') {
           const box = document.createElement('div')
