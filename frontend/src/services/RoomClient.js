@@ -141,6 +141,60 @@ export default class RoomClient {
     return device
   }
 
+  async initConsumerTransport(device) {
+    const data = await this.socket.request('createWebRtcTransport', {
+      forceTcp: false
+    })
+
+    if (data.error) {
+      console.error(data.error)
+      return
+    }
+
+    // only one needed
+    this.consumerTransport = device.createRecvTransport(data)
+    this.consumerTransport.on(
+        'connect',
+        function ({ dtlsParameters }, callback, errback) {
+          this.socket
+              .request('connectTransport', {
+                transport_id: this.consumerTransport.id,
+                dtlsParameters
+              })
+              .then(callback)
+              .catch(errback)
+        }.bind(this)
+    )
+
+    this.consumerTransport.on('onconnectionstatechange' , (e) => {
+      console.log(e)
+    })
+    this.consumerTransport.on(
+        'connectionstatechange',
+        async function (state) {
+          console.log(state)
+          switch (state) {
+            case 'connecting':
+              break
+
+            case 'connected':
+              this.context.state.connected = true;
+              //remoteVideo.srcObject = await stream;
+              //await socket.request('resume');
+              break
+
+            case 'failed':
+              this.consumerTransport.close()
+              await this.initConsumerTransport(device)
+              break
+
+            default:
+              break
+          }
+        }.bind(this)
+    )
+  }
+
   async initTransports(device) {
     // init producerTransport
     {
@@ -229,59 +283,7 @@ export default class RoomClient {
     }
 
     // init consumerTransport
-    {
-      const data = await this.socket.request('createWebRtcTransport', {
-        forceTcp: false
-      })
-
-      if (data.error) {
-        console.error(data.error)
-        return
-      }
-
-      // only one needed
-      this.consumerTransport = device.createRecvTransport(data)
-      this.consumerTransport.on(
-        'connect',
-        function ({ dtlsParameters }, callback, errback) {
-          this.socket
-            .request('connectTransport', {
-              transport_id: this.consumerTransport.id,
-              dtlsParameters
-            })
-            .then(callback)
-            .catch(errback)
-        }.bind(this)
-      )
-
-      this.consumerTransport.on('onconnectionstatechange' , (e) => {
-        console.log(e)
-      })
-      this.consumerTransport.on(
-        'connectionstatechange',
-        async function (state) {
-          console.log(state)
-          switch (state) {
-            case 'connecting':
-              break
-
-            case 'connected':
-              this.context.state.connected = true;
-              //remoteVideo.srcObject = await stream;
-              //await socket.request('resume');
-              break
-
-            case 'failed':
-              this.consumerTransport.close()
-              await this.join(this.name,this.room_id)
-              break
-
-            default:
-              break
-          }
-        }.bind(this)
-      )
-    }
+    await this.initConsumerTransport(device)
   }
 
   initSockets(callback = null) {
