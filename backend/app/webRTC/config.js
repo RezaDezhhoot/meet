@@ -14,7 +14,8 @@ const getLocalIp = () => {
       return
     }
   })
-  return "127.0.0.1"
+  console.log(localIp)
+  return localIp
 }
 
 module.exports = {
