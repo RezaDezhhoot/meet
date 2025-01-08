@@ -56,13 +56,13 @@
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
                 <x-admin.menu-item href="{{route('fm.fm-button')}}" icon="flaticon2-file" :active="request()->routeIs('unisharp.lfm.show')" label="مدیریت رسانه ها" />
-                <li class="menu-section">
-                    <h4 class="menu-text">بخش گزارشات</h4>
-                    <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
-                </li>
-                @role('administrator')
-                    <x-admin.menu-item href="{{route('log-viewer::dashboard')}}" icon="flaticon-book" :active="request()->routeIs(['telescope'])" label=" گزارش های سیستم logger" />
-                @endif
+{{--                <li class="menu-section">--}}
+{{--                    <h4 class="menu-text">بخش گزارشات</h4>--}}
+{{--                    <i class="menu-icon ki ki-bold-more-hor icon-md"></i>--}}
+{{--                </li>--}}
+{{--                @role('administrator')--}}
+{{--                    <x-admin.menu-item href="{{route('log-viewer::dashboard')}}" icon="flaticon-book" :active="request()->routeIs(['telescope'])" label=" گزارش های سیستم logger" />--}}
+{{--                @endif--}}
                 <li class="menu-section">
                     <h4 class="menu-text">بخش کاربر</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md "></i>
