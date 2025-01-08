@@ -250,7 +250,7 @@ export default class RoomClient {
               // this.closeProducer(RoomClient.mediaType.audio)
               // this.closeProducer(RoomClient.mediaType.video)
               //
-              // await this.initProducerTransport(device)
+              await this.initProducerTransport(device)
               // if (
               //     this.context.state.user.media.media.local.camera &&
               //     this.context.state.user.media.media.remote.camera
