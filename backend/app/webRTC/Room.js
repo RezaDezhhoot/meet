@@ -77,14 +77,23 @@ module.exports = class Room {
         iceParameters: transport.iceParameters,
         iceCandidates: transport.iceCandidates,
         dtlsParameters: transport.dtlsParameters,
-        // iceServers: [
-        //   { urls: "stun:stun.l.google.com:19302" },
-        //   {
-        //     urls: [process.env.ICE_SERVER_URL],
-        //     username: process.env.ICE_SERVER_USERNAME,
-        //     credential: process.env.ICE_SERVER_PASSWORD,
-        //   }
-        // ]
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun.l.google.com:5349" },
+          { urls: "stun:stun1.l.google.com:3478" },
+          { urls: "stun:stun1.l.google.com:5349" },
+          { urls: "stun:stun2.l.google.com:19302" },
+          { urls: "stun:stun2.l.google.com:5349" },
+          { urls: "stun:stun3.l.google.com:3478" },
+          { urls: "stun:stun3.l.google.com:5349" },
+          { urls: "stun:stun4.l.google.com:19302" },
+          { urls: "stun:stun4.l.google.com:5349" },
+          {
+            urls: [process.env.ICE_SERVER_URL],
+            username: process.env.ICE_SERVER_USERNAME,
+            credential: process.env.ICE_SERVER_PASSWORD,
+          }
+        ]
       }
     }
   }
