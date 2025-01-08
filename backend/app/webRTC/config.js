@@ -59,7 +59,10 @@ module.exports = {
           mimeType: 'video/VP8',
           clockRate: 90000,
           parameters: {
-            'x-google-start-bitrate': 1000
+            'x-google-start-bitrate': 600,
+            'x-google-max-bitrate': 900,   // Max 2.5 Mbps
+            'x-google-min-bitrate': 400,    // Min 800 kbps
+            'x-google-bitrate-priority': 1.0 // High priority
           }
         }
       ]
