@@ -46,6 +46,9 @@
                         <span class="menu-text">داشبورد</span>
                     </a>
                 </li>
+                @can('show_rooms')
+                    <x-admin.menu-item href="{{route('admin.room.index')}}" icon="flaticon2-group" :active="request()->routeIs(['admin.room.index','admin.room.store'])" label="اتاق ها  " />
+                @endcan
                 <li class="menu-section">
                     <h4 class="menu-text">بخش شخصی</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
@@ -89,9 +92,7 @@
                     <h4 class="menu-text">بخش فنی</h4>
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
-                @can('show_rooms')
-                    <x-admin.menu-item href="{{route('admin.room.index')}}" icon="flaticon2-group" :active="request()->routeIs(['admin.room.index','admin.room.store'])" label="اتاق ها  " />
-                @endcan
+
 {{--                @can('show_subscriptions')--}}
 {{--                    <x-admin.menu-item href="{{route('admin.subscription.index')}}" icon="flaticon2-box" :active="request()->routeIs(['admin.subscription.index','admin.subscription.store'])" label="اشتراک ها" />--}}
 {{--                @endcan--}}
