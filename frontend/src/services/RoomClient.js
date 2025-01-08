@@ -181,8 +181,8 @@ export default class RoomClient {
               break
 
             case 'failed':
-              // this.consumerTransport.close()
-                await this.initConsumerTransport(device)
+              this.consumerTransport.close()
+              await this.initConsumerTransport(device)
               break
 
             default:
