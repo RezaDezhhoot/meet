@@ -246,24 +246,24 @@ export default class RoomClient {
               break
 
             case 'failed':
-              // this.producerTransport.close()
-              // this.closeProducer(RoomClient.mediaType.audio)
-              // this.closeProducer(RoomClient.mediaType.video)
+              this.producerTransport.close()
+              this.closeProducer(RoomClient.mediaType.audio)
+              this.closeProducer(RoomClient.mediaType.video)
               //
               await this.initProducerTransport(device)
-              // if (
-              //     this.context.state.user.media.media.local.camera &&
-              //     this.context.state.user.media.media.remote.camera
-              // ) {
-              //   await this.produce(RoomClient.mediaType.video)
-              // }
-              //
-              // if (
-              //     this.context.state.user.media.media.local.microphone &&
-              //     this.context.state.user.media.media.remote.microphone
-              // ) {
-              //   await this.produce(RoomClient.mediaType.audio)
-              // }
+              if (
+                  this.context.state.user.media.media.local.camera &&
+                  this.context.state.user.media.media.remote.camera
+              ) {
+                await this.produce(RoomClient.mediaType.video)
+              }
+
+              if (
+                  this.context.state.user.media.media.local.microphone &&
+                  this.context.state.user.media.media.remote.microphone
+              ) {
+                await this.produce(RoomClient.mediaType.audio)
+              }
               break
 
             default:
