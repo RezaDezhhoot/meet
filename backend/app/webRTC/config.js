@@ -51,7 +51,7 @@ module.exports = {
         {
           kind: 'audio',
           mimeType: 'audio/opus',
-          clockRate: 16000,
+          clockRate: 48000,
           channels: 2
         },
         {
