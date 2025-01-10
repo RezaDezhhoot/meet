@@ -51,7 +51,7 @@ module.exports = {
         {
           kind: 'audio',
           mimeType: 'audio/opus',
-          clockRate: 48000,
+          clockRate: 16000,
           channels: 2
         },
         {
@@ -59,6 +59,9 @@ module.exports = {
           mimeType: 'video/VP8',
           clockRate: 90000,
           parameters: {
+            "packetization-mode"      : 1,
+            "profile-level-id"        : "42e01f",
+            "level-asymmetry-allowed" : 1,
             'x-google-start-bitrate': 600,
             'x-google-max-bitrate': 900,   // Max 2.5 Mbps
             'x-google-min-bitrate': 400,    // Min 800 kbps
@@ -75,8 +78,8 @@ module.exports = {
           announcedIp: getLocalIp() // replace by public IP address
         }
       ],
-      maxIncomingBitrate: 30000,
-      initialAvailableOutgoingBitrate: 60000,
+      maxIncomingBitrate: 3000,
+      initialAvailableOutgoingBitrate: 6000,
     }
   }
 }
