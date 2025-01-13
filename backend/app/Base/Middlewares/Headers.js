@@ -1,10 +1,8 @@
 const cors = require('cors');
 exports.Headers = (req, res, next) => {
     res.set(cors({
-        origin: "*",
-        methods: ['*'],
-        allowedHeaders: ['*'],
-        exposedHeaders: ["Authorization"],
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true,
     }));
 
