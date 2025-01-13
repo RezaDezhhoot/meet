@@ -26,6 +26,6 @@ class AccessToken extends Model
 
     public function expire(): Attribute
     {
-        return Attribute::get(fn() => Jalalian::forge($this->expire_at)->format('%A, %d %B %Y'));
+        return Attribute::get(fn() => $this->expire_at ? Jalalian::forge($this->expire_at)->format('%A, %d %B %Y') : null);
     }
 }
