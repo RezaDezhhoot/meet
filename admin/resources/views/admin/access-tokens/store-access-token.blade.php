@@ -9,7 +9,7 @@
         <div class="card-body">
             <div class="row">
                 <x-admin.forms.input with="4" type="text" id="title" label="عنوان*" wire:model.defer="title"/>
-                <x-admin.forms.select2 id="user_id" :data="$token ? $token->user->toArray() : []"  width="4" label="کاربر*" ajaxUrl="/admin/feed/users" wire:model.defer="user_id"/>
+                <x-admin.forms.select2 id="user_id" :data="$token ? $token->user->toArray() : []"  width="4" label="کاربر*" ajaxUrl="/feed/users" wire:model.defer="user_id"/>
                 <x-admin.forms.jdate-picker with="4" id="expire_at" label="تاریخ انقضا" wire:model.defer="expire_at"/>
             </div>
         </div>
