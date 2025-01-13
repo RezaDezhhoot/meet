@@ -14,7 +14,7 @@ class TokenObserver
      */
     public function created(AccessToken $accessToken): void
     {
-        $value = Hash::make(AccessToken::SALT.$accessToken->user_id);
+        $value = Hash::make(AccessToken::SALT.$accessToken->user_id.Str::uuid()->toString());
         $accessToken->update([
             'value' => $value
         ]);
