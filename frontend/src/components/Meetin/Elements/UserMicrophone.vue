@@ -10,7 +10,7 @@
       </a>
     </div>
 
-    <button v-on:click="control" :title="title" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId || disabled" class="mic px-2 rounded-l-lg border-l-2 border-y-2" v-if="show">
+    <button v-on:click="control" :title="title" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic px-2 rounded-l-lg border-l-2 border-y-2" v-if="show">
       <svg :width="width" :height="height" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <g id="#000000ff">
           <path :fill="fill ? fill : ((status || active) ? '#62dc82' : '#dbdbdb')" opacity="1.00" d=" M 46.49 4.50 C 56.87 2.22 67.92 10.46 68.62 21.07 C 68.94 29.71 68.65 38.35 68.75 46.99 C 68.67 51.78 69.27 56.81 67.30 61.33 C 64.40 68.54 56.67 73.45 48.90 72.87 C 39.64 72.52 31.51 64.35 31.31 55.07 C 31.18 44.36 31.27 33.64 31.26 22.93 C 31.09 14.18 37.88 6.01 46.49 4.50 Z" />
@@ -24,7 +24,7 @@
     </button>
   </div>
   <div v-else-if="responsive && menu && show" class="flex my-6 mx-4 align-center relative border-r-2 rounded-r-lg border-y-2">
-    <button v-on:click="control" :title="title"  :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId || disabled" class="mic px-2 py-1  responsive-action  border-[#d1d1d1]" v-if="show">
+    <button v-on:click="control" :title="title"  :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic px-2 py-1  responsive-action  border-[#d1d1d1]" v-if="show">
       <svg :width="width" :height="height" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <g id="#000000ff">
           <path :fill="fill ? fill : (status ? '#62dc82' : '#dbdbdb')" opacity="1.00" d=" M 46.49 4.50 C 56.87 2.22 67.92 10.46 68.62 21.07 C 68.94 29.71 68.65 38.35 68.75 46.99 C 68.67 51.78 69.27 56.81 67.30 61.33 C 64.40 68.54 56.67 73.45 48.90 72.87 C 39.64 72.52 31.51 64.35 31.31 55.07 C 31.18 44.36 31.27 33.64 31.26 22.93 C 31.09 14.18 37.88 6.01 46.49 4.50 Z" />
@@ -46,7 +46,7 @@
     </div>
   </div>
   <div v-else-if="show" class="flex md:mx-2 relative align-center">
-    <button v-on:click="control" :title="title" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId || disabled" class="mic  mr-[0.1rem]" v-if="show">
+    <button v-on:click="control" :title="title" :class="{'flex my-[1rem]': responsive }" :disabled="socket.id !== user.socketId" class="mic  mr-[0.1rem]" v-if="show">
       <svg :width="width" :height="height" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <g id="#000000ff">
           <path :fill="fill ? fill : (status ? '#62dc82' : '#dbdbdb')" opacity="1.00" d=" M 46.49 4.50 C 56.87 2.22 67.92 10.46 68.62 21.07 C 68.94 29.71 68.65 38.35 68.75 46.99 C 68.67 51.78 69.27 56.81 67.30 61.33 C 64.40 68.54 56.67 73.45 48.90 72.87 C 39.64 72.52 31.51 64.35 31.31 55.07 C 31.18 44.36 31.27 33.64 31.26 22.93 C 31.09 14.18 37.88 6.01 46.49 4.50 Z" />

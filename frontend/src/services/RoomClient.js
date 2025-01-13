@@ -245,6 +245,7 @@ export default class RoomClient {
               this.context.state.connected = true;
               break
 
+
             case 'failed':
               this.producerTransport.close()
               this.closeProducer(RoomClient.mediaType.audio)
