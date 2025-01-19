@@ -211,7 +211,8 @@ export default {
     },
    async handleFileUpload(event) {
       const uploadedFile = event.target.files[0];
-      const validMime = ['application/pdf','image/jpeg','image/png','image/gif','image/jpg','application/vnd.openxmlformats-officedocument.presentationml.presentation']
+      // const validMime = ['application/pdf','image/jpeg','image/png','image/gif','image/jpg','application/vnd.openxmlformats-officedocument.presentationml.presentation']
+      const validMime = ['image/jpeg','image/png','image/gif','image/jpg']
       if (uploadedFile) {
         if (uploadedFile.size > 1024 * 1024 * 100) {
           Swal.fire({
