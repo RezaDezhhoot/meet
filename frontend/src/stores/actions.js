@@ -70,7 +70,7 @@ export const actions = {
         await context.dispatch('updateShareScreen')
         await context.dispatch('startStream',{from: context.state.socket.id,to: context.state.clients ,media: ['screen'] ,firstTime: true})
     },
-    async shareStream({state , dispatch} , data) {
+    async shareStream({state , commit , dispatch} , data) {
         switch (data.media) {
             case 'screen':
                 navigator.mediaDevices.getDisplayMedia({ video: true, audio: false}).then(async function(stream){
@@ -83,9 +83,9 @@ export const actions = {
                     await dispatch('screenShare')
                 }).catch(function (err) {
                     console.log(err)
-                    context.commit('setContent' , false)
-                    context.commit('setShareScreen' , false)
-                    context.commit('controlScreenLoader' , false);
+                    commit('setContent' , false)
+                    commit('setShareScreen' , false)
+                    commit('controlScreenLoader' , false);
                     Swal.fire({
                         position: 'top-start',
                         text: "مشکلی در عملیات اشتراک گذاری رخ داده است!",
