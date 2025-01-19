@@ -9,11 +9,11 @@ const https = require('httpolyglot')
 
 app.use(express.urlencoded({limit: '5000mb',extended: false}));
 app.use(express.json({limit: '5000mb'}));
-// app.use(cors({
-//     origin: process.env.FRONTEND_URL,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE','OPTIONS'],
-//     credentials: true,
-// }));
+app.use(cors({
+    origin: "*",
+    methods: ['GET', 'POST', 'PUT', 'DELETE','OPTIONS'],
+    credentials: true,
+}));
 
 app.set('trust proxy', '127.0.0.1');
 
