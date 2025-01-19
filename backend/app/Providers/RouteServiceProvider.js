@@ -7,7 +7,7 @@ const rateLimit = require("express-rate-limit");
 
 exports.loadApiRoutes = (app) => {
     // Set global headers:
-    app.use('/api',Headers,Useragent.ApiHeaders,rateLimit({
+    app.use(Headers,Useragent.ApiHeaders,rateLimit({
         windowMs: 3 * 60 * 60 * 1000,
         max: 15000,
         message: {
