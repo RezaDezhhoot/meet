@@ -17,7 +17,7 @@ class RoomController extends Controller
         $token = AccessToken::query()->where('value',$request->token)->first();
         $data = [
             ... $request->only(['title','capacity']),
-            'user_id' => $token->user_id,
+            'host_id' => $token->user_id,
             'owner_id' =>  $token->user_id,
             'logo' => 'storage/'.$request->file('logo')->store('rooms','public'),
             'status' => RoomStatus::OPEN

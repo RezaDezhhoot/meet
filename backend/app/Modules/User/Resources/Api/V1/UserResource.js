@@ -1,6 +1,8 @@
 exports.make = (user , token = null , ignore = [] , type = null) => {
     ignore.forEach((v , k) => {
-        user[v] = undefined;
+        if (user && user.hasOwnProperty(v)) {
+            user[v] = undefined;
+        }
     });
 
     return {
