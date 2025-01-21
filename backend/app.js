@@ -7,6 +7,8 @@ const sequelize = require('./config/database');
 const cors = require('cors');
 const https = require('httpolyglot')
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 app.use(express.urlencoded({limit: '5000mb',extended: false}));
 app.use(express.json({limit: '5000mb'}));
 app.use(cors({
@@ -15,7 +17,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.set('trust proxy', '127.0.0.1');
+app.set('trust proxy', true);
 
 const server = https.createServer({},app);
 
