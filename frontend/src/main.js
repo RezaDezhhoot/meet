@@ -6,7 +6,7 @@ import VueCookies from 'vue-cookies';
 import PrimeVue from 'primevue/config';
 
 const baseURL = import.meta.env.VITE_BASE_URL
-axios.defaults.baseURL = `//${baseURL}/api`;
+axios.defaults.baseURL = `${baseURL}/api`;
 axios.defaults.withCredentials = false;
 import App from './App.vue'
 import router from './router'
