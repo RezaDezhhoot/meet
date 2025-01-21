@@ -11,6 +11,9 @@ export default defineConfig({
   ],
   server: {
     https: false,
+    proxy: {
+      secure: false,
+    }
   },
   resolve: {
     alias: {
