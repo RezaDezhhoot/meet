@@ -5,7 +5,7 @@ const appDir = path.dirname(require.main.filename);
 module.exports.load = async (server) => {
     const IO = socketio(server, {
         cors: {
-            origin: process.env.FRONTEND_URL,
+            origin: "*",
             credentials: true,
         },
         pingTimeout: 60000,
