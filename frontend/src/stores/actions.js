@@ -21,7 +21,7 @@ export const actions = {
         const audioArea = document.getElementById('audios')
         context.state.videoArea = videoArea
 
-        rc = new RoomClient(context.state.videoArea,context.state.videoArea,audioArea,window.mediasoupClient,context.state.socket,room , name , context,function (){},function (kind = null) {
+        rc = new RoomClient(context.state.videoArea,context.state.videoArea,audioArea,window.mediasoupClient,context.state.socket,room.key , name , context,function (){},function (kind = null) {
             if (!kind || kind === 'video') {
                 context.dispatch('setDynamicGrid')
             }

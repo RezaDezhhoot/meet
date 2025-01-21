@@ -81,9 +81,8 @@ export default {
   beforeMount() {
     this.user = this.$cookies.get('auth');
     this.auth = this.user;
-    fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/rooms/${this.$route.params.key}`).then(async res => {
-      const json = await res.json();
-      this.room = json.room;
+    axios.get(`/v1/rooms/${this.$route.params.key}`).then(res => {
+      this.room = res.data.room;
       this.$store.commit('setLogo' , this.room.logo);
       document.title = this.room.title;
       this.$store.commit('setRoom',this.room);
@@ -92,7 +91,6 @@ export default {
     }).catch(err => {
       this.redirectClientIfHappenedError(this.$route.params.key,404);
     });
-
     this.mainLoading = false;
     this.wires();
   },
@@ -148,7 +146,7 @@ export default {
         type: this.auth.type,
         name: this.auth.name,
       })
-      await this.$store.dispatch('init' , {room: this.$route.params.key ,name: this.auth.name});
+      await this.$store.dispatch('init' , {room: this.room ,name: this.auth.name});
     },
     wires() {
       let meeting = this;
