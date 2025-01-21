@@ -11,6 +11,7 @@ axios.defaults.withCredentials = false;
 import App from './App.vue'
 import router from './router'
 
+console.log(baseURL)
 const app = createApp(App)
 let AppName = 'Brand name';
 let logo = null;
