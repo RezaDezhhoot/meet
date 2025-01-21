@@ -37,7 +37,6 @@
 </template>
 <script>
 import "../../lib/jquery.min.js";
-import axios from "axios";
 import {useFavicon} from "@vueuse/core/index";
 
 export default {
@@ -54,7 +53,7 @@ export default {
     },
   },
   mounted() {
-    axios.get('/v1/settings/base?lang=fa').then(base => {
+    fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/settings/base?lang=fa`).then(res => {
       if (base && base.data.data.title) {
         this.app_name = base.data.data.title;
       }
@@ -63,16 +62,18 @@ export default {
         icon.value = base.data.data.logo;
       }
       document.title = this.app_name;
-    }).catch(() => {
+    }).catch(err => {
       document.title = 'خطا در برقراری ارتباط'
+
     });
 
-    axios.get(`/v1/rooms/exists?room=${this.$route.query.room}`).then(response => {
+    fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/rooms/exists?room=${this.$route.query.room}`).then(res => {
       this.room_exists = true;
       this.$emit("check-for-login",this.$route.query.room,this.room_exists);
-    }).catch(error => {
+    }).catch(err => {
       this.room_exists = false;
     });
+
   },
 }
 </script>
