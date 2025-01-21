@@ -11,13 +11,6 @@ export default defineConfig({
   ],
   server: {
     https: false,
-    proxy: {
-      '/api': {
-        target: import.meta.env.VITE_BASE_URL, // Backend's HTTP URL
-        changeOrigin: true,
-        secure: false,
-      },
-    },
   },
   resolve: {
     alias: {
